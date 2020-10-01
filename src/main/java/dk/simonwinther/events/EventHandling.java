@@ -1,18 +1,17 @@
 package dk.simonwinther.events;
 
-import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Gang;
-import dk.simonwinther.files.ConfigFile;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.MainPlugin;
 import dk.simonwinther.enums.Level;
 import dk.simonwinther.enums.Rank;
+import dk.simonwinther.files.ConfigFile;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.utility.ChatUtil;
+import dk.simonwinther.utility.GangManaging;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -38,8 +37,11 @@ public class EventHandling implements Listener
     private final String npcName;
     private List<String> npcMessages;
     private List<String> goAwayMessages;
+
     public EventHandling(MainPlugin plugin)
     {
+        //TODO: Change this to our Settings Object
+        // [ ] Stupid not using generics in above Java 8
         this.plugin = plugin;
         Map map = null;
         ConfigFile cf = plugin.getConfigFile();
@@ -246,7 +248,6 @@ public class EventHandling implements Listener
                 .map(Bukkit::getPlayer)
                 .forEach(p -> p.sendMessage(msg));
     }
-
 
 
     @EventHandler

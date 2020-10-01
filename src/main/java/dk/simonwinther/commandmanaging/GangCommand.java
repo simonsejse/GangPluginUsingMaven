@@ -2,7 +2,7 @@ package dk.simonwinther.commandmanaging;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.utility.GangManaging;
-import com.simonsejse.bande.commandmanaging.arguments.*;
+import dk.simonwinther.commandmanaging.arguments.*;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.MainMenu;
 import org.bukkit.Bukkit;
@@ -17,8 +17,8 @@ import java.util.*;
 public class GangCommand implements CommandExecutor
 {
 
-    private CommandArguments[] commandArgumentsList;
-    private MainPlugin plugin;
+    private final CommandArguments[] commandArgumentsList;
+    private final MainPlugin plugin;
 
     public GangCommand(MainPlugin plugin)
     {
@@ -82,6 +82,7 @@ public class GangCommand implements CommandExecutor
                 p.openInventory(new InfoMenu(plugin, GangManaging.getGangByNameFunction.apply(args[0]), false).getInventory());
                 return true;
             }
+
             //Search for Player Gang
             if (Bukkit.getPlayer(args[0]) != null){
                 UUID argsUuid = Bukkit.getPlayer(args[0]).getUniqueId();

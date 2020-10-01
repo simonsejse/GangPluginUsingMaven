@@ -35,6 +35,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -44,6 +45,7 @@ import java.util.logging.Logger;
 public final class MainPlugin extends JavaPlugin
 {
 
+    /* Properties */
     private FileInterface messageConfig;
     private ConfigFile configFile;
     private ChatUtil chatUtil;
@@ -59,7 +61,10 @@ public final class MainPlugin extends JavaPlugin
     public void onEnable()
     {
         createFiles();
-        registerCommands(new String[]{"bande", "confirmtransfercmd"}, new GangCommand(this), new ConfirmTransferCmd(this));
+        System.out.println(getCommand("bande"));
+        getCommand("bande").setExecutor(new GangCommand(this));
+        getCommand("confirmtransfercmd").setExecutor(new ConfirmTransferCmd(this));
+
 
         eventHandling = new EventHandling(this);
 
@@ -85,14 +90,6 @@ public final class MainPlugin extends JavaPlugin
                 .filter(p -> p.getOpenInventory().getTopInventory().getHolder() instanceof Menu)
                 .forEach(Player::closeInventory);
         saveData();
-    }
-
-    private void registerCommands(String[] cmd, CommandExecutor... commandExecutor)
-    {
-        for (int index = 0; index < cmd.length; index++)
-        {
-            getCommand(cmd[index]).setExecutor(commandExecutor[index]);
-        }
     }
 
     private void registerEvents(Listener... listeners)

@@ -1,14 +1,14 @@
 package dk.simonwinther.inventorymanaging.menus.infomenu;
 
-import dk.simonwinther.MainPlugin;
+import dk.simonwinther.enums.*;
+import dk.simonwinther.inventorymanaging.menus.infomenu.submenus.*;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
-import dk.simonwinther.utility.GangManaging;
-import com.simonsejse.bande.enums.*;
+import dk.simonwinther.MainPlugin;
 import dk.simonwinther.inventorymanaging.Menu;
-import com.simonsejse.bande.inventorymanaging.menus.infomenu.submenus.*;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.MainMenu;
 import dk.simonwinther.utility.ChatUtil;
+import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.utility.InventoryUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
