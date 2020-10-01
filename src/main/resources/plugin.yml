@@ -1,0 +1,7 @@
+name: BandePlugin
+version: ${project.version}
+main: dk.simonwinther.MainPlugin
+api-version: 1.16
+authors: [simonsejse]
+description: Et avanceret bande plugin
+website: simon-winther.dk
