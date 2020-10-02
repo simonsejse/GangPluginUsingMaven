@@ -56,12 +56,12 @@ public final class MainPlugin extends JavaPlugin
     private static Chat chat = null;
 
 
-
     @Override
     public void onEnable()
     {
         createFiles();
         System.out.println(getCommand("bande"));
+
         getCommand("bande").setExecutor(new GangCommand(this));
         getCommand("confirmtransfercmd").setExecutor(new ConfirmTransferCmd(this));
 
