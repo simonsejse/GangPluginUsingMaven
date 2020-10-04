@@ -75,17 +75,8 @@ public class ChatUtil
         LEVELUP_SUCCESS = PREFIX + messageYml.get("levelUp");
         INSERT_BANK = PREFIX + messageYml.get("insertBank");
         TOGGLE_DAMAGE = PREFIX + messageYml.get("toggleDamage");
-        try{
-
-            MAX_GANG_NAME_LENGTH = Integer.parseInt(plugin.getConfigFile().retrieve("maxNameLength").toString());
-        }catch(NumberFormatException e){
-            MAX_GANG_NAME_LENGTH = 12;
-        }
-        try{
-            MIN_GANG_NAME_LENGTH = Integer.parseInt(plugin.getConfigFile().retrieve("minNameLength").toString());
-        }catch(NumberFormatException e){
-            MIN_GANG_NAME_LENGTH = 4;
-        }
+        MAX_GANG_NAME_LENGTH = plugin.getCustomSettingsProvider().getMaxNameLength();
+        MIN_GANG_NAME_LENGTH = plugin.getCustomSettingsProvider().getMinNameLength();
         MAX_MIN_GANG_NAME_LENGTH_REACHED = PREFIX + messageYml.get("maxMinNameLengthReached");
         CONTAINS_BAD_WORDS = PREFIX + messageYml.get("containsBadWords");
         NO_SPACE = PREFIX + messageYml.get("noSpace");

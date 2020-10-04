@@ -17,7 +17,7 @@ public class CreateArgument implements CommandArguments
 
     public CreateArgument(MainPlugin plugin){
         this.plugin = plugin;
-        bannedWords = (ArrayList<String>) plugin.getConfigFile().retrieve("bannedWords");
+        bannedWords = plugin.getCustomSettingsProvider().getNpcProvider().getBannedWords();
     }
 
 

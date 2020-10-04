@@ -1,9 +1,9 @@
 package dk.simonwinther;
 
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.extent.Extent;
-import com.sk89q.worldedit.util.Location;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -14,10 +14,11 @@ import com.sk89q.worldguard.protection.regions.RegionQuery;
 import dk.simonwinther.commandmanaging.ConfirmTransferCmd;
 import dk.simonwinther.commandmanaging.GangCommand;
 import dk.simonwinther.events.EventHandling;
-import dk.simonwinther.files.ConfigFile;
+import dk.simonwinther.exceptions.ConfigFileNotFoundException;
 import dk.simonwinther.files.FileInterface;
 import dk.simonwinther.files.MessageFile;
 import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.settingsprovider.CustomSettingsProvider;
 import dk.simonwinther.utility.ChatUtil;
 import dk.simonwinther.utility.GangManaging;
 import net.milkbowl.vault.chat.Chat;
@@ -25,21 +26,21 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
-import java.util.Arrays;
-import java.util.List;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class MainPlugin extends JavaPlugin
@@ -47,7 +48,7 @@ public final class MainPlugin extends JavaPlugin
 
     /* Properties */
     private FileInterface messageConfig;
-    private ConfigFile configFile;
+    private CustomSettingsProvider customSettingsProvider;
     private ChatUtil chatUtil;
     private EventHandling eventHandling;
     private static final Logger log = Logger.getLogger("Minecraft");
@@ -59,12 +60,31 @@ public final class MainPlugin extends JavaPlugin
     @Override
     public void onEnable()
     {
-        createFiles();
-        System.out.println(getCommand("bande"));
+        // TODO: GSON to Object
+        //  [ ] customSettingsProvider = new Object();
+        try{
+            createFiles();
+        }catch(IOException e){
+            Logger.getLogger(MainPlugin.class.getName()).log(Level.WARNING, "Beware, Config.json file EXISTS but is corrupt! Fix config.json or delete to create a default config.json!");
+        }catch(ConfigFileNotFoundException exception){
+            File config = new File(getDataFolder(), "config.json");
+
+            System.out.println("hey man");
+            customSettingsProvider = new CustomSettingsProvider();
+            System.out.println("hey");
+            String json = new GsonBuilder().setPrettyPrinting().create().toJson(customSettingsProvider, CustomSettingsProvider.class);
+            System.out.println(json);
+            try(FileWriter fileWriter = new FileWriter(config)){
+                fileWriter.write(json);
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println(this.customSettingsProvider.getMaxNameLength());
 
         getCommand("bande").setExecutor(new GangCommand(this));
         getCommand("confirmtransfercmd").setExecutor(new ConfirmTransferCmd(this));
-
 
         eventHandling = new EventHandling(this);
 
@@ -117,111 +137,22 @@ public final class MainPlugin extends JavaPlugin
 
     private final Supplier<String> schedulerUpdated = () -> "&8&l| &b&lBande &8&l| &2&l" + GangManaging.gangMap.keySet().size() + "&a bander er blevet automatisk gemt...!";
 
-
-    private void loadData()
-    {
-        /*
-        File f = new File(getDataFolder() + File.separator + "Gangs");
-        if (f.listFiles() != null) {
-            File[] files = f.listFiles();
-            for(File file : files)
-            {
-                try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file)))
-                {
-                    Gang gang = (Gang) objectInputStream.readObject();
-                    String gangName = gang.getGangName();
-                    GangManaging.gangMap.put(gangName, gang);
-                } catch (IOException | ClassNotFoundException e)
-                {
-                    logMessage.accept("ObjectInputStream couldn't be established, or Gang object wasn't written right.");
-                }
-            }
-        }
-
-        File f2 = new File(getDataFolder() + File.separator + "Users");
-        if (f2.listFiles() != null){
-            File[] files = f2.listFiles();
-            for(File file2 : files){
-                try(DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file2))){
-                    String uuidString = file2.getName().substring(0, file2.getName().length()-4); //Remove .bin
-                    UUID uuid = UUID.fromString(uuidString);
-                    final String utf = dataInputStream.readUTF();
-                    GangManaging.namesOfGang.put(uuid, utf);
-                    final boolean value = dataInputStream.readBoolean();
-                    GangManaging.damageMap.put(uuid, value);
-                }catch(IOException e){
-                    logMessage.accept("ObjectInputStream couldn't be established, or Gang object wasn't written right.");
-                }
-            }
-        }
-         */
-        //TODO: Load from MySQL
-    }
-
-    private void saveData()
-    {
-        /*
-        GangManaging.getGangMap().values().forEach(gang ->
-        {
-            File file = new File(getDataFolder() + File.separator + "Gangs", gang.getGangName() + ".bin");
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                try
-                {
-                    file.createNewFile();
-                } catch (IOException e)
-                {
-                    file.delete();
-                    logMessage.accept("File couldn't be created! Trying again!");
-                    saveData(); //Recursion
-                }
-            }
-            try(ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(file))){
-                objectOutputStream.writeObject(gang);
-                objectOutputStream.flush();
-            } catch (IOException e)
-            {
-                file.delete();
-                logMessage.accept("Gang data couldn't be saved! Trying again!");
-                saveData(); //Recursion
-            }
-
-            GangManaging.namesOfGang.forEach((key, value) ->
-            {
-                File file2 = new File(getDataFolder() + File.separator + "Users", key+".bin");
-                if (!file2.getParentFile().exists()){
-                    file2.getParentFile().mkdirs();
-                    try
-                    {
-                        file2.getParentFile().createNewFile();
-                    } catch (IOException e)
-                    {
-                        logMessage.accept("File couldn't be created!");
-                    }
-                }
-                if (!GangManaging.damageMap.containsKey(key)) GangManaging.damageMap.put(key, false);
-
-                try(DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file2))){
-                    dataOutputStream.writeUTF(value);
-                    dataOutputStream.writeBoolean(GangManaging.damageMap.get(key));
-                    dataOutputStream.flush();
-                }catch(IOException e){
-                   logMessage.accept("Couldn't write Object penis!");
-                }
-            });
-
-        });
-         */
-        //TODO: Save into MySQL
-        // [ ]
-    }
-
-    private void createFiles()
+    private void createFiles() throws IOException, JsonSyntaxException, ConfigFileNotFoundException
     {
         messageConfig = new MessageFile(this, "messages.yml");
         messageConfig.create();
-        configFile = new ConfigFile(this, "config.json");
-        configFile.create();
+
+        File configFile = new File(getDataFolder(), "config.json");
+        if (!configFile.exists()) throw new ConfigFileNotFoundException("File doesn't exist creating config.json!");
+
+        StringBuilder json = new StringBuilder();
+        FileReader fileReader = new FileReader(configFile);
+        for(int i = fileReader.read(); i != -1; i = fileReader.read()){
+            json.append((char) i);
+        }
+
+        this.customSettingsProvider = new Gson().fromJson(json.toString(), CustomSettingsProvider.class);
+
         chatUtil = new ChatUtil(this);
     }
 
@@ -321,9 +252,9 @@ public final class MainPlugin extends JavaPlugin
 
     private Consumer<String> logMessage = (string) -> Bukkit.getConsoleSender().sendMessage(ChatColor.RED + string);
 
-    public ConfigFile getConfigFile()
+    public CustomSettingsProvider getCustomSettingsProvider()
     {
-        return configFile;
+        return customSettingsProvider;
     }
 
     public FileInterface getMessageConfig()
@@ -370,4 +301,105 @@ public final class MainPlugin extends JavaPlugin
     {
         MainPlugin.chat = chat;
     }
+
+    /* Saving and loading data old way using object output and input streams. */
+    private void loadData()
+    {
+        /*
+        File f = new File(getDataFolder() + File.separator + "Gangs");
+        if (f.listFiles() != null) {
+            File[] files = f.listFiles();
+            for(File file : files)
+            {
+                try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file)))
+                {
+                    Gang gang = (Gang) objectInputStream.readObject();
+                    String gangName = gang.getGangName();
+                    GangManaging.gangMap.put(gangName, gang);
+                } catch (IOException | ClassNotFoundException e)
+                {
+                    logMessage.accept("ObjectInputStream couldn't be established, or Gang object wasn't written right.");
+                }
+            }
+        }
+
+        File f2 = new File(getDataFolder() + File.separator + "Users");
+        if (f2.listFiles() != null){
+            File[] files = f2.listFiles();
+            for(File file2 : files){
+                try(DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file2))){
+                    String uuidString = file2.getName().substring(0, file2.getName().length()-4); //Remove .bin
+                    UUID uuid = UUID.fromString(uuidString);
+                    final String utf = dataInputStream.readUTF();
+                    GangManaging.namesOfGang.put(uuid, utf);
+                    final boolean value = dataInputStream.readBoolean();
+                    GangManaging.damageMap.put(uuid, value);
+                }catch(IOException e){
+                    logMessage.accept("ObjectInputStream couldn't be established, or Gang object wasn't written right.");
+                }
+            }
+        }
+         */
+        //TODO: Load from MySQL
+    }
+
+    private void saveData()
+    {
+        /*
+        GangManaging.getGangMap().values().forEach(gang ->
+        {
+            File file = new File(getDataFolder() + File.separator + "Gangs", gang.getGangName() + ".bin");
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                try
+                {
+                    file.createNewFile();
+                } catch (IOException e)
+                {
+                    file.delete();
+                    logMessage.accept("File couldn't be created! Trying again!");
+                    saveData(); //Recursion
+                }
+            }
+            try(ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(file))){
+                objectOutputStream.writeObject(gang);
+                objectOutputStream.flush();
+            } catch (IOException e)
+            {
+                file.delete();
+                logMessage.accept("Gang data couldn't be saved! Trying again!");
+                saveData(); //Recursion
+            }
+
+            GangManaging.namesOfGang.forEach((key, value) ->
+            {
+                File file2 = new File(getDataFolder() + File.separator + "Users", key+".bin");
+                if (!file2.getParentFile().exists()){
+                    file2.getParentFile().mkdirs();
+                    try
+                    {
+                        file2.getParentFile().createNewFile();
+                    } catch (IOException e)
+                    {
+                        logMessage.accept("File couldn't be created!");
+                    }
+                }
+                if (!GangManaging.damageMap.containsKey(key)) GangManaging.damageMap.put(key, false);
+
+                try(DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file2))){
+                    dataOutputStream.writeUTF(value);
+                    dataOutputStream.writeBoolean(GangManaging.damageMap.get(key));
+                    dataOutputStream.flush();
+                }catch(IOException e){
+                   logMessage.accept("Couldn't write Object penis!");
+                }
+            });
+
+        });
+         */
+        //TODO: Save into MySQL
+        // [ ]
+    }
+
+
 }

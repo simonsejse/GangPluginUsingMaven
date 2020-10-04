@@ -4,7 +4,6 @@ import dk.simonwinther.Gang;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.enums.Level;
 import dk.simonwinther.enums.Rank;
-import dk.simonwinther.files.ConfigFile;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.utility.ChatUtil;
 import dk.simonwinther.utility.GangManaging;
@@ -35,25 +34,21 @@ public class EventHandling implements Listener
 {
     private MainPlugin plugin;
     private final String npcName;
-    private List<String> npcMessages;
     private List<String> goAwayMessages;
+    private List<String> deliveredMessages;
 
     public EventHandling(MainPlugin plugin)
     {
         //TODO: Change this to our Settings Object
         // [ ] Stupid not using generics in above Java 8
         this.plugin = plugin;
-        Map map = null;
-        ConfigFile cf = plugin.getConfigFile();
-        if (plugin.getConfigFile().retrieve("npc") instanceof Map){
-            map = (Map) plugin.getConfigFile().retrieve("npc");
-        }
-        npcName = map.get("npcName") != null ? map.get("npcName").toString() : "ali mustafa";
-        npcMessages = map.get("messages") != null ? (ArrayList<String>) map.get("messages") : Arrays.asList("Tak for stoffer!");
-        goAwayMessages = map.get("goAwayMessages") != null ? (ArrayList<String>) map.get("goAwayMessages") : Arrays.asList("Gå væk!!", "Føj!");
+        this.npcName = this.plugin.getCustomSettingsProvider().getNpcProvider().getNpcName();
+        this.goAwayMessages = this.plugin.getCustomSettingsProvider().getNpcProvider().getGoAwayMessages();
+        this.deliveredMessages = this.plugin.getCustomSettingsProvider().getNpcProvider().getDeliveredMessages();
     }
 
     public static Map<UUID, String> lastOnline = new HashMap<>();
+    //TODO: Maybe create PlayerData object
 
     @EventHandler
     public void onPlayerJoinEvent(PlayerJoinEvent event)
@@ -83,22 +78,22 @@ public class EventHandling implements Listener
         }
     }
 
-    private Set<UUID> createGang = new HashSet<>();
+    private final Set<UUID> createGang = new HashSet<>();
     public Consumer<UUID> addCreateGangConsumer = createGang::add;
     public Consumer<UUID> removeCreateGangConsumer = createGang::remove;
 
 
-    private Set<UUID> inviteMemberChat = new HashSet<>();
+    private final Set<UUID> inviteMemberChat = new HashSet<>();
     public Consumer<UUID> addInviteMemberChatConsumer = inviteMemberChat::add;
-    private Consumer<UUID> removeInviteMemberChatConsumer = inviteMemberChat::remove;
+    private final Consumer<UUID> removeInviteMemberChatConsumer = inviteMemberChat::remove;
 
-    private Set<UUID> allyChat = new HashSet<>();
+    private final Set<UUID> allyChat = new HashSet<>();
     public Consumer<UUID> addAllyConsumer = allyChat::add;
-    private Consumer<UUID> removeAllyConsumer = allyChat::remove;
+    private final Consumer<UUID> removeAllyConsumer = allyChat::remove;
 
-    private static Set<UUID> enemyChat = new HashSet<>();
+    private static final Set<UUID> enemyChat = new HashSet<>();
     public Consumer<UUID> addEnemyChat = enemyChat::add;
-    private Consumer<UUID> removeEnemyChat = enemyChat::remove;
+    private final Consumer<UUID> removeEnemyChat = enemyChat::remove;
 
     @EventHandler
     public void onAsyncPlayerChat(AsyncPlayerChatEvent event)
@@ -270,12 +265,12 @@ public class EventHandling implements Listener
     }
 
 
-    private Set<UUID> activeMoneyPlayers = new HashSet<>();
+    private final Set<UUID> activeMoneyPlayers = new HashSet<>();
     public Consumer<UUID> removeActiveMoneyPlayers = activeMoneyPlayers::remove;
     public Consumer<UUID> addActiveMoneyPlayers = activeMoneyPlayers::add;
     public Function<UUID, Boolean> containsActiveMoneyPlayer = activeMoneyPlayers::contains;
 
-    private Consumer<Player> playerConsumer = (player) -> {
+    private final Consumer<Player> playerConsumer = (player) -> {
         UUID uuid = player.getUniqueId();
         ItemStack item = player.getInventory().getItemInHand();
         //Ternary operator to determine whether it should check for transfer items or money access.
@@ -335,7 +330,7 @@ public class EventHandling implements Listener
 
                             gang.getLevelSystem().addValue(playerItemInHandType, amount);
 
-                            String randomMessage = npcMessages.get(new Random().nextInt(npcMessages.size()));
+                            String randomMessage = this.deliveredMessages.get(new Random().nextInt(this.deliveredMessages.size()));
                             player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PREFIX + "&7"+randomMessage));
                         }
                         return;
