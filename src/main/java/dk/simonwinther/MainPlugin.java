@@ -64,24 +64,20 @@ public final class MainPlugin extends JavaPlugin
         //  [ ] customSettingsProvider = new Object();
         try{
             createFiles();
-        }catch(IOException e){
+        }catch(IOException | JsonSyntaxException e){
             Logger.getLogger(MainPlugin.class.getName()).log(Level.WARNING, "Beware, Config.json file EXISTS but is corrupt! Fix config.json or delete to create a default config.json!");
+            this.customSettingsProvider = new CustomSettingsProvider(); //File corrupt, use default settings.
         }catch(ConfigFileNotFoundException exception){
-            File config = new File(getDataFolder(), "config.json");
-
-            System.out.println("hey man");
             customSettingsProvider = new CustomSettingsProvider();
-            System.out.println("hey");
+            File config = new File(getDataFolder(), "config.json");
             String json = new GsonBuilder().setPrettyPrinting().create().toJson(customSettingsProvider, CustomSettingsProvider.class);
-            System.out.println(json);
             try(FileWriter fileWriter = new FileWriter(config)){
                 fileWriter.write(json);
+                fileWriter.flush();
             }catch(IOException e){
                 e.printStackTrace();
             }
         }
-
-        System.out.println(this.customSettingsProvider.getMaxNameLength());
 
         getCommand("bande").setExecutor(new GangCommand(this));
         getCommand("confirmtransfercmd").setExecutor(new ConfirmTransferCmd(this));
@@ -143,14 +139,15 @@ public final class MainPlugin extends JavaPlugin
         messageConfig.create();
 
         File configFile = new File(getDataFolder(), "config.json");
-        if (!configFile.exists()) throw new ConfigFileNotFoundException("File doesn't exist creating config.json!");
+        if (!configFile.exists()) throw new ConfigFileNotFoundException();
 
         StringBuilder json = new StringBuilder();
+        //Throws IOException means JSON wasn't read right, therefore in catch create new instance of CustomSettingsProvider using default settings.
         FileReader fileReader = new FileReader(configFile);
         for(int i = fileReader.read(); i != -1; i = fileReader.read()){
             json.append((char) i);
         }
-
+        //Throws JsonSyntaxException means JSON wasn't WRITTEN right, therefore in catch create new instance of CustomSettingsProvider using default settings.
         this.customSettingsProvider = new Gson().fromJson(json.toString(), CustomSettingsProvider.class);
 
         chatUtil = new ChatUtil(this);

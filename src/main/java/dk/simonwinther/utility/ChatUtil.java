@@ -6,7 +6,8 @@ import org.bukkit.ChatColor;
 
 public class ChatUtil
 {
-    public static String[] numbers = {"NULL",  "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE", "THIRTEEN"};
+    //TODO: Check if I purposely left out "ONE"!
+    public static String[] numbers = {"NULL", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE", "THIRTEEN"};
 
     public ChatUtil(MainPlugin plugin)
     {
