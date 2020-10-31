@@ -1,5 +1,6 @@
 package dk.simonwinther.commandmanaging;
 
+import dk.simonwinther.Gang;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.arguments.*;
@@ -19,28 +20,30 @@ public class GangCommand implements CommandExecutor
 
     private final CommandArguments[] commandArgumentsList;
     private final MainPlugin plugin;
+    private final GangManaging gangManaging;
 
-    public GangCommand(MainPlugin plugin)
+    public GangCommand(GangManaging gangManaging, MainPlugin plugin)
     {
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
         commandArgumentsList = new CommandArguments[]
         {
-            new CreateArgument(plugin),
-            new DeleteArgument(plugin),
-            new InfoArgument(plugin),
-            new KickArgument(plugin),
-            new InviteArgument(plugin),
-            new JoinArgument(plugin),
-            new RankArgument(plugin),
-            new AllyArgument(plugin),
-            new EnemyArgument(plugin),
-            new LeaveArgument(plugin),
-            new BankArgument(plugin),
-            new AllianceChat(plugin),
-            new BandeChat(plugin),
-            new AdminArgument(plugin),
+            new CreateArgument(gangManaging, plugin),
+            new DeleteArgument(gangManaging, plugin),
+            new InfoArgument(gangManaging, plugin),
+            new KickArgument(gangManaging, plugin),
+            new InviteArgument(gangManaging, plugin),
+            new JoinArgument(gangManaging, plugin),
+            new RankArgument(gangManaging, plugin),
+            new AllyArgument(gangManaging, plugin),
+            new EnemyArgument(gangManaging, plugin),
+            new LeaveArgument(gangManaging, plugin),
+            new BankArgument(gangManaging, plugin),
+            new AllianceChat(gangManaging, plugin),
+            new BandeChat(gangManaging, plugin),
+            new AdminArgument(gangManaging, plugin),
             new SpawnBotArgument(),
-            new GangDamageArgument(plugin)
+            new GangDamageArgument(gangManaging, plugin)
         };
 
     }
@@ -77,25 +80,25 @@ public class GangCommand implements CommandExecutor
             });
             if (commandArgumentsOptional.isPresent()) return false;
             //Search for Gang Name
-            if (GangManaging.gangMap.containsKey(args[0]))
+            if (gangManaging.gangMap.containsKey(args[0]))
             {
-                p.openInventory(new InfoMenu(plugin, GangManaging.getGangByNameFunction.apply(args[0]), false).getInventory());
+                p.openInventory(new InfoMenu(gangManaging, plugin, gangManaging.getGangByNameFunction.apply(args[0]), false).getInventory());
                 return true;
             }
 
             //Search for Player Gang
             if (Bukkit.getPlayer(args[0]) != null){
                 UUID argsUuid = Bukkit.getPlayer(args[0]).getUniqueId();
-                if (GangManaging.namesOfGang.containsKey(argsUuid))
+                if (gangManaging.namesOfGang.containsKey(argsUuid))
                 {
-                    p.openInventory(new InfoMenu(plugin, GangManaging.getGangByUuidFunction.apply(argsUuid), false).getInventory());
+                    p.openInventory(new InfoMenu(gangManaging, plugin, gangManaging.getGangByUuidFunction.apply(argsUuid), false).getInventory());
                     return true;
                 }
             }
         }
-        if (GangManaging.playerInGangPredicate.test(p.getUniqueId()))
-            p.openInventory(new MainMenu(plugin, p.getUniqueId(), true).getInventory());
-        else p.openInventory(new MainMenu(plugin, p.getUniqueId(), false).getInventory());
+        if (gangManaging.playerInGangPredicate.test(p.getUniqueId()))
+            p.openInventory(new MainMenu(gangManaging, plugin, p.getUniqueId(), true).getInventory());
+        else p.openInventory(new MainMenu(gangManaging, plugin, p.getUniqueId(), false).getInventory());
         return false;
     }
 

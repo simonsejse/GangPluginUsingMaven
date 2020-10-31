@@ -17,9 +17,11 @@ public class ConfirmTransferCmd implements CommandExecutor
 {
 
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public ConfirmTransferCmd(MainPlugin plugin){
+    public ConfirmTransferCmd(GangManaging gangManaging, MainPlugin plugin){
         this.plugin = plugin;
+        this.gangManaging = gangManaging;
     }
 
     @Override
@@ -31,7 +33,7 @@ public class ConfirmTransferCmd implements CommandExecutor
         if (plugin.getEventHandling().containsActiveMoneyPlayer.apply(player.getUniqueId())){
             plugin.getEventHandling().removeActiveMoneyPlayers.accept(player.getUniqueId());
             if (args[0].equalsIgnoreCase("yes")){
-                Gang gang = GangManaging.getGangByUuidFunction.apply(uuid);
+                Gang gang = this.gangManaging.getGangByUuidFunction.apply(uuid);
                 Level level = Level.valueOf(ChatUtil.numbers[gang.getGangLevel()]);
                 if (gang.getLevelSystem().getPaidForQuest() >= level.getAmountToPay()[QuestPayEnum.AMOUNT_PAY_INDEX.value]){
                     player.sendMessage("Du har allerede betalt det du skulle i dette level!");

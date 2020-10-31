@@ -12,8 +12,10 @@ import java.util.UUID;
 public class InfoArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public InfoArgument(MainPlugin plugin){
+    public InfoArgument(GangManaging gangManaging, MainPlugin plugin){
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
 
@@ -40,13 +42,13 @@ public class InfoArgument implements CommandArguments
     {
         if (args.length > 1) return;
         UUID playerUuid = p.getUniqueId();
-        if (!GangManaging.playerInGangPredicate.test(playerUuid))
+        if (!gangManaging.playerInGangPredicate.test(playerUuid))
         {
             p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
             return;
         }
-        Gang gang = GangManaging.getGangByUuidFunction.apply(playerUuid);
+        Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
 
-        p.openInventory(new InfoMenu(plugin, gang, true).getInventory());
+        p.openInventory(new InfoMenu(gangManaging, plugin, gang, true).getInventory());
     }
 }

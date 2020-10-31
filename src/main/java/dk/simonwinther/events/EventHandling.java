@@ -37,17 +37,18 @@ public class EventHandling implements Listener
     private List<String> goAwayMessages;
     private List<String> deliveredMessages;
 
-    public EventHandling(MainPlugin plugin)
+    private GangManaging gangManaging;
+
+    public EventHandling(GangManaging gangManaging, MainPlugin plugin)
     {
-        //TODO: Change this to our Settings Object
-        // [ ] Stupid not using generics in above Java 8
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
         this.npcName = this.plugin.getCustomSettingsProvider().getNpcProvider().getNpcName();
         this.goAwayMessages = this.plugin.getCustomSettingsProvider().getNpcProvider().getGoAwayMessages();
         this.deliveredMessages = this.plugin.getCustomSettingsProvider().getNpcProvider().getDeliveredMessages();
     }
 
-    public static Map<UUID, String> lastOnline = new HashMap<>();
+    public Map<UUID, String> lastOnline = new HashMap<>();
     //TODO: Maybe create PlayerData object
 
     @EventHandler
@@ -56,7 +57,7 @@ public class EventHandling implements Listener
         UUID playerUuid = event.getPlayer().getUniqueId();
         refreshDate(playerUuid);
 
-        if (!GangManaging.damageMap.containsKey(playerUuid)) GangManaging.damageMap.put(playerUuid, false);
+        if (!gangManaging.damageMap.containsKey(playerUuid)) gangManaging.damageMap.put(playerUuid, false);
 
     }
 
@@ -91,7 +92,7 @@ public class EventHandling implements Listener
     public Consumer<UUID> addAllyConsumer = allyChat::add;
     private final Consumer<UUID> removeAllyConsumer = allyChat::remove;
 
-    private static final Set<UUID> enemyChat = new HashSet<>();
+    private final Set<UUID> enemyChat = new HashSet<>();
     public Consumer<UUID> addEnemyChat = enemyChat::add;
     private final Consumer<UUID> removeEnemyChat = enemyChat::remove;
 
@@ -107,31 +108,31 @@ public class EventHandling implements Listener
             removeInviteMemberChatConsumer.accept(uuid);
             if (Bukkit.getOfflinePlayer(message) != null)
             {
-                if (GangManaging.getGangByUuidFunction.apply(uuid).isPlayerInvited(message)){
-                    GangManaging.removeInvitationConsumer.accept(uuid, message);
+                if (gangManaging.getGangByUuidFunction.apply(uuid).isPlayerInvited(message)){
+                    gangManaging.removeInvitationConsumer.accept(uuid, message);
                     player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_UNINVITED.replace("{args}", message)));
                     return;
                 }
-                GangManaging.addInvitationConsumer.accept(uuid, message);
+                gangManaging.addInvitationConsumer.accept(uuid, message);
                 player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_INVITED.replace("{args}", message)));
-                if (Bukkit.getPlayer(message) != null) Bukkit.getPlayer(message).sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().INVITED_TO_GANG.replace("{name}", GangManaging.getGangByUuidFunction.apply(uuid).getGangName()).replace("{player}", player.getName())));
+                if (Bukkit.getPlayer(message) != null) Bukkit.getPlayer(message).sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().INVITED_TO_GANG.replace("{name}", gangManaging.getGangByUuidFunction.apply(uuid).getGangName()).replace("{player}", player.getName())));
             } else
                 player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().HAS_NEVER_PLAYED.replace("{args}", message)));
         } else if (allyChat.contains(uuid))
         {
             event.setCancelled(true);
             removeAllyConsumer.accept(uuid);
-            if (GangManaging.gangExistsPredicate.test(message))
+            if (gangManaging.gangExistsPredicate.test(message))
             {
-                Gang argGang = GangManaging.getGangByNameFunction.apply(message);
-                Gang playerGang = GangManaging.getGangByUuidFunction.apply(uuid);
+                Gang argGang = gangManaging.getGangByNameFunction.apply(message);
+                Gang playerGang = gangManaging.getGangByUuidFunction.apply(uuid);
                 if (playerGang.getAllies().size() < playerGang.getMaxAllies())
                 {
                     if (!(playerGang.getGangName().equalsIgnoreCase(message)))
                     {
                         if (!playerGang.getAllyInvitation().contains(message))
                         {
-                            if (GangManaging.gangContainsAllyInvitationPredicate.test(argGang, playerGang.getGangName()))
+                            if (gangManaging.gangContainsAllyInvitationPredicate.test(argGang, playerGang.getGangName()))
                             {
                                 playerGang.getAllyInvitation().remove(message);
                                 argGang.getAllyInvitation().remove(playerGang.getGangName());
@@ -170,14 +171,14 @@ public class EventHandling implements Listener
             removeEnemyChat.accept(uuid);
             UUID playerUuid = player.getUniqueId();
             message = message.toLowerCase();
-            if (GangManaging.playerInGangPredicate.test(playerUuid))
+            if (gangManaging.playerInGangPredicate.test(playerUuid))
             {
-                Gang playerGang = GangManaging.getGangByUuidFunction.apply(playerUuid);
-                if (GangManaging.isRankMinimumPredicate.test(playerUuid, playerGang.gangPermissions.accessToEnemy))
+                Gang playerGang = gangManaging.getGangByUuidFunction.apply(playerUuid);
+                if (gangManaging.isRankMinimumPredicate.test(playerUuid, playerGang.gangPermissions.accessToEnemy))
                 {
-                    if (GangManaging.gangExistsPredicate.test(message))
+                    if (gangManaging.gangExistsPredicate.test(message))
                     {
-                        Gang argsGang = GangManaging.getGangByNameFunction.apply(message);
+                        Gang argsGang = gangManaging.getGangByNameFunction.apply(message);
                         if (argsGang.getEnemies().size() < playerGang.getMaxEnemies())
                         {
                             if (playerGang.getEnemies().size() < playerGang.getMaxEnemies())
@@ -187,7 +188,7 @@ public class EventHandling implements Listener
                                 {
                                     if (!playerGang.getEnemies().contains(message))
                                     {
-                                        GangManaging.addEnemyGang.accept(playerGang, argsGang);
+                                        gangManaging.addEnemyGang.accept(playerGang, argsGang);
                                     } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_ENEMIES));
                                 } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_ENEMY_OWN_GANG));
                             } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_GANG_MAX_ENEMIES));
@@ -275,11 +276,11 @@ public class EventHandling implements Listener
         ItemStack item = player.getInventory().getItemInHand();
         //Ternary operator to determine whether it should check for transfer items or money access.
 
-        if (GangManaging.playerInGangPredicate.test(player.getUniqueId()))
+        if (gangManaging.playerInGangPredicate.test(player.getUniqueId()))
         {
-            Gang gang = GangManaging.getGangByUuidFunction.apply(player.getUniqueId());
+            Gang gang = gangManaging.getGangByUuidFunction.apply(player.getUniqueId());
             Rank rank = item.getType() != Material.AIR ? gang.getGangPermissions().accessToTransferItems : gang.getGangPermissions().accessToTransferMoney;
-            if(GangManaging.isRankMinimumPredicate.test(uuid, rank))
+            if(gangManaging.isRankMinimumPredicate.test(uuid, rank))
             {
                 String gangLevelString = ChatUtil.numbers[gang.getGangLevel()];
                 Level level = Level.valueOf(gangLevelString);

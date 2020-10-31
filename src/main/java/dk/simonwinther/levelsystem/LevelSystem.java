@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class LevelSystem implements Serializable
 {
-    private static final long serialVersionUID = 12387213612321L;
+    private final long serialVersionUID = 12387213612321L;
 
     //bread = 0, sugar = 0,ironSword = 0, ironHelmet = 0, ironChestPlate = 0, ironLegs = 0, ironBoots = 0, diamondSword = 0, diamondHelmet = 0, diamondChest = 0, diamondLegs = 0, diamondBoots = 0,
     private int gangLevel = 1, paidForQuest = 0;

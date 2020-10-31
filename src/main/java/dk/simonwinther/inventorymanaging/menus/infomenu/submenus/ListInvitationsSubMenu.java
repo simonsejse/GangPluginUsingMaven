@@ -62,7 +62,7 @@ public class ListInvitationsSubMenu extends Menu
     public Inventory getInventory()
     {
         slot = 10;
-        InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookSevenPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.MAGENTA.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+        InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_SIX, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.MAGENTA.value[ColorIndexEnum.STAINED_GLASS.index]), true);
 
         gang.getMemberInvitations()
                 .stream()

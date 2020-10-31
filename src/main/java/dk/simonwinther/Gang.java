@@ -2,7 +2,6 @@ package dk.simonwinther;
 
 import dk.simonwinther.enums.Rank;
 import dk.simonwinther.levelsystem.LevelSystem;
-import dk.simonwinther.utility.GangManaging;
 import org.bukkit.Bukkit;
 
 import java.io.Serializable;
@@ -11,7 +10,7 @@ import java.util.*;
 public class Gang implements Serializable
 {
 
-    private static final long serialVersionUID = 2109381209382109L;
+    private final long serialVersionUID = 2109381209382109L;
 
     @Override
     public boolean equals(Object o)
@@ -187,11 +186,6 @@ public class Gang implements Serializable
         gangBalance += amount;
     }
 
-    public void withdrawMoney(int amount)
-    {
-        gangBalance -= amount;
-    }
-
     public int getGuardKills()
     {
         return guardKills;
@@ -261,19 +255,9 @@ public class Gang implements Serializable
         return membersSorted;
     }
 
-    public void setMembersSorted(LinkedHashMap<UUID, Integer> membersSorted)
-    {
-        this.membersSorted = membersSorted;
-    }
-
     public int getGangId()
     {
         return gangId;
-    }
-
-    public void setGangId(int gangId)
-    {
-        this.gangId = gangId;
     }
 
     public int getGangBalance()
@@ -314,12 +298,6 @@ public class Gang implements Serializable
     public void setGangName(String gangName)
     {
         this.gangName = gangName;
-    }
-
-    public void removeMember(UUID playerUuid)
-    {
-        GangManaging.namesOfGang.remove(playerUuid);
-        membersSorted.remove(playerUuid);
     }
 
     public UUID getOwnerUuid(){
@@ -372,6 +350,7 @@ public class Gang implements Serializable
         memberInvitations.remove(displayName);
         membersSorted.put(playerUuid, rank.getValue());
     }
+
 
 
 }

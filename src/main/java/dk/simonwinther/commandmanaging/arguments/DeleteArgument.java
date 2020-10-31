@@ -11,8 +11,10 @@ import java.util.UUID;
 public class DeleteArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private final GangManaging gangManaging;
 
-    public DeleteArgument(MainPlugin plugin){
+    public DeleteArgument(GangManaging gangManaging, MainPlugin plugin){
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
 
@@ -40,30 +42,30 @@ public class DeleteArgument implements CommandArguments
         if (args.length > 1) return;
         UUID playerUuid = p.getUniqueId();
 
-        if (GangManaging.playerInGangPredicate.test(playerUuid))
+        if (gangManaging.playerInGangPredicate.test(playerUuid))
         {
-            if (GangManaging.ownerOfGangPredicate.test(playerUuid))
+            if (gangManaging.ownerOfGangPredicate.test(playerUuid))
             {
-                if (GangManaging.getGangByUuidFunction.apply(playerUuid).getMembersSorted().size() <= 1)
+                if (gangManaging.getGangByUuidFunction.apply(playerUuid).getMembersSorted().size() <= 1)
                 {
                     //Last player inside gang, delete
-                    Gang gang = GangManaging.getGangByUuidFunction.apply(playerUuid);
+                    Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
                     String gangName = gang.getGangName();
 
                     //@Removes the gang from all other gang allies!
                     gang.getAllies()
                             .stream()
-                            .map(GangManaging.getGangByNameFunction)
+                            .map(gangManaging.getGangByNameFunction)
                             .forEach(g -> g.getAllies().remove(gangName.toLowerCase()));
 
                     //@Removes the gang from all other gang enemies!
 
-                    GangManaging.enemyGangListFunction.apply(gangName)
+                    gangManaging.enemyGangListFunction.apply(gangName)
                             .stream()
                             .map(Gang::getEnemies)
                             .forEach(list -> list.remove(gangName));
 
-                    GangManaging.deleteGangConsumer.accept(playerUuid);
+                    gangManaging.deleteGangConsumer.accept(playerUuid);
                     p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_LEFT_GANG.replace("{name}", gangName)));
                 } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().KICK_PLAYERS_TO_LEAVE_GANG));
 

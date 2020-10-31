@@ -219,7 +219,7 @@ public class ChatUtil
 
     public final String NO_SPACE;
 
-    public static void setup(FileInterface messageYml)
+    public void setup(FileInterface messageYml)
     {
         messageYml.set("PREFIX", "&8&l| &cBande &8&l| ");
         messageYml.set("accessToToilets", "adgang.toilets");

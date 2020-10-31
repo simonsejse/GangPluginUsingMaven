@@ -14,8 +14,10 @@ public class AllianceChat implements CommandArguments
 {
 
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public AllianceChat(MainPlugin plugin){
+    public AllianceChat(GangManaging gangManaging, MainPlugin plugin){
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
 
@@ -38,7 +40,7 @@ public class AllianceChat implements CommandArguments
     }
 
     /*
-    public static <K, V extends Comparable<? super V>> Map<K, V> getLowestToHighest(@NotNull Map<K, V> map, @Nullable Integer limit){
+    public <K, V extends Comparable<? super V>> Map<K, V> getLowestToHighest(@NotNull Map<K, V> map, @Nullable Integer limit){
 
     }
      */
@@ -48,10 +50,10 @@ public class AllianceChat implements CommandArguments
     {
         UUID playerUuid = p.getUniqueId();
         if (args.length >= 2){
-            if (GangManaging.playerInGangPredicate.test(playerUuid))
+            if (gangManaging.playerInGangPredicate.test(playerUuid))
             {
-                Gang gang = GangManaging.getGangByUuidFunction.apply(playerUuid);
-                if (GangManaging.isRankMinimumPredicate.test(playerUuid, gang.gangPermissions.accessToAllyChat)){
+                Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
+                if (gangManaging.isRankMinimumPredicate.test(playerUuid, gang.gangPermissions.accessToAllyChat)){
                     //Check if has permissions
                     StringBuilder message = new StringBuilder();
                     final Consumer<String> messageConsumer = line -> message.append(line).append(" ");
@@ -59,7 +61,7 @@ public class AllianceChat implements CommandArguments
                     p.sendMessage("§8§l| §a§lALLIANCECHAT §8§l|§e "+p.getName()+" §8§l|§f "+message.toString());
                     gang.getAllies()
                             .stream()
-                            .map(GangManaging.getGangByNameFunction::apply)
+                            .map(gangManaging.getGangByNameFunction::apply)
                             .map(Gang::getMembersSorted)
                             .map(Map::keySet)
                             .flatMap(Collection::stream)

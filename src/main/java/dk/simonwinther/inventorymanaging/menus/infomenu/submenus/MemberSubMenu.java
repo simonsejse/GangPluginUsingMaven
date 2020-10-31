@@ -26,12 +26,14 @@ public class MemberSubMenu extends Menu
     private InfoMenu infoMenu;
     private Gang gang;
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public MemberSubMenu(MainPlugin plugin, InfoMenu infoMenu, Gang gang)
+    public MemberSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang)
     {
         this.plugin = plugin;
         this.infoMenu = infoMenu;
         this.gang = gang;
+        this.gangManaging = gangManaging;
     }
 
     @Override
@@ -56,7 +58,7 @@ public class MemberSubMenu extends Menu
                 break;
 
             case 51:
-                whoClicked.openInventory(new ListInvitationsSubMenu(plugin, GangManaging.getGangByUuidFunction.apply(whoClicked.getUniqueId()), this).getInventory());
+                whoClicked.openInventory(new ListInvitationsSubMenu(plugin, this.gangManaging.getGangByUuidFunction.apply(whoClicked.getUniqueId()), this).getInventory());
                 break;
             case 47:
                 whoClicked.getOpenInventory().close();
@@ -75,7 +77,7 @@ public class MemberSubMenu extends Menu
                     @Override
                     public Inventory getInventory()
                     {
-                        InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookTwoPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+                        InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_TWO, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
 
                         super.setItem(20, new ItemBuilder(Material.NETHER_STAR).setItemName("&a&lÆndre &2" + chosenPlayer + "&a&l rang").setLore("&fKlik her for at", "&fændre spillerens rang").buildItem());
                         super.setItem(24, new ItemBuilder(Material.BARRIER).setItemName("&c&lKick &4&l" + chosenPlayer).setLore("&fKlik her for at", "&fsmide &7" + chosenPlayer + "&f ud af banden").buildItem());
@@ -109,14 +111,14 @@ public class MemberSubMenu extends Menu
                                     whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_RANK_YOURSELF));
                                     return;
                                 }
-                                whoClicked.openInventory(new RankMenu(plugin, gang, whoClickedUuid, whoClicked.getName(), getChosenPlayerUuid(), chosenPlayer).getInventory());
+                                whoClicked.openInventory(new RankMenu(gangManaging, plugin, gang, whoClickedUuid, whoClicked.getName(), getChosenPlayerUuid(), chosenPlayer).getInventory());
                                 break;
                             case BARRIER:
-                                if (GangManaging.isRankMinimumPredicate.test(whoClickedUuid, gang.gangPermissions.accessToKick))
+                                if (gangManaging.isRankMinimumPredicate.test(whoClickedUuid, gang.gangPermissions.accessToKick))
                                 {
-                                    if (GangManaging.rankFunction.apply(whoClickedUuid) > GangManaging.rankFunction.apply(getChosenPlayerUuid()))
+                                    if (gangManaging.rankFunction.apply(whoClickedUuid) > gangManaging.rankFunction.apply(getChosenPlayerUuid()))
                                     {
-                                        GangManaging.kickConsumer.accept(getChosenPlayerUuid());
+                                        gangManaging.kickConsumer.accept(getChosenPlayerUuid());
                                         whoClicked.getOpenInventory().close();
                                         whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_KICKED.replace("{args}", chosenPlayer)));
                                         if(Bukkit.getPlayer(getChosenPlayerUuid()) != null) Bukkit.getPlayer(getChosenPlayerUuid()).sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().MEMBER_KICKED.replace("{name}", gang.getGangName())));
@@ -143,7 +145,7 @@ public class MemberSubMenu extends Menu
     public Inventory getInventory()
     {
         slot = 10;
-        InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookSixPredicate, new ItemStack(Material.STAINED_GLASS_PANE,1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+        InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_FIVE, new ItemStack(Material.STAINED_GLASS_PANE,1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
         gang.getMembersSorted()
                 .entrySet()
                 .stream()

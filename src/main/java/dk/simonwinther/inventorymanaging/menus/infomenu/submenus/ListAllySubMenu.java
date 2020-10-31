@@ -28,14 +28,15 @@ public class ListAllySubMenu extends Menu
     private final MainPlugin plugin;
     private InfoMenu infoMenu;
     private Gang gang;
-
+    private GangManaging gangManaging;
     private ItemBuilder skullBuilder;
-    public ListAllySubMenu(MainPlugin plugin, InfoMenu infoMenu, Gang gang)
+
+    public ListAllySubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang)
     {
         this.plugin = plugin;
         this.infoMenu = infoMenu;
         this.gang = gang;
-
+        this.gangManaging = gangManaging;
         skullBuilder = new ItemBuilder(Material.SKULL_ITEM, 1, SkullType.PLAYER).setPlayerSkull(gang.getOwnerName());
     }
 
@@ -55,7 +56,7 @@ public class ListAllySubMenu extends Menu
     public void onGuiClick(int slot, ItemStack item, Player whoClicked, ClickType clickType)
     {
         UUID uuid = whoClicked.getUniqueId();
-        if (slot == InventoryUtility.backSlot) whoClicked.openInventory(infoMenu.getInventory());
+        if (slot == InventoryUtility.BACK_SLOT) whoClicked.openInventory(infoMenu.getInventory());
         else if (slot == 4)
         {
             plugin.getEventHandling().addAllyConsumer.accept(uuid);
@@ -71,8 +72,8 @@ public class ListAllySubMenu extends Menu
                 public Inventory getInventory()
                 {
                     slot = 10;
-                    InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookSevenPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
-                    List<Gang> _listOfGangs = GangManaging.allyInvitationGangListFunction.apply(gang.getGangName());
+                    InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_SIX, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+                    List<Gang> _listOfGangs = gangManaging.allyInvitationGangListFunction.apply(gang.getGangName());
                     _listOfGangs.forEach(gang ->
                     {
                         if (slot == 43) return;
@@ -97,13 +98,13 @@ public class ListAllySubMenu extends Menu
                 @Override
                 public void onGuiClick(int slot, ItemStack item, Player whoClicked, ClickType clickType)
                 {
-                    if (slot == InventoryUtility.backSlot) whoClicked.openInventory(ListAllySubMenu.this.getInventory());
+                    if (slot == InventoryUtility.BACK_SLOT) whoClicked.openInventory(ListAllySubMenu.this.getInventory());
 
                     if (item.getType() == Material.SKULL_ITEM)
                     {
                         String gangName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
-                        Gang localGang = GangManaging.getGangByNameFunction.apply(gangName);
-                        Gang playerGang = GangManaging.getGangByUuidFunction.apply(whoClicked.getUniqueId());
+                        Gang localGang = gangManaging.getGangByNameFunction.apply(gangName);
+                        Gang playerGang = gangManaging.getGangByUuidFunction.apply(whoClicked.getUniqueId());
                         if (!localGang.getAllyInvitation().contains(playerGang.getGangName())) return;
 
                         if (clickType == ClickType.RIGHT)
@@ -164,11 +165,11 @@ public class ListAllySubMenu extends Menu
                 {
                     slot = 10;
 
-                    InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookSevenPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.GREEN.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+                    InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_SIX, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.GREEN.value[ColorIndexEnum.STAINED_GLASS.index]), true);
 
                     gang.getAllyInvitation()
                             .stream()
-                            .map(GangManaging.getGangByNameFunction::apply)
+                            .map(gangManaging.getGangByNameFunction::apply)
                             .forEach(gang ->
                             {
                                 if (slot == 43) return;
@@ -194,7 +195,7 @@ public class ListAllySubMenu extends Menu
                 public void onGuiClick(int slot, ItemStack item, Player whoClicked, ClickType clickType)
                 {
                     if (item.getType() == Material.STAINED_GLASS_PANE) return;
-                    if (slot == InventoryUtility.backSlot) whoClicked.openInventory(ListAllySubMenu.this.getInventory());
+                    if (slot == InventoryUtility.BACK_SLOT) whoClicked.openInventory(ListAllySubMenu.this.getInventory());
                     else
                     {
                         String gangName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
@@ -208,8 +209,8 @@ public class ListAllySubMenu extends Menu
         {
             //remove gang as allies
             String gangName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
-            Gang localGang = GangManaging.getGangByNameFunction.apply(gangName);
-            Gang playerGang = GangManaging.getGangByUuidFunction.apply(uuid);
+            Gang localGang = this.gangManaging.getGangByNameFunction.apply(gangName);
+            Gang playerGang = this.gangManaging.getGangByUuidFunction.apply(uuid);
 
             if (!localGang.getAllies().contains(playerGang.getGangName()) || !playerGang.getAllies().contains(localGang.getGangName())) {
                 whoClicked.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8&l| &e&lVENT &8&l| &eVent venligst, vær tålmodig.."));
@@ -248,14 +249,14 @@ public class ListAllySubMenu extends Menu
             public void run(){
                 ListAllySubMenu.this.inventory.clear();
                 slot = 10;
-                InventoryUtility.decorate(inventory, InventoryUtility.menuLookOnePredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+                InventoryUtility.decorate(inventory, InventoryUtility.MENU_PREDICATE_ONE, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
 
                 gang.getAllies()
                         .forEach(gangName ->
                         {
                             if (slot > 43) return;
                             if (slot == 17 | slot == 26 | slot == 35) slot += 2;
-                            Gang gang = GangManaging.getGangByNameFunction.apply(gangName);
+                            Gang gang = gangManaging.getGangByNameFunction.apply(gangName);
                             setItem(slot++, skullBuilder.setItemName("&a&l" + gangName).setLore("&7Leder: &f" + gang.getOwner(), "&7Co-Leader: &f" + gang.getCoOwner(), "&7Level: &f" + gang.getGangLevel(), "", "&7Klik her for at fjerne", "&7denne alliance").buildItem());
                         });
                 setItem(4, skullBuilder.setItemName("&a&lAlliance").setLore("&7Klik her for at spørge", "&7en bande om alliance").buildItem());

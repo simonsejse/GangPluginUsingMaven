@@ -14,8 +14,10 @@ import java.util.function.Consumer;
 public class BandeChat implements CommandArguments
 {
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public BandeChat(MainPlugin plugin){
+    public BandeChat(GangManaging gangManaging, MainPlugin plugin){
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
 
@@ -43,9 +45,9 @@ public class BandeChat implements CommandArguments
 
         UUID playerUuid = p.getUniqueId();
         if (args.length >= 2){
-            if (GangManaging.playerInGangPredicate.test(playerUuid)){
-                Gang gang = GangManaging.getGangByUuidFunction.apply(playerUuid);
-                if (GangManaging.isRankMinimumPredicate.test(playerUuid, gang.gangPermissions.accessToGangChat)){
+            if (gangManaging.playerInGangPredicate.test(playerUuid)){
+                Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
+                if (gangManaging.isRankMinimumPredicate.test(playerUuid, gang.gangPermissions.accessToGangChat)){
                     StringBuilder message = new StringBuilder();
                     final Consumer<String> messageConsumer = line -> message.append(line).append(" ");
                     Arrays.stream(args).skip(1).forEach(messageConsumer);

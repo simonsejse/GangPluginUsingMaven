@@ -11,10 +11,10 @@ public class NPCSettingsProvider
     }
 
     /* Properties */
-    private final List<String> bannedWords = Arrays.asList("tissemand", "tissemænd", "fisse", "pik", "patter", "luder", "fede", "homo", "bøsse");
-    private final List<String> goAwayMessages = Arrays.asList("Gå væk!!!", "Jeg vil ikke have noget!!!", "Føj!!");
-    private final List<String> deliveredMessages = Arrays.asList("Tak du gamle!", "Uha, stoffer!!", "Jeg håber for dig det er god kvalitet!", "MERE!! Jeg vil have mere!");
-    private final String npcName = "Ali Mustafa";
+    private List<String> bannedWords = Arrays.asList("tissemand", "tissemænd", "fisse", "pik", "patter", "luder", "fede", "homo", "bøsse");
+    private List<String> goAwayMessages = Arrays.asList("Gå væk!!!", "Jeg vil ikke have noget!!!", "Føj!!");
+    private List<String> deliveredMessages = Arrays.asList("Tak du gamle!", "Uha, stoffer!!", "Jeg håber for dig det er god kvalitet!", "MERE!! Jeg vil have mere!");
+    private String npcName = "Ali Mustafa";
 
     /* Getters */
     public List<String> getBannedWords()

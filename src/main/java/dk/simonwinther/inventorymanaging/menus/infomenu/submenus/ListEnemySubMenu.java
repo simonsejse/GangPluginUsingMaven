@@ -23,16 +23,19 @@ public class ListEnemySubMenu extends Menu
 {
     private MainPlugin plugin;
     private InfoMenu infoMenu;
+    private GangManaging gangManaging;
     private Gang gang;
 
     ItemBuilder playersSkull;
 
-    public ListEnemySubMenu(MainPlugin plugin, InfoMenu infoMenu, Gang gang)
+    public ListEnemySubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang)
     {
         this.plugin = plugin;
         this.infoMenu = infoMenu;
         this.gang = gang;
         playersSkull = new ItemBuilder(Material.SKULL_ITEM, 1, SkullType.PLAYER).setPlayerSkull(gang.getOwnerName());
+        this.gangManaging = gangManaging;
+
     }
 
     @Override
@@ -51,7 +54,7 @@ public class ListEnemySubMenu extends Menu
     public void onGuiClick(int slot, ItemStack item, Player whoClicked, ClickType clickType)
     {
         UUID uuid = whoClicked.getUniqueId();
-        if (slot == InventoryUtility.backSlot) whoClicked.openInventory(infoMenu.getInventory());
+        if (slot == InventoryUtility.BACK_SLOT) whoClicked.openInventory(infoMenu.getInventory());
         else if (slot == 47)
         {
             plugin.getEventHandling().addEnemyChat.accept(uuid);
@@ -66,8 +69,8 @@ public class ListEnemySubMenu extends Menu
             {
                 slot = 10;
 
-                InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookSevenPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
-                GangManaging.enemyGangListFunction.apply(gang.getGangName())
+                InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_SIX, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+                gangManaging.enemyGangListFunction.apply(gang.getGangName())
                         .stream()
                         .forEach(gang ->
                         {
@@ -92,7 +95,7 @@ public class ListEnemySubMenu extends Menu
             @Override
             public void onGuiClick(int slot, ItemStack item, Player whoClicked, ClickType clickType)
             {
-                if (slot == InventoryUtility.backSlot) whoClicked.openInventory(ListEnemySubMenu.this.getInventory());
+                if (slot == InventoryUtility.BACK_SLOT) whoClicked.openInventory(ListEnemySubMenu.this.getInventory());
             }
         }.getInventory());
         else if (item.getType() == Material.SKULL_ITEM)
@@ -115,7 +118,7 @@ public class ListEnemySubMenu extends Menu
     @Override
     public Inventory getInventory()
     {
-        InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookSixPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIGHT_BLUE.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+        InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_FIVE, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIGHT_BLUE.value[ColorIndexEnum.STAINED_GLASS.index]), true);
 
         super.setItem(47, playersSkull.setItemName("&a&lTilføj rival").setLore("&7Klik her for at tilføje", "&7en bande som rival").buildItem());
         super.setItem(51, playersSkull.setItemName("&a&lRival list").setLore("&7Klik her for at se en liste", "&7over rivaler imod din bande").buildItem());
@@ -123,7 +126,7 @@ public class ListEnemySubMenu extends Menu
 
         gang.getEnemies()
                 .stream()
-                .map(GangManaging.getGangByNameFunction::apply)
+                .map(gangManaging.getGangByNameFunction::apply)
                 .forEach(gang ->
                 {
                     if (slot > 43) return;

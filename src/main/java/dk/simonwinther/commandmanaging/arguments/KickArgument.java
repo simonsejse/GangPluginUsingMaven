@@ -12,8 +12,10 @@ import java.util.UUID;
 public class KickArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public KickArgument(MainPlugin plugin){
+    public KickArgument(GangManaging gangManaging, MainPlugin plugin){
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
 
@@ -46,20 +48,20 @@ public class KickArgument implements CommandArguments
             p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_KICK_HIMSELF));
             return;
         }
-        if (GangManaging.playerInGangPredicate.test(playerUuid))
+        if (gangManaging.playerInGangPredicate.test(playerUuid))
         {
-            if (GangManaging.isRankMinimumPredicate.test(playerUuid, GangManaging.getGangByUuidFunction.apply(playerUuid).getGangPermissions().accessToKick))
+            if (gangManaging.isRankMinimumPredicate.test(playerUuid, gangManaging.getGangByUuidFunction.apply(playerUuid).getGangPermissions().accessToKick))
             {
                 try
                 {
                     UUID playerKickedUuid = Bukkit.getOfflinePlayer(args[1].trim()).getUniqueId();
-                    if (GangManaging.playerInGangPredicate.test(playerKickedUuid))
+                    if (gangManaging.playerInGangPredicate.test(playerKickedUuid))
                     {
-                        if (GangManaging.playersInSameGangPredicate.test(playerUuid, playerKickedUuid))
+                        if (gangManaging.playersInSameGangPredicate.test(playerUuid, playerKickedUuid))
                         {
-                            if (GangManaging.rankFunction.apply(playerKickedUuid) < GangManaging.rankFunction.apply(playerUuid)){
-                                String gangName = GangManaging.gangNameFunction.apply(playerKickedUuid);
-                                GangManaging.kickConsumer.accept(playerKickedUuid);
+                            if (gangManaging.rankFunction.apply(playerKickedUuid) < gangManaging.rankFunction.apply(playerUuid)){
+                                String gangName = gangManaging.gangNameFunction.apply(playerKickedUuid);
+                                gangManaging.kickConsumer.accept(playerKickedUuid);
                                 //Check if kicked player is online, only send message if online.
                                 p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_KICKED.replace("{args}", args[1])));
                                 if (Bukkit.getPlayer(playerKickedUuid) != null)

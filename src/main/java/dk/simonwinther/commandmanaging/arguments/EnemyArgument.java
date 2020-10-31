@@ -11,8 +11,10 @@ import java.util.UUID;
 public class EnemyArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public EnemyArgument(MainPlugin plugin){
+    public EnemyArgument(GangManaging gangManaging, MainPlugin plugin){
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
 
@@ -38,14 +40,14 @@ public class EnemyArgument implements CommandArguments
     public void perform(Player p, String... args)
     {
         UUID playerUuid = p.getUniqueId();
-        if (GangManaging.playerInGangPredicate.test(playerUuid))
+        if (gangManaging.playerInGangPredicate.test(playerUuid))
         {
-            Gang playerGang = GangManaging.getGangByUuidFunction.apply(playerUuid);
-            if (GangManaging.isRankMinimumPredicate.test(playerUuid, playerGang.gangPermissions.accessToEnemy))
+            Gang playerGang = gangManaging.getGangByUuidFunction.apply(playerUuid);
+            if (gangManaging.isRankMinimumPredicate.test(playerUuid, playerGang.gangPermissions.accessToEnemy))
             {
-                if (GangManaging.gangExistsPredicate.test(args[1]))
+                if (gangManaging.gangExistsPredicate.test(args[1]))
                 {
-                    Gang argsGang = GangManaging.getGangByNameFunction.apply(args[1]);
+                    Gang argsGang = gangManaging.getGangByNameFunction.apply(args[1]);
                     if (argsGang.getEnemies().size() < playerGang.getMaxEnemies())
                     {
                         if (playerGang.getEnemies().size() < playerGang.getMaxEnemies())
@@ -55,7 +57,7 @@ public class EnemyArgument implements CommandArguments
                             {
                                 if (!playerGang.getEnemies().contains(args[1].toLowerCase()))
                                 {
-                                    GangManaging.addEnemyGang.accept(playerGang, argsGang);
+                                    gangManaging.addEnemyGang.accept(playerGang, argsGang);
                                 } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_ENEMIES));
                             } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_ENEMY_OWN_GANG));
                         } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_GANG_MAX_ENEMIES));

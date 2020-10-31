@@ -19,25 +19,25 @@ public class RankMenu extends Menu
 {
     private MainPlugin plugin;
 
-    private Gang getGang()
-    {
-        return gang;
-    }
+    private Gang gang;
 
-    private void setGang(Gang gang)
-    {
-        this.gang = gang;
-    }
+    private UUID argsUuid;
+
+    private String nameOfArgs;
+    private UUID playerUuid;
+    private String nameOfPlayer;
+    private GangManaging gangManaging;
+
+
+
+
 
     public UUID getArgsUuid()
     {
         return argsUuid;
     }
 
-    public void setArgsUuid(UUID argsUuid)
-    {
-        this.argsUuid = argsUuid;
-    }
+
 
     public String getNameOfArgs()
     {
@@ -49,13 +49,6 @@ public class RankMenu extends Menu
         this.nameOfArgs = nameOfArgs;
     }
 
-    private Gang gang;
-    private UUID argsUuid;
-    private String nameOfArgs;
-
-    private UUID playerUuid;
-    private String nameOfPlayer;
-
     public UUID getPlayerUuid()
     {
         return playerUuid;
@@ -66,17 +59,7 @@ public class RankMenu extends Menu
         this.playerUuid = playerUuid;
     }
 
-    public String getNameOfPlayer()
-    {
-        return nameOfPlayer;
-    }
-
-    public void setNameOfPlayer(String nameOfPlayer)
-    {
-        this.nameOfPlayer = nameOfPlayer;
-    }
-
-    public RankMenu(MainPlugin plugin, Gang gang, UUID playerUuid, String nameOfPlayer, UUID argsUuid, String nameOfArgs)
+    public RankMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang, UUID playerUuid, String nameOfPlayer, UUID argsUuid, String nameOfArgs)
     {
         super();
         this.plugin = plugin;
@@ -85,6 +68,7 @@ public class RankMenu extends Menu
         this.nameOfPlayer = nameOfPlayer;
         this.argsUuid = argsUuid;
         this.nameOfArgs = nameOfArgs;
+        this.gangManaging = gangManaging;
     }
 
     @Override
@@ -107,7 +91,7 @@ public class RankMenu extends Menu
             whoClicked.sendMessage("Du kan ikke ændre din egen rang.");
             return;
         }
-        if (!GangManaging.playerInGangPredicate.test(whoClicked.getUniqueId())) {
+        if (!this.gangManaging.playerInGangPredicate.test(whoClicked.getUniqueId())) {
             whoClicked.getOpenInventory().close();
             return;
         }

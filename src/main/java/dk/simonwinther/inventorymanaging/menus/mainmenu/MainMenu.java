@@ -26,11 +26,15 @@ public class MainMenu extends Menu
     private UUID playerUuid;
     private boolean isInGang;
 
-    public MainMenu(MainPlugin plugin, UUID playerUuid, boolean isInGang)
+    private GangManaging gangManaging;
+
+    public MainMenu(GangManaging gangManaging, MainPlugin plugin, UUID playerUuid, boolean isInGang)
     {
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
         this.playerUuid = playerUuid;
         this.isInGang = isInGang;
+        this.gangManaging = gangManaging;
     }
 
     @Override
@@ -50,13 +54,13 @@ public class MainMenu extends Menu
     {
         UUID uniqueId = whoClicked.getUniqueId();
         if (item.getType() == Material.STAINED_GLASS_PANE) return;
-        if (slot == InventoryUtility.memberAndOpenShopSlot){
-            if (!isInGang) whoClicked.openInventory(new InviteSubMenu(plugin, this, playerUuid).getInventory());
+        if (slot == InventoryUtility.MEMBER_AND_OPEN_SHOP_SLOT){
+            if (!isInGang) whoClicked.openInventory(new InviteSubMenu(this.gangManaging, plugin, this, playerUuid).getInventory());
             else
-                whoClicked.openInventory(new ShopSubMenu(plugin, GangManaging.getGangByUuidFunction.apply(uniqueId)).getInventory());
-        } else if (slot == InventoryUtility.othersSlot) whoClicked.openInventory(new OtherSubMenu(this).getInventory());
-        else if (slot == InventoryUtility.backSlot || slot == 40) whoClicked.getOpenInventory().close();
-        else if (slot == InventoryUtility.gangOrCreationSlot)
+                whoClicked.openInventory(new ShopSubMenu(gangManaging, plugin, gangManaging.getGangByUuidFunction.apply(uniqueId)).getInventory());
+        } else if (slot == InventoryUtility.OTHERS_SLOT) whoClicked.openInventory(new OtherSubMenu(this.gangManaging, this).getInventory());
+        else if (slot == InventoryUtility.BACK_SLOT || slot == 40) whoClicked.getOpenInventory().close();
+        else if (slot == InventoryUtility.GANG_OR_CREATION_SLOT)
         {
             if (!isInGang)
             {
@@ -65,7 +69,7 @@ public class MainMenu extends Menu
                 return;
             }
 
-            whoClicked.openInventory(new InfoMenu(plugin, GangManaging.getGangByUuidFunction.apply(uniqueId), true).getInventory());
+            whoClicked.openInventory(new InfoMenu(gangManaging, plugin, gangManaging.getGangByUuidFunction.apply(uniqueId), true).getInventory());
         }
 
     }
@@ -73,20 +77,20 @@ public class MainMenu extends Menu
     @Override
     public Inventory getInventory()
     {
-        InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookTwoPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), false);
+        InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_TWO, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), false);
 
-        super.setItem(InventoryUtility.backSlot, new ItemBuilder(Material.BARRIER).setItemName("&c&lLuk Menuen").setLore("&fKlik her, for at", "&flukke menuen").buildItem());
+        super.setItem(InventoryUtility.BACK_SLOT, new ItemBuilder(Material.BARRIER).setItemName("&c&lLuk Menuen").setLore("&fKlik her, for at", "&flukke menuen").buildItem());
 
-        super.setItem(InventoryUtility.othersSlot, new ItemBuilder(Material.BOOK).setItemName("&b&lAndet").setLore("&fKlik for at se top 10", "&fog kommandoer").buildItem());
+        super.setItem(InventoryUtility.OTHERS_SLOT, new ItemBuilder(Material.BOOK).setItemName("&b&lAndet").setLore("&fKlik for at se top 10", "&fog kommandoer").buildItem());
         if (!isInGang)
         {
             double balance = plugin.getEconomy().getBalance(Bukkit.getOfflinePlayer(playerUuid));
-            super.setItem(InventoryUtility.memberAndOpenShopSlot, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.YELLOW.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&e&lBliv medlem").setLore("&fKlik her, for at få en", "&fliste over invitationer").buildItem());
-            super.setItem(InventoryUtility.gangOrCreationSlot, new ItemBuilder(Material.NETHER_STAR).setItemName("&a&lOpret bande").setLore((balance >= GangManaging.getGangCost() ? "&fDu har penge nok" : "&fDu har &4ikke&f penge nok\n&fDu mangler &e" + ((int) (GangManaging.getGangCost() - balance)) + "$"), "&a&lPris: &f" + GangManaging.getGangCost()+"$").buildItem());
+            super.setItem(InventoryUtility.MEMBER_AND_OPEN_SHOP_SLOT, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.YELLOW.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&e&lBliv medlem").setLore("&fKlik her, for at få en", "&fliste over invitationer").buildItem());
+            super.setItem(InventoryUtility.GANG_OR_CREATION_SLOT, new ItemBuilder(Material.NETHER_STAR).setItemName("&a&lOpret bande").setLore((balance >= gangManaging.getGangCost() ? "&fDu har penge nok" : "&fDu har &4ikke&f penge nok\n&fDu mangler &e" + ((int) (gangManaging.getGangCost() - balance)) + "$"), "&a&lPris: &f" + gangManaging.getGangCost()+"$").buildItem());
         } else
         {
-            super.setItem(InventoryUtility.memberAndOpenShopSlot, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.YELLOW.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&e&lButik").setLore("&fKlik her, for at", "&fåbne bande butikken").buildItem());
-            super.setItem(InventoryUtility.gangOrCreationSlot, new ItemBuilder(Material.NETHER_STAR).setItemName("&a&lDin bande").setLore("&fKlik her for at se info", "&fom din bande").buildItem());
+            super.setItem(InventoryUtility.MEMBER_AND_OPEN_SHOP_SLOT, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.YELLOW.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&e&lButik").setLore("&fKlik her, for at", "&fåbne bande butikken").buildItem());
+            super.setItem(InventoryUtility.GANG_OR_CREATION_SLOT, new ItemBuilder(Material.NETHER_STAR).setItemName("&a&lDin bande").setLore("&fKlik her for at se info", "&fom din bande").buildItem());
         }
 
         return super.inventory;

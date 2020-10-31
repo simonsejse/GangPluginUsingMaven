@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 public class ShopSubMenu extends Menu
 {
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
     private InfoMenu infoMenu;
     private Gang gang;
@@ -34,10 +35,11 @@ public class ShopSubMenu extends Menu
     private final int accessToLabCost = 250000;
 
 
-    public ShopSubMenu(MainPlugin plugin, Gang gang) //In case opening directly without opening the InfoMenu
+    public ShopSubMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang) //In case opening directly without opening the InfoMenu
     {
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
-        this.infoMenu = new InfoMenu(plugin, gang, true);
+        this.infoMenu = new InfoMenu(gangManaging, plugin, gang, true);
         this.openedFromMainMenu = true;
         this.gang = gang;
     }
@@ -67,14 +69,14 @@ public class ShopSubMenu extends Menu
     public void onGuiClick(int slot, ItemStack item, Player whoClicked, ClickType clickType)
     {
         if (item.getType() != Material.BED && item.getType() != Material.INK_SACK) return;
-        if (slot == InventoryUtility.backSlot) {
+        if (slot == InventoryUtility.BACK_SLOT) {
             Inventory inventory = null;
-            if (openedFromMainMenu) inventory = new MainMenu(plugin, whoClicked.getUniqueId(), true).getInventory();
+            if (openedFromMainMenu) inventory = new MainMenu(gangManaging, plugin, whoClicked.getUniqueId(), true).getInventory();
             else inventory = infoMenu.getInventory();
             whoClicked.openInventory(inventory);
             return;
         }
-        if (GangManaging.isRankMinimumPredicate.test(whoClicked.getUniqueId(), gang.gangPermissions.accessToGangShop))
+        if (gangManaging.isRankMinimumPredicate.test(whoClicked.getUniqueId(), gang.gangPermissions.accessToGangShop))
         {
             int cost = 0;
             int balance = gang.getGangBalance();
@@ -159,7 +161,7 @@ public class ShopSubMenu extends Menu
     @Override
     public Inventory getInventory()
     {
-        InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookTwoPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.MAGENTA.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+        InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_TWO, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.MAGENTA.value[ColorIndexEnum.STAINED_GLASS.index]), true);
 
         int gangLevel = gang.getGangLevel();
         setItem(10, gangLevel >= 3 ? (gang.getGangDamage() > 0 ?

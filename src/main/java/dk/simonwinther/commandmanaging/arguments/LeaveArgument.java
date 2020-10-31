@@ -13,8 +13,10 @@ import java.util.UUID;
 public class LeaveArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public LeaveArgument(MainPlugin plugin){
+    public LeaveArgument(GangManaging gangManaging, MainPlugin plugin){
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
 
@@ -40,10 +42,11 @@ public class LeaveArgument implements CommandArguments
     public void perform(Player p, String... args)
     {
         UUID playerUuid = p.getUniqueId();
-        if (GangManaging.playerInGangPredicate.test(playerUuid)){
-            if (GangManaging.rankFunction.apply(playerUuid) != Rank.LEADER.getValue()){
-                Gang gang = GangManaging.getGangByUuidFunction.apply(playerUuid);
-                gang.removeMember(playerUuid);
+        if (gangManaging.playerInGangPredicate.test(playerUuid)){
+            if (gangManaging.rankFunction.apply(playerUuid) != Rank.LEADER.getValue()){
+                Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
+                gangManaging.kick.accept(gang, playerUuid);
+
                 p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_LEFT_GANG.replace("{name}", gang.getGangName())));
 
                 gang.getMembersSorted().keySet()

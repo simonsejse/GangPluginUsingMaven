@@ -14,8 +14,9 @@ import java.util.function.Function;
 public class AllyArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public AllyArgument(MainPlugin plugin)
+    public AllyArgument(GangManaging gangManaging, MainPlugin plugin)
     {
         this.plugin = plugin;
     }
@@ -41,14 +42,17 @@ public class AllyArgument implements CommandArguments
     @Override
     public void perform(Player p, String... args)
     {
-        if (GangManaging.playerInGangPredicate.test(p.getUniqueId()))
+        //Player is in gang
+        //Player 
+
+        if (gangManaging.playerInGangPredicate.test(p.getUniqueId()))
         {
-            Gang playerGang = GangManaging.getGangByUuidFunction.apply(p.getUniqueId());
-            if (GangManaging.isRankMinimumPredicate.test(p.getUniqueId(), playerGang.gangPermissions.accessToAlly))
+            Gang playerGang = gangManaging.getGangByUuidFunction.apply(p.getUniqueId());
+            if (gangManaging.isRankMinimumPredicate.test(p.getUniqueId(), playerGang.gangPermissions.accessToAlly))
             {
-                if (GangManaging.gangExistsPredicate.test(args[1]))
+                if (gangManaging.gangExistsPredicate.test(args[1]))
                 {
-                    Gang argsGang = GangManaging.getGangByNameFunction.apply(args[1]);
+                    Gang argsGang = gangManaging.getGangByNameFunction.apply(args[1]);
                     if (gangIsAllyFunction.apply(playerGang, argsGang))
                     {
                         if (gangHasAllyRoomFunction.apply(argsGang))
@@ -58,7 +62,7 @@ public class AllyArgument implements CommandArguments
                                 if (!gangEqualsFunction.apply(playerGang, argsGang))
                                 {
                                     gangDeleteEnemiesConsumer.accept(playerGang, argsGang);
-                                    if (GangManaging.gangContainsAllyInvitationPredicate.test(argsGang, playerGang.getGangName().toLowerCase()))
+                                    if (gangManaging.gangContainsAllyInvitationPredicate.test(argsGang, playerGang.getGangName().toLowerCase()))
                                     {
                                         //@ALLY SUCCESS
                                         playerGang.getAllies().add(argsGang.getGangName().toLowerCase());
@@ -87,7 +91,7 @@ public class AllyArgument implements CommandArguments
 
                                     } else
                                     {
-                                        if (GangManaging.gangContainsAllyInvitationPredicate.test(playerGang, argsGang.getGangName().toLowerCase()))
+                                        if (gangManaging.gangContainsAllyInvitationPredicate.test(playerGang, argsGang.getGangName().toLowerCase()))
                                         {
                                             p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().UN_ALLY.replace("{name}", args[1])));
                                             playerGang.getAllyInvitation().remove(argsGang.getGangName().toLowerCase());

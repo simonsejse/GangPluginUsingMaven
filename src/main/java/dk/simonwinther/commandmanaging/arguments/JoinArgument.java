@@ -10,8 +10,10 @@ import org.bukkit.entity.Player;
 public class JoinArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public JoinArgument(MainPlugin plugin){
+    public JoinArgument(GangManaging gangManaging, MainPlugin plugin){
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
 
@@ -39,23 +41,23 @@ public class JoinArgument implements CommandArguments
         //Player is not in gang
         //Gang exists.
         //Player is invited to current gang he's trying to join
-        if (!(GangManaging.playerInGangPredicate.test(p.getUniqueId())))
+        if (!(gangManaging.playerInGangPredicate.test(p.getUniqueId())))
         {
-            if (GangManaging.gangExistsPredicate.test(args[1]))
+            if (gangManaging.gangExistsPredicate.test(args[1]))
             {
-                if (GangManaging.alreadyInvitedByGangNamePredicate.test(args[1], p.getName()))
+                if (gangManaging.alreadyInvitedByGangNamePredicate.test(args[1], p.getName()))
                 {
-                    Gang gang = GangManaging.getGangByNameFunction.apply(args[1]);
+                    Gang gang = gangManaging.getGangByNameFunction.apply(args[1]);
                     if (gang.getMembersSorted().size() < gang.getMaxMembers())
                     {
-                        GangManaging.joinGang(p.getUniqueId(), p.getName(), args[1]);
+                        gangManaging.joinGang(p.getUniqueId(), p.getName(), args[1]);
                         p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_JOINED_GANG.replace("{name}", args[1])));
-
+                        //TODO: Check if filter works.
                         Bukkit.getOnlinePlayers()
+                                .stream()
+                                .filter(globalPlayer -> !p.getName().equalsIgnoreCase(globalPlayer.getName()))
                                 .forEach(globalPlayer ->
-                                {
-                                    if (!(p.getName().equalsIgnoreCase(globalPlayer.getName()))) globalPlayer.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_JOINED_GANG_GLOBAL.replace("{spiller}", p.getName()).replace("{name}", args[1])));
-                                });
+                                        globalPlayer.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_JOINED_GANG_GLOBAL.replace("{spiller}", p.getName()).replace("{name}", args[1]))));
 
                     } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_FULL));
                 } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_INVITED_TO_GANG));

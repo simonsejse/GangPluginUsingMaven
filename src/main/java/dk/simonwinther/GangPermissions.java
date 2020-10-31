@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 public class GangPermissions implements Serializable
 {
-    private static final long serialVersionUID = 98798793217321L;
+    private final long serialVersionUID = 98798793217321L;
 
     public Rank accessToGangShop = Rank.CO_LEADER
             , accessToTransferMoney = Rank.OFFICER
@@ -22,7 +22,7 @@ public class GangPermissions implements Serializable
 
     public boolean accessToToilets = false, accessToFarm = false, accessToLab = false;
 
-    public static long getSerialVersionUID()
+    public long getSerialVersionUID()
     {
         return serialVersionUID;
     }

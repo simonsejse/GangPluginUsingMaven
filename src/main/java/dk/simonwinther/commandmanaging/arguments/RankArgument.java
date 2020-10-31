@@ -14,8 +14,10 @@ import java.util.UUID;
 public class RankArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public RankArgument(MainPlugin plugin){
+    public RankArgument(GangManaging gangManaging, MainPlugin plugin){
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
 
@@ -44,16 +46,16 @@ public class RankArgument implements CommandArguments
         UUID playerUuid = p.getUniqueId();
         //Nested if-statements
         if (!args[1].equalsIgnoreCase(p.getName())){
-            if (GangManaging.playerInGangPredicate.test(playerUuid))
+            if (gangManaging.playerInGangPredicate.test(playerUuid))
             {
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
                 if (offlinePlayer.hasPlayedBefore())
                 {
-                    if (GangManaging.playersInSameGangPredicate.test(p.getUniqueId(), offlinePlayer.getUniqueId()))
+                    if (gangManaging.playersInSameGangPredicate.test(p.getUniqueId(), offlinePlayer.getUniqueId()))
                     {
-                        Gang tempGang = GangManaging.getGangByUuidFunction.apply(playerUuid);
+                        Gang tempGang = gangManaging.getGangByUuidFunction.apply(playerUuid);
                         UUID argsUuid = Bukkit.getOfflinePlayer(args[1]).getUniqueId();
-                        p.openInventory(new RankMenu(plugin, tempGang, p.getUniqueId(), p.getName(), argsUuid, args[1]).getInventory());
+                        p.openInventory(new RankMenu(this.gangManaging, plugin, tempGang, p.getUniqueId(), p.getName(), argsUuid, args[1]).getInventory());
                     } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_SAME_GANG));
                 } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().HAS_NEVER_PLAYED));
             } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));

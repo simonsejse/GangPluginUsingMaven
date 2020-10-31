@@ -3,6 +3,7 @@ package dk.simonwinther.inventorymanaging.menus.infomenu.submenus;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
+import dk.simonwinther.enums.GangAccess;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.GangPermissions;
 import dk.simonwinther.enums.ColorDataEnum;
@@ -28,14 +29,16 @@ public class AccessSubMenu extends Menu
     private Gang gang;
     private GangPermissions gangPermissions;
     private int slotType;
+    private GangManaging gangManaging;
 
-    public AccessSubMenu(MainPlugin plugin, PermissionSubMenu permissionSubMenu, UUID playerUuid, int slotType)
+    public AccessSubMenu(GangManaging gangManaging, MainPlugin plugin, PermissionSubMenu permissionSubMenu, UUID playerUuid, int slotType)
     {
         this.plugin = plugin;
         this.permissionSubMenu = permissionSubMenu;
-        this.gang = GangManaging.getGangByUuidFunction.apply(playerUuid);
+        this.gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
         this.gangPermissions = gang.getGangPermissions();
         this.slotType = slotType;
+        this.gangManaging = gangManaging;
     }
 
     @Override
@@ -57,50 +60,51 @@ public class AccessSubMenu extends Menu
         if (mat.name().endsWith("SWORD"))
         {
             Rank rank = mat == Material.WOOD_SWORD ? Rank.MEMBER : mat == Material.STONE_SWORD ? Rank.OFFICER : mat == Material.IRON_SWORD ? Rank.CO_LEADER : Rank.LEADER;
+
             switch (slotType)
             {
-                case 10:
+                case GangAccess.GANG_SHOP_SLOT:
                     gangPermissions.setAccessToGangShop(rank);
                     break;
-                case 12:
+                case GangAccess.TRANSFER_MONEY_SLOT:
                     gangPermissions.setAccessToTransferMoney(rank);
                     break;
-                case 14:
+                case GangAccess.TRANSFER_ITEM_SLOT:
                     gangPermissions.setAccessToTransferItems(rank);
                     break;
-                case 16:
+                case GangAccess.KICK_SLOT:
                     gangPermissions.setAccessToKick(rank);
                     break;
-                case 20:
+                case GangAccess.GANG_CHAT_SLOT:
                     gangPermissions.setAccessToGangChat(rank);
                     break;
-                case 22:
+                case GangAccess.DEPOSIT_SLOT:
                     gangPermissions.setAccessToDeposit(rank);
                     break;
-                case 24:
+                case GangAccess.ALLY_CHAT_SLOT:
                     gangPermissions.setAccessToAllyChat(rank);
                     break;
-                case 28:
+                case GangAccess.ENEMY_SLOT:
                     gangPermissions.setAccessToEnemy(rank);
                     break;
-                case 30:
+                case GangAccess.ALLY_SLOT:
                     gangPermissions.setAccessToAlly(rank);
                     break;
-                case 32:
+                case GangAccess.INVITE_SLOT:
                     gangPermissions.setAccessToInvite(rank);
                     break;
-                case 34:
+                case GangAccess.LEVEL_SLOT:
                     gangPermissions.setAccessToLevelUp(rank);
                     break;
             }
-            Bukkit.getScheduler().runTaskLater(plugin, () -> whoClicked.openInventory(new AccessSubMenu(this.plugin, this.permissionSubMenu, whoClicked.getUniqueId(), this.slotType).getInventory()), 10l);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> whoClicked.openInventory(new AccessSubMenu(this.gangManaging, this.plugin, this.permissionSubMenu, whoClicked.getUniqueId(), this.slotType).getInventory()), 10l);
         } else if (mat == Material.BED) whoClicked.openInventory(permissionSubMenu.getInventory());
     }
 
     @Override
     public Inventory getInventory()
     {
-        InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookFourPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIGHT_BLUE.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+        InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_FOUR, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIGHT_BLUE.value[ColorIndexEnum.STAINED_GLASS.index]), true);
 
 
         int memberSlot = (getCurrentPermission() == Rank.MEMBER ? 31 : 2);
@@ -119,32 +123,33 @@ public class AccessSubMenu extends Menu
 
     private Rank getCurrentPermission()
     {
-        switch (slotType)
+        switch (this.slotType)
         {
-            case 10:
+            case GangAccess.GANG_SHOP_SLOT:
                 return gangPermissions.accessToGangShop;
-            case 12:
+            case GangAccess.TRANSFER_MONEY_SLOT:
                 return gangPermissions.accessToTransferMoney;
-            case 14:
+            case GangAccess.TRANSFER_ITEM_SLOT:
                 return gangPermissions.accessToTransferItems;
-            case 16:
+            case GangAccess.KICK_SLOT:
                 return gangPermissions.accessToKick;
-            case 20:
+            case GangAccess.GANG_CHAT_SLOT:
                 return gangPermissions.accessToGangChat;
-            case 22:
+            case GangAccess.DEPOSIT_SLOT:
                 return gangPermissions.accessToDeposit;
-            case 24:
+            case GangAccess.ALLY_CHAT_SLOT:
                 return gangPermissions.accessToAllyChat;
-            case 28:
+            case GangAccess.ENEMY_SLOT:
                 return gangPermissions.accessToEnemy;
-            case 30:
+            case GangAccess.ALLY_SLOT:
                 return gangPermissions.accessToAlly;
-            case 32:
+            case GangAccess.INVITE_SLOT:
                 return gangPermissions.accessToInvite;
-            case 34:
+            case GangAccess.LEVEL_SLOT:
                 return gangPermissions.accessToLevelUp;
+            default:
+                return Rank.MEMBER;
         }
-        return Rank.MEMBER;
     }
 
     public boolean isRankChosen(Rank rank)

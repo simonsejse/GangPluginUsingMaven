@@ -8,10 +8,11 @@ public class CustomSettingsProvider
         npcSettingsProvider = new NPCSettingsProvider();
     }
 
-    /* Properties */
+    /* Properties - cannot be final since we won't be able to change in config.json */
     private int maxNameLength = 12;
     private int minNameLength = 4;
     private NPCSettingsProvider npcSettingsProvider;
+    private MySQLProvider mySQLProvider;
 
     /* Getters */
     public int getMaxNameLength()
@@ -29,4 +30,8 @@ public class CustomSettingsProvider
         return this.npcSettingsProvider;
     }
 
+    public MySQLProvider getMySQLProvider()
+    {
+        return mySQLProvider;
+    }
 }

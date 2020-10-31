@@ -51,17 +51,19 @@ public final class MainPlugin extends JavaPlugin
     private CustomSettingsProvider customSettingsProvider;
     private ChatUtil chatUtil;
     private EventHandling eventHandling;
-    private static final Logger log = Logger.getLogger("Minecraft");
-    private static Economy econ = null;
+    private final Logger log = Logger.getLogger("Minecraft");
+    private Economy econ = null;
     private static Permission perms = null;
-    private static Chat chat = null;
-
+    private Chat chat = null;
+    private ConnectionProvider connectionProvider;
+    GangManaging gangManaging = null;
 
     @Override
     public void onEnable()
     {
-        // TODO: GSON to Object
-        //  [ ] customSettingsProvider = new Object();
+        //TODO: Might have to convert to field variable
+        this.gangManaging = new GangManaging();
+
         try{
             createFiles();
         }catch(IOException | JsonSyntaxException e){
@@ -79,10 +81,14 @@ public final class MainPlugin extends JavaPlugin
             }
         }
 
-        getCommand("bande").setExecutor(new GangCommand(this));
-        getCommand("confirmtransfercmd").setExecutor(new ConfirmTransferCmd(this));
+        //After initialising customSettingsProvider
+        this.connectionProvider = new ConnectionProvider(customSettingsProvider);
+        this.connectionProvider.openConnection();
 
-        eventHandling = new EventHandling(this);
+        getCommand("bande").setExecutor(new GangCommand(gangManaging, this));
+        getCommand("confirmtransfercmd").setExecutor(new ConfirmTransferCmd(this.gangManaging, this));
+
+        eventHandling =  new EventHandling(gangManaging, this);
 
         if (!setupEconomy())
         {
@@ -131,12 +137,15 @@ public final class MainPlugin extends JavaPlugin
     }
 
 
-    private final Supplier<String> schedulerUpdated = () -> "&8&l| &b&lBande &8&l| &2&l" + GangManaging.gangMap.keySet().size() + "&a bander er blevet automatisk gemt...!";
+    private final Supplier<String> schedulerUpdated = () -> "&8&l| &b&lBande &8&l| &2&l" + gangManaging.gangMap.keySet().size() + "&a bander er blevet automatisk gemt...!";
 
     private void createFiles() throws IOException, JsonSyntaxException, ConfigFileNotFoundException
     {
-        messageConfig = new MessageFile(this, "messages.yml");
-        messageConfig.create();
+        //TODO: I might be instantiating to early, so this may be the reason it causes break
+        this.chatUtil = new ChatUtil(this);
+
+        this.messageConfig = new MessageFile(this.chatUtil, this, "messages.yml");
+        this.messageConfig.create();
 
         File configFile = new File(getDataFolder(), "config.json");
         if (!configFile.exists()) throw new ConfigFileNotFoundException();
@@ -150,7 +159,6 @@ public final class MainPlugin extends JavaPlugin
         //Throws JsonSyntaxException means JSON wasn't WRITTEN right, therefore in catch create new instance of CustomSettingsProvider using default settings.
         this.customSettingsProvider = new Gson().fromJson(json.toString(), CustomSettingsProvider.class);
 
-        chatUtil = new ChatUtil(this);
     }
 
     public WorldGuardPlugin getWorldGuard()
@@ -239,10 +247,10 @@ public final class MainPlugin extends JavaPlugin
 
     public static Permission getPermissions()
     {
-        return perms;
+        return MainPlugin.perms;
     }
 
-    public static Chat getChat()
+    public Chat getChat()
     {
         return chat;
     }
@@ -269,39 +277,17 @@ public final class MainPlugin extends JavaPlugin
         return eventHandling;
     }
 
-    public static Logger getLog()
+    public Logger getLog()
     {
         return log;
     }
 
-    public static Economy getEcon()
-    {
-        return econ;
-    }
-
-    public static void setEcon(Economy econ)
-    {
-        MainPlugin.econ = econ;
-    }
-
-    public static Permission getPerms()
-    {
-        return perms;
-    }
-
-    public static void setPerms(Permission perms)
-    {
-        MainPlugin.perms = perms;
-    }
-
-    public static void setChat(Chat chat)
-    {
-        MainPlugin.chat = chat;
-    }
 
     /* Saving and loading data old way using object output and input streams. */
     private void loadData()
     {
+
+        //TODO: Checking if connection provider throws NullPointerException
         /*
         File f = new File(getDataFolder() + File.separator + "Gangs");
         if (f.listFiles() != null) {

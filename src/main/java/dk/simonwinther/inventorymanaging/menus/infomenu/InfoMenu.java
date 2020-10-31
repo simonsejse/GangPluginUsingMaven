@@ -31,10 +31,12 @@ public class InfoMenu extends Menu
     private MainPlugin plugin;
     private boolean isOwnGang;
 
+    private GangManaging gangManaging;
 
-    public InfoMenu(MainPlugin plugin, Gang gang, boolean isOwnGang)
+    public InfoMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang, boolean isOwnGang)
     {
         super();
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
         this.gang = gang;
         this.isOwnGang = isOwnGang;
@@ -57,16 +59,16 @@ public class InfoMenu extends Menu
     {
         if (!isOwnGang) return;
         String gangName = this.gang.getGangName();
-        this.gang = GangManaging.getGangByNameFunction.apply(gangName); //Refreshes gang instance to pass through new inventorys
+        this.gang = gangManaging.getGangByNameFunction.apply(gangName); //Refreshes gang instance to pass through new inventorys
         UUID uuid = whoClicked.getUniqueId();
 
-        if (slot == InventoryUtility.backSlot) whoClicked.openInventory(new MainMenu(plugin, uuid, GangManaging.playerInGangPredicate.test(uuid)).getInventory());
-        else if (slot == InventoryUtility.permissionSlot) whoClicked.openInventory(new PermissionSubMenu(plugin, this).getInventory());
-        else if (slot == InventoryUtility.gangShopSlot) whoClicked.openInventory(new ShopSubMenu(plugin, this, gang).getInventory());
-        else if (slot == InventoryUtility.membersSlot) whoClicked.openInventory(new MemberSubMenu(plugin, this, gang).getInventory());
-        else if (slot == InventoryUtility.economySlot) whoClicked.openInventory(new BankSubMenu(plugin, this, gang, uuid).getInventory());
-        else if (slot == InventoryUtility.levelSlot){
-            if(GangManaging.isRankMinimumPredicate.test(uuid, gang.getGangPermissions().accessToLevelUp)){
+        if (slot == InventoryUtility.BACK_SLOT) whoClicked.openInventory(new MainMenu(gangManaging, plugin, uuid, gangManaging.playerInGangPredicate.test(uuid)).getInventory());
+        else if (slot == InventoryUtility.PERMISSION_SLOT) whoClicked.openInventory(new PermissionSubMenu(this.gangManaging, plugin, this).getInventory());
+        else if (slot == InventoryUtility.GANG_SHOP_SLOT) whoClicked.openInventory(new ShopSubMenu(plugin, this, gang).getInventory());
+        else if (slot == InventoryUtility.MEMBERS_SLOT) whoClicked.openInventory(new MemberSubMenu(this.gangManaging, plugin, this, gang).getInventory());
+        else if (slot == InventoryUtility.ECONOMY_SLOT) whoClicked.openInventory(new BankSubMenu(this.gangManaging, plugin, this, gang, uuid).getInventory());
+        else if (slot == InventoryUtility.LEVEL_SLOT){
+            if(gangManaging.isRankMinimumPredicate.test(uuid, gang.getGangPermissions().accessToLevelUp)){
                 Level level = Level.valueOf(ChatUtil.numbers[gang.getGangLevel()]);
                 boolean allMatch = Stream.of(level.getRequirements())  //Stream Stream<List<Predicate>>
                         .flatMap(Collection::stream) //  Stream<Predicate>
@@ -82,9 +84,9 @@ public class InfoMenu extends Menu
                     whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().STILL_MISSING_REQUIREMENTS));
                 }
             }else whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
-        }else if (slot == InventoryUtility.allySlot) whoClicked.openInventory(new ListAllySubMenu(plugin, this, gang).getInventory());
-        else if (slot == InventoryUtility.enemySlot) whoClicked.openInventory(new ListEnemySubMenu(plugin, this, gang).getInventory());
-        else if (slot == InventoryUtility.deleteSlot)
+        }else if (slot == InventoryUtility.ALLY_SLOT) whoClicked.openInventory(new ListAllySubMenu(this.gangManaging, plugin, this, gang).getInventory());
+        else if (slot == InventoryUtility.ENEMY_SLOT) whoClicked.openInventory(new ListEnemySubMenu(this.gangManaging, plugin, this, gang).getInventory());
+        else if (slot == InventoryUtility.DELETE_SLOT)
         {
             /*
             @Anonymous class: Using anonymous class of the menu class to open a confirm or cancel menu
@@ -95,7 +97,7 @@ public class InfoMenu extends Menu
                 @Override
                 public Inventory getInventory()
                 {
-                    InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookTwoPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+                    InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_TWO, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
                     super.setItem(20, gang.getMembersSorted().size() > 1 ? new ItemBuilder(Material.BARRIER).setItemName("&c&lDer er flere i bande").setLore("&fDu skal være den sidste", "&fi banden før du kan", "&fforlade den").buildItem() : (gang.getMembersSorted().get(uuid) == Rank.LEADER.getValue()) ? new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.MAGENTA.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&a&lSlet bande").setLore("&fKlik her for at", "&fslette din bande").buildItem() : new ItemBuilder(Material.BARRIER).setItemName("&c&lDu ikke leder").setLore("&fKun lederen af banden", "&fkan slette den").buildItem());
                     super.setItem(24, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.RED.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&c&lAnnullere").setLore("&fKlik her for at", "&fannullere").buildItem());
                     return super.inventory;
@@ -136,25 +138,25 @@ public class InfoMenu extends Menu
     @Override
     public Inventory getInventory()
     {
-        InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookThreePredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+        InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_THREE, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
 
-        super.setItem(InventoryUtility.economySlot, new ItemBuilder(Material.GOLD_INGOT).setItemName("&6&lØkonomi").setLore("&8&m----------------------", "&7Bandens saldo: &f$" + MessageFormat.format("{0}", gang.getGangBalance()), "", "&7Klik for at indsætte penge", "&7bandens konto").buildItem());
-        super.setItem(InventoryUtility.membersSlot, new ItemBuilder(Material.GOLD_SWORD).setItemName("&a&lMedlemmer").setLore(getMembersList()).addFlags(ItemFlag.HIDE_ATTRIBUTES).buildItem());
+        super.setItem(InventoryUtility.ECONOMY_SLOT, new ItemBuilder(Material.GOLD_INGOT).setItemName("&6&lØkonomi").setLore("&8&m----------------------", "&7Bandens saldo: &f$" + MessageFormat.format("{0}", gang.getGangBalance()), "", "&7Klik for at indsætte penge", "&7bandens konto").buildItem());
+        super.setItem(InventoryUtility.MEMBERS_SLOT, new ItemBuilder(Material.GOLD_SWORD).setItemName("&a&lMedlemmer").setLore(getMembersList()).addFlags(ItemFlag.HIDE_ATTRIBUTES).buildItem());
         try
         {
-            super.setItem(InventoryUtility.gangInformationSlot, new ItemBuilder(Material.NETHER_STAR).setItemName("&d&lMin bande").setLore("&8&m----------------------", "&7Bande ID: &f" + gang.getGangId(), "&7Navn: &f" + gang.getGangName(), "&7Level: &f" + gang.getGangLevel(), "&7Leder: &f" + gang.getOwner(), "&7Coleder: &f" + gang.getCoOwner(), "&7Fangedrab: &f" + gang.getPrisonerKills(), "&7Vagtdrab: &f" + gang.getGuardKills(), "&7Officerdrab: &f" + gang.getOfficerKills()).buildItem());
+            super.setItem(InventoryUtility.GANG_INFORMATION_SLOT, new ItemBuilder(Material.NETHER_STAR).setItemName("&d&lMin bande").setLore("&8&m----------------------", "&7Bande ID: &f" + gang.getGangId(), "&7Navn: &f" + gang.getGangName(), "&7Level: &f" + gang.getGangLevel(), "&7Leder: &f" + gang.getOwner(), "&7Coleder: &f" + gang.getCoOwner(), "&7Fangedrab: &f" + gang.getPrisonerKills(), "&7Vagtdrab: &f" + gang.getGuardKills(), "&7Officerdrab: &f" + gang.getOfficerKills()).buildItem());
         } catch (Exception e)
         {
             e.printStackTrace();
         }
-        super.setItem(InventoryUtility.limitsSlot, new ItemBuilder(Material.ENDER_CHEST).setItemName("&e&lBegræsninger").setLore(MessageFormat.format("&6Medlemmer&f: &2&l{0}&f ud af &c&l{1}", gang.getAmountOfMembers(), gang.getMaxMembers()), MessageFormat.format("&6Allierede&f: &2&l{0}&f ud af &c&l{1}", gang.getAmountOfAllies(), gang.getMaxAllies()), MessageFormat.format("&6Rivaler&f: &2&l{0}&f ud af &c&l{1}", gang.getAmountOfEnemys(), gang.getMaxEnemies()), MessageFormat.format("&6Bande skade&f: &c&l{0}%", gang.getGangDamage()), MessageFormat.format("&6Alliance skade&f: &c&l{0}%", gang.getAllyDamage()), "&6Adgang til:", "&8 »&e Toiletterne: " + (gang.gangPermissions.accessToToilets ? "&aJa" : "&cNej"), "&8 »&e Gården: " + (gang.gangPermissions.accessToToilets ? "&aJa" : "&cNej"), "&8 »&e Laboratoriet: " + (gang.gangPermissions.accessToLab ? "&aJa" : "&cNej")).buildItem());
-        super.setItem(InventoryUtility.levelSlot, new ItemBuilder(Material.OBSIDIAN).setItemName("&5&lKrav til level "+(gang.getGangLevel() + 1)).setLore("&8&m----------------------", levelDescFunc.apply(gang)).buildItem());
-        super.setItem(InventoryUtility.allySlot, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.GREEN.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&a&lAllierede &e" + gang.getAllies().size() + "&7/&6" + gang.getMaxAllies()).setLore(getAllyList()).buildItem());
-        super.setItem(InventoryUtility.enemySlot, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.RED.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&4&lRivaler &c" + gang.getEnemies().size() + "&7/&4" + gang.getMaxEnemies()).setLore(getEnemiesList()).buildItem());
+        super.setItem(InventoryUtility.LIMITS_SLOT, new ItemBuilder(Material.ENDER_CHEST).setItemName("&e&lBegræsninger").setLore(MessageFormat.format("&6Medlemmer&f: &2&l{0}&f ud af &c&l{1}", gang.getAmountOfMembers(), gang.getMaxMembers()), MessageFormat.format("&6Allierede&f: &2&l{0}&f ud af &c&l{1}", gang.getAmountOfAllies(), gang.getMaxAllies()), MessageFormat.format("&6Rivaler&f: &2&l{0}&f ud af &c&l{1}", gang.getAmountOfEnemys(), gang.getMaxEnemies()), MessageFormat.format("&6Bande skade&f: &c&l{0}%", gang.getGangDamage()), MessageFormat.format("&6Alliance skade&f: &c&l{0}%", gang.getAllyDamage()), "&6Adgang til:", "&8 »&e Toiletterne: " + (gang.gangPermissions.accessToToilets ? "&aJa" : "&cNej"), "&8 »&e Gården: " + (gang.gangPermissions.accessToToilets ? "&aJa" : "&cNej"), "&8 »&e Laboratoriet: " + (gang.gangPermissions.accessToLab ? "&aJa" : "&cNej")).buildItem());
+        super.setItem(InventoryUtility.LEVEL_SLOT, new ItemBuilder(Material.OBSIDIAN).setItemName("&5&lKrav til level "+(gang.getGangLevel() + 1)).setLore("&8&m----------------------", levelDescFunc.apply(gang)).buildItem());
+        super.setItem(InventoryUtility.ALLY_SLOT, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.GREEN.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&a&lAllierede &e" + gang.getAllies().size() + "&7/&6" + gang.getMaxAllies()).setLore(getAllyList()).buildItem());
+        super.setItem(InventoryUtility.ENEMY_SLOT, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.RED.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&4&lRivaler &c" + gang.getEnemies().size() + "&7/&4" + gang.getMaxEnemies()).setLore(getEnemiesList()).buildItem());
 //        super.setItem(28, new ItemBuilder(Material.NETHER_STAR).setItemName("&9✯&b&l Changelogs &9✯").setLore("&7Release version: 1.0", "&7Nuværende version: 1.0", "", "&8[&91:&b&l ♛&8] &7➤ &9Ingen nye ændringer...", "&8&m&l——————————————", "&7Kommende ændringer:", "&6&l - &eBegrænsninger",  "&6&l - &eBande skade (allierede/bandemedlemmer)").buildItem());
-        super.setItem(InventoryUtility.gangShopSlot, new ItemBuilder(Material.GOLD_HELMET).setItemName("&d&lBandeshop").setLore("&fKøb opgraderinger til din bande!").addFlags(ItemFlag.HIDE_ATTRIBUTES).buildItem());
-        super.setItem(InventoryUtility.permissionSlot, new ItemBuilder(Material.BOOK).setItemName("&a&lTilladelser").buildItem());
-        super.setItem(InventoryUtility.deleteSlot, new ItemBuilder(Material.BARRIER).setItemName("&4&lSlet bande").setLore("&fKlik her for at", "&fslette din bande").buildItem());
+        super.setItem(InventoryUtility.GANG_SHOP_SLOT, new ItemBuilder(Material.GOLD_HELMET).setItemName("&d&lBandeshop").setLore("&fKøb opgraderinger til din bande!").addFlags(ItemFlag.HIDE_ATTRIBUTES).buildItem());
+        super.setItem(InventoryUtility.PERMISSION_SLOT, new ItemBuilder(Material.BOOK).setItemName("&a&lTilladelser").buildItem());
+        super.setItem(InventoryUtility.DELETE_SLOT, new ItemBuilder(Material.BARRIER).setItemName("&4&lSlet bande").setLore("&fKlik her for at", "&fslette din bande").buildItem());
         return super.inventory;
     }
 

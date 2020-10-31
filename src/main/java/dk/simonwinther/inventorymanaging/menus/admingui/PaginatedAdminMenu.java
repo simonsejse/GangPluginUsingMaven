@@ -23,10 +23,12 @@ public class PaginatedAdminMenu extends Menu
 
     private int page;
     private final int PAGE_COUNT = 52;
+    private final GangManaging gangManaging;
 
-    public PaginatedAdminMenu(int page)
+    public PaginatedAdminMenu(GangManaging gangManaging, int page)
     {
         super();
+        this.gangManaging = gangManaging;
         this.page = page;
     }
 
@@ -49,13 +51,13 @@ public class PaginatedAdminMenu extends Menu
     {
         if (item.getType() == Material.BARRIER) return;
         if (slot == 52 && page <= 0) return;
-        if (slot == 53) whoClicked.openInventory(new PaginatedAdminMenu(++page).getInventory());
-        else if (slot == 52) whoClicked.openInventory(new PaginatedAdminMenu(--page).getInventory());
+        if (slot == 53) whoClicked.openInventory(new PaginatedAdminMenu(this.gangManaging, ++page).getInventory());
+        else if (slot == 52) whoClicked.openInventory(new PaginatedAdminMenu(this.gangManaging, --page).getInventory());
         else{
             String gangName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
-            if (GangManaging.gangExistsPredicate.test(gangName))
+            if (gangManaging.gangExistsPredicate.test(gangName))
             {
-                whoClicked.openInventory(new SpecificAdminMenu(gangName, this).getInventory());
+                whoClicked.openInventory(new SpecificAdminMenu(this.gangManaging, gangName, this).getInventory());
             }
         }
     }
@@ -63,7 +65,7 @@ public class PaginatedAdminMenu extends Menu
     @Override
     public Inventory getInventory()
     {
-        final List<Gang> gangList = new ArrayList<>(GangManaging.getGangMap().values());
+        final List<Gang> gangList = new ArrayList<>(gangManaging.getGangMap().values());
         //Page 0 -> 0*52 -> 0
         //page 1 -> 1*52 -> 52
         for (int slot = 0, index = page * PAGE_COUNT; slot < PAGE_COUNT && index < gangList.size(); slot++)

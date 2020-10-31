@@ -11,13 +11,13 @@ import java.util.stream.IntStream;
 public class InventoryUtility
 {
 
-    public static IntPredicate menuLookOnePredicate = t -> t < 10 && t != 4 || t > 16 && t < 19 || t > 25 && t < 28 || t > 34 && t < 37 || t > 43 && t != 47 && t != 49 && t != 51;
-    public static IntPredicate menuLookTwoPredicate = t -> t < 10 || t > 16 && t < 19 || t > 25 && t < 28 || t > 34 && t != 49;
-    public static IntPredicate menuLookThreePredicate = t -> t < 10 || t > 16 && t < 19 || t > 25 && t < 28 || t > 34 && t != 47 && t != 49 && t != 51;
-    public static IntPredicate menuLookFourPredicate = t -> t != 2 && t != 4 && t != 6 && t < 19 || t > 25 && t < 28 || t > 34 && t < 37 || t > 43 && t != 49;
-    //public static IntPredicate menuLookFivePredicate = t -> t < 10 | t > 16 && t < 19 | t > 25 && t < 28 | t > 34 && t != 40;
-    public static IntPredicate menuLookSixPredicate = t -> t < 10 || t > 16 && t < 19 || t > 25 && t < 28 || t > 34 && t < 37 || t > 43 && t != 47 && t != 49 && t != 51;
-    public static IntPredicate menuLookSevenPredicate = t -> t < 10 || t > 16 && t < 19 || t > 25 && t < 28 || t > 34 && t < 37 || t > 43 && t != 49;
+    public static IntPredicate MENU_PREDICATE_ONE = t -> t < 10 && t != 4 || t > 16 && t < 19 || t > 25 && t < 28 || t > 34 && t < 37 || t > 43 && t != 47 && t != 49 && t != 51;
+    public static IntPredicate MENU_PREDICATE_TWO = t -> t < 10 || t > 16 && t < 19 || t > 25 && t < 28 || t > 34 && t != 49;
+    public static IntPredicate MENU_PREDICATE_THREE = t -> t < 10 || t > 16 && t < 19 || t > 25 && t < 28 || t > 34 && t != 47 && t != 49 && t != 51;
+    public static IntPredicate MENU_PREDICATE_FOUR = t -> t != 2 && t != 4 && t != 6 && t < 19 || t > 25 && t < 28 || t > 34 && t < 37 || t > 43 && t != 49;
+    //public IntPredicate menuLookFivePredicate = t -> t < 10 | t > 16 && t < 19 | t > 25 && t < 28 | t > 34 && t != 40;
+    public static IntPredicate MENU_PREDICATE_FIVE = t -> t < 10 || t > 16 && t < 19 || t > 25 && t < 28 || t > 34 && t < 37 || t > 43 && t != 47 && t != 49 && t != 51;
+    public static IntPredicate MENU_PREDICATE_SIX = t -> t < 10 || t > 16 && t < 19 || t > 25 && t < 28 || t > 34 && t < 37 || t > 43 && t != 49;
 
     public static void decorate(Inventory inv, IntPredicate intPredicate, ItemStack item, boolean setBed){
         IntStream.range(0, 9 * 6)
@@ -27,9 +27,10 @@ public class InventoryUtility
     }
 
 
-    public static final int backSlot = 49;
-    public static final int economySlot = 10, membersSlot = 12, gangInformationSlot = 14, limitsSlot = 16, levelSlot = 28, allySlot = 30, enemySlot = 32, gangShopSlot = 34, permissionSlot = 47, deleteSlot = 51;
-    public static final int othersSlot = 24, memberAndOpenShopSlot = 20, gangOrCreationSlot = 22;
+    public static final int BACK_SLOT = 49;
+    //TODO: Use GangAccess instead
+    public static final int ECONOMY_SLOT = 10, MEMBERS_SLOT = 12, GANG_INFORMATION_SLOT = 14, LIMITS_SLOT = 16, LEVEL_SLOT = 28, ALLY_SLOT = 30, ENEMY_SLOT = 32, GANG_SHOP_SLOT = 34, PERMISSION_SLOT = 47, DELETE_SLOT = 51;
+    public static final int OTHERS_SLOT = 24, MEMBER_AND_OPEN_SHOP_SLOT = 20, GANG_OR_CREATION_SLOT = 22;
 
 
 }

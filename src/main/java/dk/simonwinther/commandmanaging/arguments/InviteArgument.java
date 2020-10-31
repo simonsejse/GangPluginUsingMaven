@@ -11,9 +11,11 @@ import java.util.UUID;
 public class InviteArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public InviteArgument(MainPlugin plugin)
+    public InviteArgument(GangManaging gangManaging, MainPlugin plugin)
     {
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
 
@@ -41,30 +43,30 @@ public class InviteArgument implements CommandArguments
         UUID playerUuid = p.getUniqueId();
         if (!args[1].equalsIgnoreCase(p.getName()))
         {
-            if (GangManaging.playerInGangPredicate.test(playerUuid))
+            if (gangManaging.playerInGangPredicate.test(playerUuid))
             {
                 if (Bukkit.getOfflinePlayer(args[1]).hasPlayedBefore())
                 {
                     //Check if player and invitedPlayer is in the game gang:
                     UUID invitedPlayerUuid = Bukkit.getOfflinePlayer(args[1]).getUniqueId();
-                    if (GangManaging.getGangByUuidFunction.apply(invitedPlayerUuid) == null || !GangManaging.playersInSameGangPredicate.test(playerUuid, invitedPlayerUuid))
+                    if (gangManaging.getGangByUuidFunction.apply(invitedPlayerUuid) == null || !gangManaging.playersInSameGangPredicate.test(playerUuid, invitedPlayerUuid))
                     {
-                        if (GangManaging.isRankMinimumPredicate.test(playerUuid, GangManaging.getGangByUuidFunction.apply(playerUuid).gangPermissions.accessToInvite))
+                        if (gangManaging.isRankMinimumPredicate.test(playerUuid, gangManaging.getGangByUuidFunction.apply(playerUuid).gangPermissions.accessToInvite))
                         {
-                            if (GangManaging.hasMemberSpacePredicate.test(playerUuid))
+                            if (gangManaging.hasMemberSpacePredicate.test(playerUuid))
                             {
-                                if (GangManaging.alreadyInvitedByUuidPredicate.test(playerUuid, args[1]))
+                                if (gangManaging.alreadyInvitedByUuidPredicate.test(playerUuid, args[1]))
                                 {
                                     //Remove invitation
-                                    GangManaging.removeInvitationConsumer.accept(playerUuid, args[1]);
+                                    gangManaging.removeInvitationConsumer.accept(playerUuid, args[1]);
                                     p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_UNINVITED.replace("{args}", args[1])));
                                     return;
                                 }
                                 if (Bukkit.getPlayer(args[1]) != null){
-                                    Bukkit.getPlayer(args[1]).sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().INVITED_TO_GANG.replace("{name}", GangManaging.gangNameFunction.apply(playerUuid)).replace("{player}", p.getName())));
+                                    Bukkit.getPlayer(args[1]).sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().INVITED_TO_GANG.replace("{name}", gangManaging.gangNameFunction.apply(playerUuid)).replace("{player}", p.getName())));
                                 }
                                 //Invite player to gang
-                                GangManaging.addInvitationConsumer.accept(playerUuid, args[1]);
+                                gangManaging.addInvitationConsumer.accept(playerUuid, args[1]);
                                 p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_INVITED.replace("{args}", args[1])));
 
 

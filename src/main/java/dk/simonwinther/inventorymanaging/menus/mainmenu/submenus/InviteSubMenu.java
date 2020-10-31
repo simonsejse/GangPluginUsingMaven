@@ -29,12 +29,14 @@ public class InviteSubMenu extends Menu
     private UUID playerUuid;
     private MainMenu mainMenu;
     private int slot;
+    private GangManaging gangManaging;
 
-    public InviteSubMenu(MainPlugin plugin, MainMenu mainMenu, UUID playerUuid)
+    public InviteSubMenu(GangManaging gangManaging, MainPlugin plugin, MainMenu mainMenu, UUID playerUuid)
     {
         this.plugin = plugin;
         this.mainMenu = mainMenu;
         this.playerUuid = playerUuid;
+        this.gangManaging = gangManaging;
     }
 
     @Override
@@ -68,15 +70,15 @@ public class InviteSubMenu extends Menu
 
                 if (m.find())
                 {
-                    if (!GangManaging.playerInGangPredicate.test(whoClicked.getUniqueId()))
+                    if (!this.gangManaging.playerInGangPredicate.test(whoClicked.getUniqueId()))
                     {
                         String gangName = m.group("gangName").replace(" ", "");
-                        if (GangManaging.gangExistsPredicate.test(gangName))
+                        if (this.gangManaging.gangExistsPredicate.test(gangName))
                         {
-                            Gang gang = GangManaging.getGangByNameFunction.apply(gangName);
+                            Gang gang = this.gangManaging.getGangByNameFunction.apply(gangName);
                             if (gang.getMemberInvitations().contains(whoClicked.getName().toLowerCase()))
                             {
-                                GangManaging.joinGang(whoClicked.getUniqueId(), whoClicked.getName(), gangName);
+                                this.gangManaging.joinGang(whoClicked.getUniqueId(), whoClicked.getName(), gangName);
                                 whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_JOINED_GANG.replace("{name}", gangName)));
                                 Bukkit.getOnlinePlayers()
                                         .stream()
@@ -111,17 +113,17 @@ public class InviteSubMenu extends Menu
                     return;
                 }
                 inventory.clear();
-                InventoryUtility.decorate(inventory, InventoryUtility.menuLookSevenPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
-                addInviteItemsToIventory();
+                InventoryUtility.decorate(inventory, InventoryUtility.MENU_PREDICATE_SIX, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+                addInviteItemsToInventory();
             }
         }.runTaskTimer(plugin, 0l, 10l);
         return super.inventory;
     }
 
-    private void addInviteItemsToIventory()
+    private void addInviteItemsToInventory()
     {
         slot = 10;
-        GangManaging.getGangMap()
+        this.gangManaging.getGangMap()
                 .values()
                 .stream()
                 .filter(gang -> gang.getMemberInvitations().contains(Bukkit.getPlayer(playerUuid).getName().toLowerCase()))

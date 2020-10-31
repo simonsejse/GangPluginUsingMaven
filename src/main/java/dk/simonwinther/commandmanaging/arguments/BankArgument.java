@@ -11,8 +11,10 @@ import java.util.UUID;
 public class BankArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public BankArgument(MainPlugin plugin){
+    public BankArgument(GangManaging gangManaging, MainPlugin plugin){
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
 
@@ -44,14 +46,14 @@ public class BankArgument implements CommandArguments
         }
 
         UUID playerUuid = p.getUniqueId();
-        if (GangManaging.playerInGangPredicate.test(playerUuid))
+        if (gangManaging.playerInGangPredicate.test(playerUuid))
         {
-            if (GangManaging.isRankMinimumPredicate.test(playerUuid, GangManaging.getGangByUuidFunction.apply(playerUuid).gangPermissions.accessToDeposit)){
+            if (gangManaging.isRankMinimumPredicate.test(playerUuid, gangManaging.getGangByUuidFunction.apply(playerUuid).gangPermissions.accessToDeposit)){
                 int amount;
                 try
                 {
                     amount = Integer.parseInt(args[1]);
-                    Gang gang = GangManaging.getGangByUuidFunction.apply(playerUuid);
+                    Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
                     gang.depositMoney(amount);
                     p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().INSERT_BANK.replace("{0}", String.valueOf(amount))));
 

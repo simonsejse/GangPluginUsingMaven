@@ -21,10 +21,12 @@ public class SpecificAdminMenu extends Menu
 
     private String gangName;
     private final PaginatedAdminMenu paginatedAdminMenu;
+    private GangManaging gangManaging;
 
-    public SpecificAdminMenu(String gangName, final PaginatedAdminMenu paginatedAdminMenu){
+    public SpecificAdminMenu(GangManaging gangManaging, String gangName, final PaginatedAdminMenu paginatedAdminMenu){
         this.gangName = gangName;
         this.paginatedAdminMenu = paginatedAdminMenu;
+        this.gangManaging = gangManaging;
     }
 
 
@@ -43,17 +45,17 @@ public class SpecificAdminMenu extends Menu
     @Override
     public void onGuiClick(int slot, ItemStack item, Player whoClicked, ClickType clickType)
     {
-      if (slot == InventoryUtility.backSlot) whoClicked.openInventory(paginatedAdminMenu.getInventory());
+      if (slot == InventoryUtility.BACK_SLOT) whoClicked.openInventory(paginatedAdminMenu.getInventory());
 
     }
 
     @Override
     public Inventory getInventory()
     {
-        InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookSevenPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.RED.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+        InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_SIX, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.RED.value[ColorIndexEnum.STAINED_GLASS.index]), true);
         super.setItem(10, new ItemBuilder(Material.ENDER_CHEST).setItemName("&c&lSlet bande").buildItem());
         return super.inventory;
     }
 
-    private final Supplier<Gang> gangSupplier = () -> GangManaging.getGangByNameFunction.apply(gangName);
+    private final Supplier<Gang> gangSupplier = () -> this.gangManaging.getGangByNameFunction.apply(gangName);
 }

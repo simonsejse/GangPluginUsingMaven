@@ -11,13 +11,14 @@ public class MessageFile implements FileInterface
 {
 
     private MainPlugin plugin;
+    private File f;
+    private YamlConfiguration yamlConfiguration;
+    private ChatUtil chatUtil;
 
-    public File f;
-    public YamlConfiguration yamlConfiguration;
-
-    public MessageFile(MainPlugin plugin, String PATH){
+    public MessageFile(ChatUtil chatUtil, MainPlugin plugin, String PATH){
         this.plugin = plugin;
         f = new File(plugin.getDataFolder(), PATH);
+        this.chatUtil = chatUtil;
         load();
     }
 
@@ -50,7 +51,7 @@ public class MessageFile implements FileInterface
             try{
                 f.createNewFile();
             }catch(IOException e){e.printStackTrace();}
-            ChatUtil.setup(this);
+            this.chatUtil.setup(this);
             save();
         }
     }

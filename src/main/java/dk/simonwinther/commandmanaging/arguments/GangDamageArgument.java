@@ -9,8 +9,10 @@ public class GangDamageArgument implements CommandArguments
 {
 
     private final MainPlugin plugin;
+    private GangManaging gangManaging;
 
-    public GangDamageArgument(MainPlugin plugin){
+    public GangDamageArgument(GangManaging gangManaging, MainPlugin plugin){
+        this.gangManaging = gangManaging;
         this.plugin = plugin;
     }
     @Override
@@ -34,8 +36,8 @@ public class GangDamageArgument implements CommandArguments
     @Override
     public void perform(Player p, String... args)
     {
-        final boolean value = GangManaging.damageMap.get(p.getUniqueId());
-        GangManaging.damageMap.compute(p.getUniqueId(), (uuid, bool) -> !value);
+        final boolean value = gangManaging.damageMap.get(p.getUniqueId());
+        gangManaging.damageMap.compute(p.getUniqueId(), (uuid, bool) -> !value);
         p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().TOGGLE_DAMAGE.replace("{value}", (!value ? "&aTil" : "&cFra"))));
     }
 }

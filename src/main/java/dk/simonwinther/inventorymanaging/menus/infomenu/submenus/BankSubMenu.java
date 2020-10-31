@@ -26,16 +26,16 @@ public class BankSubMenu extends Menu
     private MainPlugin plugin;
     private InfoMenu infoMenu;
     private Gang gang;
+    private GangManaging gangManaging;
 
-
-
-    public BankSubMenu(MainPlugin plugin, InfoMenu infoMenu, Gang gang, UUID playerUuid)
+    public BankSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang, UUID playerUuid)
     {
 
         this.plugin = plugin;
         this.infoMenu = infoMenu;
         this.gang = gang;
         this.playerUuid = playerUuid;
+        this.gangManaging = gangManaging;
     }
 
     private int deposit = 0;
@@ -48,7 +48,7 @@ public class BankSubMenu extends Menu
     @Override
     public Inventory getInventory()
     {
-        InventoryUtility.decorate(super.inventory, InventoryUtility.menuLookTwoPredicate, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIGHT_BLUE.value[ColorIndexEnum.STAINED_GLASS.index]), true);
+        InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_TWO, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIGHT_BLUE.value[ColorIndexEnum.STAINED_GLASS.index]), true);
 
         setItem(10, new ItemBuilder(Material.GOLD_NUGGET).setItemName("&c&l-1").buildItem());
         setItem(11, new ItemBuilder(Material.GOLD_NUGGET).setItemName("&c&l-25").buildItem());
@@ -97,14 +97,14 @@ public class BankSubMenu extends Menu
     @Override
     public void onGuiClick(int slot, ItemStack item, Player whoClicked, ClickType clickType)
     {
-        if (slot == 13 || slot == InventoryUtility.backSlot)
+        if (slot == 13 || slot == InventoryUtility.BACK_SLOT)
         {
             whoClicked.openInventory(infoMenu.getInventory());
         } else if (slot == 31)
         {
             UUID playerUuid = whoClicked.getUniqueId();
             Player tempPlayer = Bukkit.getPlayer(whoClicked.getUniqueId());
-            if (GangManaging.isRankMinimumPredicate.test(playerUuid, gang.gangPermissions.accessToDeposit))
+            if (this.gangManaging.isRankMinimumPredicate.test(playerUuid, gang.gangPermissions.accessToDeposit))
             {
                 if (plugin.getEconomy().getBalance(tempPlayer) >= deposit)
                 {
