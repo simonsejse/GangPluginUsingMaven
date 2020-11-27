@@ -9,7 +9,7 @@ public class GangDamageArgument implements CommandArguments
 {
 
     private final MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public GangDamageArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;

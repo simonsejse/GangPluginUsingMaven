@@ -11,7 +11,7 @@ import java.util.UUID;
 public class InviteArgument implements CommandArguments
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public InviteArgument(GangManaging gangManaging, MainPlugin plugin)
     {

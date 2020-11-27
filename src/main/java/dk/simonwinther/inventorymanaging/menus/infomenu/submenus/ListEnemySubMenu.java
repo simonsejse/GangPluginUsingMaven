@@ -23,7 +23,7 @@ public class ListEnemySubMenu extends Menu
 {
     private MainPlugin plugin;
     private InfoMenu infoMenu;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
     private Gang gang;
 
     ItemBuilder playersSkull;

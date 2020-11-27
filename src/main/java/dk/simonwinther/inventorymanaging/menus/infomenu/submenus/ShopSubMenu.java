@@ -19,8 +19,7 @@ import org.bukkit.inventory.ItemStack;
 public class ShopSubMenu extends Menu
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
-
+    private final GangManaging gangManaging;
     private InfoMenu infoMenu;
     private Gang gang;
     private final boolean openedFromMainMenu;
@@ -44,12 +43,13 @@ public class ShopSubMenu extends Menu
         this.gang = gang;
     }
     
-    public ShopSubMenu(MainPlugin plugin, InfoMenu infoMenu, Gang gang)
+    public ShopSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang)
     {
         this.plugin = plugin;
         this.infoMenu = infoMenu;
         this.openedFromMainMenu = false;
         this.gang = gang;
+        this.gangManaging = gangManaging;
     }
 
 

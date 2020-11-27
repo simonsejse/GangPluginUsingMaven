@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 public class JoinArgument implements CommandArguments
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public JoinArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;

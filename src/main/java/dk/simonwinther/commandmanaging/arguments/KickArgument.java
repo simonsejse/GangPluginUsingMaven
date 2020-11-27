@@ -12,7 +12,7 @@ import java.util.UUID;
 public class KickArgument implements CommandArguments
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public KickArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;

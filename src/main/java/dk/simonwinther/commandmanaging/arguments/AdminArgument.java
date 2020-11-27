@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 public class AdminArgument implements CommandArguments
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public AdminArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;

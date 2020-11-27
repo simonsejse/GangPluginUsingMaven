@@ -4,19 +4,17 @@ package dk.simonwinther;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.bukkit.RegionContainer;
+import com.sk89q.worldguard.bukkit.RegionQuery;
+import com.sk89q.worldguard.bukkit.WGBukkit;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionContainer;
-import com.sk89q.worldguard.protection.regions.RegionQuery;
 import dk.simonwinther.commandmanaging.ConfirmTransferCmd;
 import dk.simonwinther.commandmanaging.GangCommand;
 import dk.simonwinther.events.EventHandling;
 import dk.simonwinther.exceptions.ConfigFileNotFoundException;
 import dk.simonwinther.files.FileInterface;
-import dk.simonwinther.files.MessageFile;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.settingsprovider.CustomSettingsProvider;
 import dk.simonwinther.utility.ChatUtil;
@@ -36,6 +34,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -55,22 +54,20 @@ public final class MainPlugin extends JavaPlugin
     private Economy econ = null;
     private static Permission perms = null;
     private Chat chat = null;
-    private ConnectionProvider connectionProvider;
-    GangManaging gangManaging = null;
+
+    //private ConnectionProvider connectionProvider;
+    private GangManaging gangManaging = null;
 
     @Override
     public void onEnable()
     {
-        //TODO: Might have to convert to field variable
-        this.gangManaging = new GangManaging();
-
         try{
             createFiles();
         }catch(IOException | JsonSyntaxException e){
             Logger.getLogger(MainPlugin.class.getName()).log(Level.WARNING, "Beware, Config.json file EXISTS but is corrupt! Fix config.json or delete to create a default config.json!");
             this.customSettingsProvider = new CustomSettingsProvider(); //File corrupt, use default settings.
         }catch(ConfigFileNotFoundException exception){
-            customSettingsProvider = new CustomSettingsProvider();
+            this.customSettingsProvider = new CustomSettingsProvider();
             File config = new File(getDataFolder(), "config.json");
             String json = new GsonBuilder().setPrettyPrinting().create().toJson(customSettingsProvider, CustomSettingsProvider.class);
             try(FileWriter fileWriter = new FileWriter(config)){
@@ -81,14 +78,22 @@ public final class MainPlugin extends JavaPlugin
             }
         }
 
+        this.chatUtil = new ChatUtil(this);
+        if (!messageConfig.getFile().exists()){
+            this.messageConfig.create();
+        }
+
+
         //After initialising customSettingsProvider
-        this.connectionProvider = new ConnectionProvider(customSettingsProvider);
-        this.connectionProvider.openConnection();
+        //this.connectionProvider = new ConnectionProvider(customSettingsProvider);
+        //this.connectionProvider.openConnection();
+
+        this.gangManaging = new GangManaging(this);
 
         getCommand("bande").setExecutor(new GangCommand(gangManaging, this));
         getCommand("confirmtransfercmd").setExecutor(new ConfirmTransferCmd(this.gangManaging, this));
 
-        eventHandling =  new EventHandling(gangManaging, this);
+        this.eventHandling = new EventHandling(gangManaging, this);
 
         if (!setupEconomy())
         {
@@ -98,7 +103,7 @@ public final class MainPlugin extends JavaPlugin
         }
 
         startScheduler();
-        registerEvents(eventHandling);
+        registerEvents(this.eventHandling);
         setupPermissions();
         setupChat();
         loadData();
@@ -116,10 +121,7 @@ public final class MainPlugin extends JavaPlugin
 
     private void registerEvents(Listener... listeners)
     {
-        for(Listener listener : listeners){
-            getServer().getPluginManager().registerEvents(listener, this);
-        }
-
+        Arrays.stream(listeners).forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
     }
 
 
@@ -141,12 +143,6 @@ public final class MainPlugin extends JavaPlugin
 
     private void createFiles() throws IOException, JsonSyntaxException, ConfigFileNotFoundException
     {
-        //TODO: I might be instantiating to early, so this may be the reason it causes break
-        this.chatUtil = new ChatUtil(this);
-
-        this.messageConfig = new MessageFile(this.chatUtil, this, "messages.yml");
-        this.messageConfig.create();
-
         File configFile = new File(getDataFolder(), "config.json");
         if (!configFile.exists()) throw new ConfigFileNotFoundException();
 
@@ -158,7 +154,6 @@ public final class MainPlugin extends JavaPlugin
         }
         //Throws JsonSyntaxException means JSON wasn't WRITTEN right, therefore in catch create new instance of CustomSettingsProvider using default settings.
         this.customSettingsProvider = new Gson().fromJson(json.toString(), CustomSettingsProvider.class);
-
     }
 
     public WorldGuardPlugin getWorldGuard()
@@ -177,36 +172,28 @@ public final class MainPlugin extends JavaPlugin
     public String getBlockAtPlayerLoc(UUID playerUuid)
     {
         if (Bukkit.getPlayer(playerUuid) == null) return "&cIkke online...";
-        try
+
+        StringBuilder stringBuilder = new StringBuilder();
+        RegionContainer container = WGBukkit.getPlugin().getRegionContainer();
+        Player player = Bukkit.getPlayer(playerUuid);
+
+        RegionQuery query = container.createQuery();
+        ApplicableRegionSet applicableRegionSet = query.getApplicableRegions(player.getLocation());
+
+        final Optional<String> stringOptional = applicableRegionSet.getRegions()
+                .stream()
+                .map(ProtectedRegion::getId)
+                .map(String::toUpperCase)
+                .findFirst();
+
+        if (stringOptional.isPresent())
         {
-            StringBuilder stringBuilder = new StringBuilder();
-            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-            Player player = Bukkit.getPlayer(playerUuid);
-            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-
-            com.sk89q.worldedit.util.Location loc = localPlayer.getLocation();
-
-            RegionQuery query = container.createQuery();
-            ApplicableRegionSet applicableRegionSet = query.getApplicableRegions(loc);
-
-            final Optional<String> stringOptional = applicableRegionSet.getRegions()
-                    .stream()
-                    .map(ProtectedRegion::getId)
-                    .map(String::toUpperCase)
-                    .findFirst();
-
-            if (stringOptional.isPresent())
-            {
-                stringBuilder.append(stringOptional.get());
-            } else
-            {
-                stringBuilder.append("Ingen blok..");
-            }
-            return stringBuilder.toString();
-        } catch (NullPointerException e)
+            stringBuilder.append(stringOptional.get());
+        } else
         {
-            return "Ingen blok..";
+            stringBuilder.append("Ingen blok..");
         }
+        return stringBuilder.toString();
     }
 
     private boolean setupChat()
@@ -250,11 +237,6 @@ public final class MainPlugin extends JavaPlugin
         return MainPlugin.perms;
     }
 
-    public Chat getChat()
-    {
-        return chat;
-    }
-
     private Consumer<String> logMessage = (string) -> Bukkit.getConsoleSender().sendMessage(ChatColor.RED + string);
 
     public CustomSettingsProvider getCustomSettingsProvider()
@@ -277,16 +259,9 @@ public final class MainPlugin extends JavaPlugin
         return eventHandling;
     }
 
-    public Logger getLog()
-    {
-        return log;
-    }
-
-
     /* Saving and loading data old way using object output and input streams. */
     private void loadData()
     {
-
         //TODO: Checking if connection provider throws NullPointerException
         /*
         File f = new File(getDataFolder() + File.separator + "Gangs");
@@ -385,4 +360,8 @@ public final class MainPlugin extends JavaPlugin
     }
 
 
+    public void setMessageConfig(FileInterface messageConfig)
+    {
+        this.messageConfig = messageConfig;
+    }
 }

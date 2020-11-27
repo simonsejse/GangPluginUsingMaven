@@ -22,15 +22,13 @@ import java.util.UUID;
 
 public class MainMenu extends Menu
 {
-    private MainPlugin plugin;
-    private UUID playerUuid;
-    private boolean isInGang;
-
-    private GangManaging gangManaging;
+    private final MainPlugin plugin;
+    private final UUID playerUuid;
+    private final boolean isInGang;
+    private final GangManaging gangManaging;
 
     public MainMenu(GangManaging gangManaging, MainPlugin plugin, UUID playerUuid, boolean isInGang)
     {
-        this.gangManaging = gangManaging;
         this.plugin = plugin;
         this.playerUuid = playerUuid;
         this.isInGang = isInGang;
@@ -86,7 +84,7 @@ public class MainMenu extends Menu
         {
             double balance = plugin.getEconomy().getBalance(Bukkit.getOfflinePlayer(playerUuid));
             super.setItem(InventoryUtility.MEMBER_AND_OPEN_SHOP_SLOT, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.YELLOW.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&e&lBliv medlem").setLore("&fKlik her, for at få en", "&fliste over invitationer").buildItem());
-            super.setItem(InventoryUtility.GANG_OR_CREATION_SLOT, new ItemBuilder(Material.NETHER_STAR).setItemName("&a&lOpret bande").setLore((balance >= gangManaging.getGangCost() ? "&fDu har penge nok" : "&fDu har &4ikke&f penge nok\n&fDu mangler &e" + ((int) (gangManaging.getGangCost() - balance)) + "$"), "&a&lPris: &f" + gangManaging.getGangCost()+"$").buildItem());
+            super.setItem(InventoryUtility.GANG_OR_CREATION_SLOT, new ItemBuilder(Material.NETHER_STAR).setItemName("&a&lOpret bande").setLore((balance >= gangManaging.GANG_COST ? "&fDu har penge nok" : "&fDu har &4ikke&f penge nok\n&fDu mangler &e" + (gangManaging.GANG_COST - balance) + "$"), "&a&lPris: &f" + gangManaging.GANG_COST+"$").buildItem());
         } else
         {
             super.setItem(InventoryUtility.MEMBER_AND_OPEN_SHOP_SLOT, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.YELLOW.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&e&lButik").setLore("&fKlik her, for at", "&fåbne bande butikken").buildItem());

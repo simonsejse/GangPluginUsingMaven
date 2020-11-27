@@ -22,7 +22,7 @@ public class PaginatedAdminMenu extends Menu
 {
 
     private int page;
-    private final int PAGE_COUNT = 52;
+    private static final int PAGE_COUNT = 52;
     private final GangManaging gangManaging;
 
     public PaginatedAdminMenu(GangManaging gangManaging, int page)

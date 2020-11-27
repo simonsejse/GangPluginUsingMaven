@@ -26,7 +26,7 @@ public class MemberSubMenu extends Menu
     private InfoMenu infoMenu;
     private Gang gang;
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public MemberSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang)
     {

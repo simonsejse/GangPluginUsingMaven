@@ -14,7 +14,7 @@ import java.util.UUID;
 public class RankArgument implements CommandArguments
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public RankArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;

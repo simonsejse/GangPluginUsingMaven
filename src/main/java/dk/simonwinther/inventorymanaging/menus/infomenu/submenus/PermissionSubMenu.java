@@ -20,7 +20,7 @@ public class PermissionSubMenu extends Menu
 
     private InfoMenu infoMenu;
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
     public PermissionSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu)
     {
         this.plugin = plugin;

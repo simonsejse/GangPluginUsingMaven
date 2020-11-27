@@ -28,7 +28,7 @@ public class ListAllySubMenu extends Menu
     private final MainPlugin plugin;
     private InfoMenu infoMenu;
     private Gang gang;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
     private ItemBuilder skullBuilder;
 
     public ListAllySubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang)

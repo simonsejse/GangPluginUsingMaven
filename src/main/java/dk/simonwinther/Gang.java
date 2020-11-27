@@ -67,10 +67,6 @@ public class Gang implements Serializable
         return levelSystem;
     }
 
-    private void setLevelSystem(LevelSystem levelSystem){
-        this.levelSystem = levelSystem;
-    }
-
     private List<String> enemies = new ArrayList<>(), allies = new ArrayList<>();
     private List<String> memberInvitations = new ArrayList<>(), allyInvitation = new ArrayList<>();
 

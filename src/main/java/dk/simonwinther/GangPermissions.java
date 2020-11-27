@@ -22,11 +22,6 @@ public class GangPermissions implements Serializable
 
     public boolean accessToToilets = false, accessToFarm = false, accessToLab = false;
 
-    public long getSerialVersionUID()
-    {
-        return serialVersionUID;
-    }
-
     public void setAccessToGangShop(Rank accessToGangShop)
     {
         this.accessToGangShop = accessToGangShop;

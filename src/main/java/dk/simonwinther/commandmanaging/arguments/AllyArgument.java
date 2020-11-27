@@ -14,11 +14,12 @@ import java.util.function.Function;
 public class AllyArgument implements CommandArguments
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public AllyArgument(GangManaging gangManaging, MainPlugin plugin)
     {
         this.plugin = plugin;
+        this.gangManaging = gangManaging;
     }
 
     @Override
@@ -43,8 +44,6 @@ public class AllyArgument implements CommandArguments
     public void perform(Player p, String... args)
     {
         //Player is in gang
-        //Player 
-
         if (gangManaging.playerInGangPredicate.test(p.getUniqueId()))
         {
             Gang playerGang = gangManaging.getGangByUuidFunction.apply(p.getUniqueId());

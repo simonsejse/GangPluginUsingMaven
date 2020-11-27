@@ -22,7 +22,7 @@ public class LeaderBoardSubMenu extends Menu
     private OtherSubMenu otherSubMenu;
     private int count = 0;
     private StringBuilder stringBuilder;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public LeaderBoardSubMenu(GangManaging gangManaging, OtherSubMenu otherSubMenu)
     {

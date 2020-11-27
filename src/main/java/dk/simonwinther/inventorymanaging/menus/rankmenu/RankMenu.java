@@ -26,7 +26,7 @@ public class RankMenu extends Menu
     private String nameOfArgs;
     private UUID playerUuid;
     private String nameOfPlayer;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
 
 

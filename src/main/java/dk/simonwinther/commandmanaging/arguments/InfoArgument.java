@@ -12,7 +12,7 @@ import java.util.UUID;
 public class InfoArgument implements CommandArguments
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public InfoArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;

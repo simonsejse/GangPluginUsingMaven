@@ -37,15 +37,15 @@ public class EventHandling implements Listener
     private List<String> goAwayMessages;
     private List<String> deliveredMessages;
 
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public EventHandling(GangManaging gangManaging, MainPlugin plugin)
     {
-        this.gangManaging = gangManaging;
         this.plugin = plugin;
         this.npcName = this.plugin.getCustomSettingsProvider().getNpcProvider().getNpcName();
         this.goAwayMessages = this.plugin.getCustomSettingsProvider().getNpcProvider().getGoAwayMessages();
         this.deliveredMessages = this.plugin.getCustomSettingsProvider().getNpcProvider().getDeliveredMessages();
+        this.gangManaging = gangManaging;
     }
 
     public Map<UUID, String> lastOnline = new HashMap<>();
@@ -64,6 +64,12 @@ public class EventHandling implements Listener
     @EventHandler
     public void onGuiClick(InventoryClickEvent event)
     {
+        System.out.println(event.getClickedInventory());
+        System.out.println(event.getInventory());
+        System.out.println(event.getCurrentItem());
+        System.out.println(event.getClickedInventory().getType());
+        System.out.println(event.getView().getTopInventory().getType());
+
         if (event.getInventory() == null || event.getClickedInventory() == null || event.getCurrentItem() == null) return;
 
         if (event.getClickedInventory().getType() == InventoryType.PLAYER) return;
@@ -252,7 +258,7 @@ public class EventHandling implements Listener
 
         if (npc.getName().contains(npcName)){
             Player player = event.getClicker();
-            playerConsumer.accept(player);
+            playerCheck(player);
         }
     }
 
@@ -261,7 +267,7 @@ public class EventHandling implements Listener
         NPC npc = event.getNPC();
         if (npc.getName().contains(npcName)){
             Player player = event.getClicker();
-            playerConsumer.accept(player);
+            playerCheck(player);
         }
     }
 
@@ -271,16 +277,17 @@ public class EventHandling implements Listener
     public Consumer<UUID> addActiveMoneyPlayers = activeMoneyPlayers::add;
     public Function<UUID, Boolean> containsActiveMoneyPlayer = activeMoneyPlayers::contains;
 
-    private final Consumer<Player> playerConsumer = (player) -> {
+    private void playerCheck(Player player){
+
         UUID uuid = player.getUniqueId();
         ItemStack item = player.getInventory().getItemInHand();
         //Ternary operator to determine whether it should check for transfer items or money access.
 
-        if (gangManaging.playerInGangPredicate.test(player.getUniqueId()))
+        if (this.gangManaging.playerInGangPredicate.test(player.getUniqueId()))
         {
             Gang gang = gangManaging.getGangByUuidFunction.apply(player.getUniqueId());
             Rank rank = item.getType() != Material.AIR ? gang.getGangPermissions().accessToTransferItems : gang.getGangPermissions().accessToTransferMoney;
-            if(gangManaging.isRankMinimumPredicate.test(uuid, rank))
+            if(this.gangManaging.isRankMinimumPredicate.test(uuid, rank))
             {
                 String gangLevelString = ChatUtil.numbers[gang.getGangLevel()];
                 Level level = Level.valueOf(gangLevelString);
@@ -339,8 +346,8 @@ public class EventHandling implements Listener
                 }
             } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
         } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
+    }
 
-    };
 
 
 }

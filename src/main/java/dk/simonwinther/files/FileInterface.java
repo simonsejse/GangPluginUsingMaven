@@ -1,5 +1,6 @@
 package dk.simonwinther.files;
 
+import dk.simonwinther.utility.ChatUtil;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;

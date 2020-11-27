@@ -17,7 +17,7 @@ public class ConfirmTransferCmd implements CommandExecutor
 {
 
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public ConfirmTransferCmd(GangManaging gangManaging, MainPlugin plugin){
         this.plugin = plugin;

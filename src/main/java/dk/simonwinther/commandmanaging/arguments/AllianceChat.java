@@ -14,7 +14,7 @@ public class AllianceChat implements CommandArguments
 {
 
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public AllianceChat(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;

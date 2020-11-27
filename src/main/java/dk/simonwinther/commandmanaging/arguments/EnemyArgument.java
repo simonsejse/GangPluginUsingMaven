@@ -11,7 +11,7 @@ import java.util.UUID;
 public class EnemyArgument implements CommandArguments
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public EnemyArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;

@@ -29,7 +29,7 @@ public class InviteSubMenu extends Menu
     private UUID playerUuid;
     private MainMenu mainMenu;
     private int slot;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public InviteSubMenu(GangManaging gangManaging, MainPlugin plugin, MainMenu mainMenu, UUID playerUuid)
     {

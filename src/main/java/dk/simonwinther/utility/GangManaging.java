@@ -11,14 +11,14 @@ import java.util.function.*;
 public class GangManaging
 {
     //Normally use dependency injection instead of singleton instance, but since it's a Utility class I never create an instance!
-    private MainPlugin plugin = MainPlugin.getPlugin(MainPlugin.class);
+    private MainPlugin plugin;
 
-    private final int gangCost = 10000;
-
-    public int getGangCost()
-    {
-        return gangCost;
+    public GangManaging(MainPlugin plugin){
+        this.plugin = plugin;
     }
+
+    public final int GANG_COST = 10000;
+
 
     public int gangTotal = 0; //Set MySQL value.
 
@@ -32,11 +32,6 @@ public class GangManaging
     public Map<String, Gang> getGangMap()
     {
         return gangMap;
-    }
-
-    public int getGangTotal()
-    {
-        return gangTotal;
     }
 
     public BiConsumer<? super UUID, String> createNewGangBiConsumer = (ownerUuid, gangName) -> {
@@ -65,7 +60,6 @@ public class GangManaging
         {
             playerGang.getAllies().remove(enemyGangName);
             enemyGang.getAllies().remove(playerGangName);
-
             enemyGang.getMembersSorted().keySet()
                     .stream()
                     .filter(uuid -> Bukkit.getPlayer(uuid) != null)

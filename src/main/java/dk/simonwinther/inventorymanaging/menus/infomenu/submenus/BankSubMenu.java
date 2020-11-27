@@ -26,7 +26,7 @@ public class BankSubMenu extends Menu
     private MainPlugin plugin;
     private InfoMenu infoMenu;
     private Gang gang;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public BankSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang, UUID playerUuid)
     {

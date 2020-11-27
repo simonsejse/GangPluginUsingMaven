@@ -54,7 +54,7 @@ public class CreateArgument implements CommandArguments
             {
                 if (!(gangManager.gangExistsPredicate.test(args[1])))
                 {
-                    if (plugin.getEconomy().getBalance(Bukkit.getOfflinePlayer(p.getUniqueId())) >= gangManager.getGangCost())
+                    if (plugin.getEconomy().getBalance(Bukkit.getOfflinePlayer(p.getUniqueId())) >= gangManager.GANG_COST)
                     {
                         args[1] = args[1].replace(" ","");
                         if (nameLengthFunc.apply(args[1])){
@@ -64,10 +64,10 @@ public class CreateArgument implements CommandArguments
                                 gangManager.createNewGangBiConsumer.accept(playerUuid, args[1]);
                                 p.sendMessage((plugin.getChatUtil().color(plugin.getChatUtil().GANG_CREATED.replace("{name}", args[1]))));
                                 gangCreatedMsg(p, args[1]);
-                                plugin.getEconomy().withdrawPlayer(Bukkit.getOfflinePlayer(p.getUniqueId()), gangManager.getGangCost());
+                                plugin.getEconomy().withdrawPlayer(Bukkit.getOfflinePlayer(p.getUniqueId()), gangManager.GANG_COST);
                             } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CONTAINS_BAD_WORDS));
                         } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().MAX_MIN_GANG_NAME_LENGTH_REACHED));
-                    } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_AFFORD_GANG.replace("{0}", String.valueOf(gangManager.getGangCost()))));
+                    } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_AFFORD_GANG.replace("{0}", String.valueOf(gangManager.GANG_COST))));
                 } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_EXISTS.replace("{name}", args[1])));
             } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_IN_GANG));
         }
@@ -82,7 +82,7 @@ public class CreateArgument implements CommandArguments
                     if (!(_localPlayer.getName().equalsIgnoreCase(p.getName())))
                         _localPlayer.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_CREATED_GANG_GLOBAL.replace("{player}", p.getName()).replace("{name}", gang)));
                 });
-        p.sendMessage(ChatColor.translateAlternateColorCodes('&',"&c&l-"+gangManager.getGangCost()+"&f$"));
+        p.sendMessage(ChatColor.translateAlternateColorCodes('&',"&c&l-"+gangManager.GANG_COST+"&f$"));
     }
 
     public Function<String, Boolean> nameLengthFunc = (name) -> name.length() <= plugin.getChatUtil().MAX_GANG_NAME_LENGTH && name.length() >= plugin.getChatUtil().MIN_GANG_NAME_LENGTH;

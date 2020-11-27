@@ -2,6 +2,7 @@ package dk.simonwinther.utility;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.files.FileInterface;
+import dk.simonwinther.files.MessageFile;
 import org.bukkit.ChatColor;
 
 public class ChatUtil
@@ -11,7 +12,9 @@ public class ChatUtil
 
     public ChatUtil(MainPlugin plugin)
     {
-        FileInterface messageYml = plugin.getMessageConfig();
+        FileInterface messageYml = new MessageFile(plugin, "messages.yml");
+        plugin.setMessageConfig(messageYml);
+
         PREFIX = messageYml.get("PREFIX");
         ACCESS_TO_TOILETS = messageYml.get("adgang.toilets");
         ACCESS_TO_FARM = messageYml.get("adgang.farm");
@@ -219,7 +222,7 @@ public class ChatUtil
 
     public final String NO_SPACE;
 
-    public void setup(FileInterface messageYml)
+    public static void setup(FileInterface messageYml)
     {
         messageYml.set("PREFIX", "&8&l| &cBande &8&l| ");
         messageYml.set("accessToToilets", "adgang.toilets");

@@ -13,7 +13,7 @@ import java.util.UUID;
 public class LeaveArgument implements CommandArguments
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public LeaveArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;

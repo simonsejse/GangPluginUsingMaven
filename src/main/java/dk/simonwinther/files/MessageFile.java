@@ -10,15 +10,11 @@ import java.io.IOException;
 public class MessageFile implements FileInterface
 {
 
-    private MainPlugin plugin;
     private File f;
     private YamlConfiguration yamlConfiguration;
-    private ChatUtil chatUtil;
 
-    public MessageFile(ChatUtil chatUtil, MainPlugin plugin, String PATH){
-        this.plugin = plugin;
+    public MessageFile(MainPlugin plugin, String PATH){
         f = new File(plugin.getDataFolder(), PATH);
-        this.chatUtil = chatUtil;
         load();
     }
 
@@ -43,6 +39,7 @@ public class MessageFile implements FileInterface
             e.printStackTrace();
         }
     }
+
     @Override
     public void create()
     {
@@ -51,7 +48,7 @@ public class MessageFile implements FileInterface
             try{
                 f.createNewFile();
             }catch(IOException e){e.printStackTrace();}
-            this.chatUtil.setup(this);
+            ChatUtil.setup(this);
             save();
         }
     }

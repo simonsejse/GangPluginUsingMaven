@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public class BandeChat implements CommandArguments
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public BandeChat(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;

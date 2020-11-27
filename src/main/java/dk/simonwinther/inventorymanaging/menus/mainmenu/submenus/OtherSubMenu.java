@@ -17,7 +17,7 @@ import org.bukkit.inventory.ItemStack;
 public class OtherSubMenu extends Menu
 {
     private MainMenu mainMenu;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public OtherSubMenu(GangManaging gangManaging, MainMenu mainMenu)
     {

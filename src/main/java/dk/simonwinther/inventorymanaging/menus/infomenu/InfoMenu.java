@@ -30,8 +30,7 @@ public class InfoMenu extends Menu
     private Gang gang;
     private MainPlugin plugin;
     private boolean isOwnGang;
-
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public InfoMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang, boolean isOwnGang)
     {
@@ -64,7 +63,7 @@ public class InfoMenu extends Menu
 
         if (slot == InventoryUtility.BACK_SLOT) whoClicked.openInventory(new MainMenu(gangManaging, plugin, uuid, gangManaging.playerInGangPredicate.test(uuid)).getInventory());
         else if (slot == InventoryUtility.PERMISSION_SLOT) whoClicked.openInventory(new PermissionSubMenu(this.gangManaging, plugin, this).getInventory());
-        else if (slot == InventoryUtility.GANG_SHOP_SLOT) whoClicked.openInventory(new ShopSubMenu(plugin, this, gang).getInventory());
+        else if (slot == InventoryUtility.GANG_SHOP_SLOT) whoClicked.openInventory(new ShopSubMenu(this.gangManaging, plugin, this, gang).getInventory());
         else if (slot == InventoryUtility.MEMBERS_SLOT) whoClicked.openInventory(new MemberSubMenu(this.gangManaging, plugin, this, gang).getInventory());
         else if (slot == InventoryUtility.ECONOMY_SLOT) whoClicked.openInventory(new BankSubMenu(this.gangManaging, plugin, this, gang, uuid).getInventory());
         else if (slot == InventoryUtility.LEVEL_SLOT){

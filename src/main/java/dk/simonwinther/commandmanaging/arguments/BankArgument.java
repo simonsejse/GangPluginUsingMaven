@@ -11,7 +11,7 @@ import java.util.UUID;
 public class BankArgument implements CommandArguments
 {
     private MainPlugin plugin;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public BankArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;

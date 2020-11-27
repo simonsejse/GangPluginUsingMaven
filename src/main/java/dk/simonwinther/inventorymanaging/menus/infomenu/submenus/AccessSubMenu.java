@@ -29,7 +29,7 @@ public class AccessSubMenu extends Menu
     private Gang gang;
     private GangPermissions gangPermissions;
     private int slotType;
-    private GangManaging gangManaging;
+    private final GangManaging gangManaging;
 
     public AccessSubMenu(GangManaging gangManaging, MainPlugin plugin, PermissionSubMenu permissionSubMenu, UUID playerUuid, int slotType)
     {
