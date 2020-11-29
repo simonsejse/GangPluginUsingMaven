@@ -61,6 +61,7 @@ public final class MainPlugin extends JavaPlugin
     @Override
     public void onEnable()
     {
+
         try{
             createFiles();
         }catch(IOException | JsonSyntaxException e){

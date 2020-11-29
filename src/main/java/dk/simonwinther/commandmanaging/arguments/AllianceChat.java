@@ -55,11 +55,13 @@ public class AllianceChat implements CommandArguments
                 Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
                 if (gangManaging.isRankMinimumPredicate.test(playerUuid, gang.gangPermissions.accessToAllyChat)){
                     //Check if has permissions
-                    StringBuilder message = new StringBuilder();
-                    final Consumer<String> messageConsumer = line -> message.append(line).append(" ");
-                    Arrays.stream(args).skip(1).forEach(messageConsumer);
+                    final StringBuilder message = new StringBuilder();
+                    Arrays.stream(args).skip(1).forEach(line -> message.append(line).append(" "));
+                    
                     p.sendMessage("§8§l| §a§lALLIANCECHAT §8§l|§e "+p.getName()+" §8§l|§f "+message.toString());
+
                     gang.getAllies()
+                            .values()
                             .stream()
                             .map(gangManaging.getGangByNameFunction::apply)
                             .map(Gang::getMembersSorted)

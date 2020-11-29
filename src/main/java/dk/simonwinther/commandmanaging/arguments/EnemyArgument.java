@@ -55,7 +55,7 @@ public class EnemyArgument implements CommandArguments
 
                             if (!playerGang.equals(argsGang))
                             {
-                                if (!playerGang.getEnemies().contains(args[1].toLowerCase()))
+                                if (!playerGang.getEnemies().values().contains(args[1].toLowerCase()))
                                 {
                                     gangManaging.addEnemyGang.accept(playerGang, argsGang);
                                 } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_ENEMIES));

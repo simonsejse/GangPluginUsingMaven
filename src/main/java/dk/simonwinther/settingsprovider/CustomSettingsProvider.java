@@ -5,7 +5,8 @@ public class CustomSettingsProvider
 
     /* Constructor */
     public CustomSettingsProvider(){
-        npcSettingsProvider = new NPCSettingsProvider();
+        this.npcSettingsProvider = new NPCSettingsProvider();
+        this.mySQLProvider = new MySQLProvider();
     }
 
     /* Properties - cannot be final since we won't be able to change in config.json */

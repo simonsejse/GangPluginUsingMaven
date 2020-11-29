@@ -101,7 +101,7 @@ public class ListEnemySubMenu extends Menu
         else if (item.getType() == Material.SKULL_ITEM)
         {
             String gangName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
-            if (gang.getEnemies().contains(gangName))
+            if (gang.getEnemies().values().contains(gangName))
             {
                 gang.getEnemies().remove(gangName);
                 whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().UN_ENEMY.replace("{name}", gangName)));
@@ -125,6 +125,7 @@ public class ListEnemySubMenu extends Menu
         slot = 10;
 
         gang.getEnemies()
+                .values()
                 .stream()
                 .map(gangManaging.getGangByNameFunction::apply)
                 .forEach(gang ->

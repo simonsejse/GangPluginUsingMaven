@@ -67,7 +67,7 @@ public class Gang implements Serializable
         return levelSystem;
     }
 
-    private List<String> enemies = new ArrayList<>(), allies = new ArrayList<>();
+    private Map<Integer, String> enemies = new HashMap<>(), allies = new HashMap<>();
     private List<String> memberInvitations = new ArrayList<>(), allyInvitation = new ArrayList<>();
 
     public int getGangLevel(){
@@ -88,27 +88,18 @@ public class Gang implements Serializable
         this.gangBalance -= money;
     }
 
-    public void addMoney(int money){
-        this.gangBalance += money;
-    }
-
     public Gang getInstance(){
         return this;
     }
 
-    public List<String> getEnemies()
+    public Map<Integer, String> getEnemies()
     {
         return enemies;
     }
 
-    public List<String> getAllies()
+    public Map<Integer, String> getAllies()
     {
         return allies;
-    }
-
-    public void setEnemies(List<String> enemies)
-    {
-        this.enemies = enemies;
     }
 
     public int getMaxEnemies()
@@ -119,11 +110,6 @@ public class Gang implements Serializable
     public void setMaxEnemies(int maxEnemies)
     {
         this.maxEnemies = maxEnemies;
-    }
-
-    public void setAllies(List<String> allies)
-    {
-        this.allies = allies;
     }
 
     public int getGangDamage(){
@@ -154,17 +140,10 @@ public class Gang implements Serializable
         return deaths;
     }
 
-    public void setDeaths(int deaths){
-        this.deaths = deaths;
-    }
-
     public int getOfficerKills(){
         return officerKills;
     }
 
-    public void setOfficerKills(int officerKills){
-        this.officerKills = officerKills;
-    }
     public int getAmountOfMembers(){
         return membersSorted.size();
     }

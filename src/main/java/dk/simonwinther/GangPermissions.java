@@ -20,6 +20,7 @@ public class GangPermissions implements Serializable
             , accessToGangChat = Rank.MEMBER
             , accessToAllyChat = Rank.OFFICER;
 
+
     public boolean accessToToilets = false, accessToFarm = false, accessToLab = false;
 
     public void setAccessToGangShop(Rank accessToGangShop)

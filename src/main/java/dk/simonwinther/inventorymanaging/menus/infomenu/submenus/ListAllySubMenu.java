@@ -103,51 +103,29 @@ public class ListAllySubMenu extends Menu
                     if (item.getType() == Material.SKULL_ITEM)
                     {
                         String gangName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
-                        Gang localGang = gangManaging.getGangByNameFunction.apply(gangName);
+                        Gang argGang = gangManaging.getGangByNameFunction.apply(gangName);
                         Gang playerGang = gangManaging.getGangByUuidFunction.apply(whoClicked.getUniqueId());
-                        if (!localGang.getAllyInvitation().contains(playerGang.getGangName())) return;
+                        if (!argGang.getAllyInvitation().contains(playerGang.getGangName())) return;
 
                         if (clickType == ClickType.RIGHT)
                         {
-                            localGang.getAllyInvitation().remove(playerGang.getGangName());
+                            argGang.getAllyInvitation().remove(playerGang.getGangName());
 
-                            localGang.getMembersSorted()
-                                    .keySet()
-                                    .stream()
-                                    .filter(uuid -> Bukkit.getPlayer(uuid) != null)
-                                    .map(Bukkit::getPlayer)
-                                    .forEach(p -> p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALLY_DENIED.replace("{name}", playerGang.getGangName()))));
-
-                            playerGang.getMembersSorted()
-                                    .keySet()
-                                    .stream()
-                                    .filter(uuid -> Bukkit.getPlayer(uuid) != null)
-                                    .map(Bukkit::getPlayer)
-                                    .forEach(p -> p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().DENY_ALLY.replace("{name}", gangName))));
+                            sendTeamMessage(argGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_DENIED.replace("{name}", playerGang.getGangName())));
+                            sendTeamMessage(playerGang, plugin.getChatUtil().color(plugin.getChatUtil().DENY_ALLY.replace("{name}", gangName)));
                             whoClicked.openInventory(ListAllySubMenu.this.getInventory());
 
                         } else if (clickType == ClickType.LEFT)
                         {
-                            localGang.getAllyInvitation().remove(playerGang.getGangName());
+                            argGang.getAllyInvitation().remove(playerGang.getGangName());
                             if (playerGang.getAllyInvitation().contains(gangName))
                                 playerGang.getAllyInvitation().remove(gangName);
 
-                            localGang.getAllies().add(playerGang.getGangName().toLowerCase());
-                            playerGang.getAllies().add(gangName.toLowerCase());
+                            argGang.getAllies().put(playerGang.getGangId(), playerGang.getGangName().toLowerCase());
+                            playerGang.getAllies().put(argGang.getGangId(), gangName.toLowerCase());
 
-                            playerGang.getMembersSorted()
-                                    .keySet()
-                                    .stream()
-                                    .filter(uuid -> Bukkit.getPlayer(uuid) != null)
-                                    .map(Bukkit::getPlayer)
-                                    .forEach(p -> p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", gangName))));
-
-                            localGang.getMembersSorted()
-                                    .keySet()
-                                    .stream()
-                                    .filter(uuid -> Bukkit.getPlayer(uuid) != null)
-                                    .map(Bukkit::getPlayer)
-                                    .forEach(p -> p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", playerGang.getGangName()))));
+                            sendTeamMessage(playerGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", gangName)));
+                            sendTeamMessage(argGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", playerGang.getGangName())));
 
                             whoClicked.openInventory(ListAllySubMenu.this.getInventory());
                         }
@@ -212,7 +190,7 @@ public class ListAllySubMenu extends Menu
             Gang localGang = this.gangManaging.getGangByNameFunction.apply(gangName);
             Gang playerGang = this.gangManaging.getGangByUuidFunction.apply(uuid);
 
-            if (!localGang.getAllies().contains(playerGang.getGangName()) || !playerGang.getAllies().contains(localGang.getGangName())) {
+            if (!localGang.getAllies().values().contains(playerGang.getGangName()) || !playerGang.getAllies().values().contains(localGang.getGangName())) {
                 whoClicked.sendMessage(ChatColor.translateAlternateColorCodes('&',"&8&l| &e&lVENT &8&l| &eVent venligst, vær tålmodig.."));
                 return;
             }
@@ -252,6 +230,7 @@ public class ListAllySubMenu extends Menu
                 InventoryUtility.decorate(inventory, InventoryUtility.MENU_PREDICATE_ONE, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIME.value[ColorIndexEnum.STAINED_GLASS.index]), true);
 
                 gang.getAllies()
+                        .values()
                         .forEach(gangName ->
                         {
                             if (slot > 43) return;
@@ -266,6 +245,16 @@ public class ListAllySubMenu extends Menu
             }
         }.runTaskTimer(plugin, 0L, 40L);
         return super.inventory;
+    }
+
+    private void sendTeamMessage(Gang gang, String msg){
+        gang.getMembersSorted()
+                .keySet()
+                .stream()
+                .filter(uuid -> Bukkit.getPlayer(uuid) != null)
+                .map(Bukkit::getPlayer)
+                .forEach(p-> p.sendMessage(msg));
+
     }
 
 }

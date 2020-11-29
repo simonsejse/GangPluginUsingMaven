@@ -54,6 +54,7 @@ public class DeleteArgument implements CommandArguments
 
                     //@Removes the gang from all other gang allies!
                     gang.getAllies()
+                            .values()
                             .stream()
                             .map(gangManaging.getGangByNameFunction)
                             .forEach(g -> g.getAllies().remove(gangName.toLowerCase()));

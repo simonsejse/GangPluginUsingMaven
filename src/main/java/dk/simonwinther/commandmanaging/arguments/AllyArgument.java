@@ -64,29 +64,14 @@ public class AllyArgument implements CommandArguments
                                     if (gangManaging.gangContainsAllyInvitationPredicate.test(argsGang, playerGang.getGangName().toLowerCase()))
                                     {
                                         //@ALLY SUCCESS
-                                        playerGang.getAllies().add(argsGang.getGangName().toLowerCase());
-                                        argsGang.getAllies().add(playerGang.getGangName().toLowerCase());
+                                        playerGang.getAllies().put(argsGang.getGangId(), argsGang.getGangName().toLowerCase());
+                                        argsGang.getAllies().put(playerGang.getGangId(), playerGang.getGangName().toLowerCase());
 
                                         playerGang.getAllyInvitation().remove(argsGang.getGangName().toLowerCase());
                                         argsGang.getAllyInvitation().remove(playerGang.getGangName().toLowerCase());
 
-                                        playerGang.getMembersSorted().keySet()
-                                                .stream()
-                                                .filter(teamMember -> Bukkit.getPlayer(teamMember) != null)
-                                                .map(Bukkit::getPlayer)
-                                                .forEach(teamMember ->
-                                                {
-                                                    teamMember.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", argsGang.getGangName())));
-                                                });
-
-                                        argsGang.getMembersSorted().keySet()
-                                                .stream()
-                                                .filter(teamMember -> Bukkit.getPlayer(teamMember) != null)
-                                                .map(Bukkit::getPlayer)
-                                                .forEach(teamMember ->
-                                                {
-                                                    teamMember.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", playerGang.getGangName())));
-                                                });
+                                        sendTeamMessage(playerGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", argsGang.getGangName())));
+                                        sendTeamMessage(argsGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", playerGang.getGangName())));
 
                                     } else
                                     {
@@ -94,28 +79,15 @@ public class AllyArgument implements CommandArguments
                                         {
                                             p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().UN_ALLY.replace("{name}", args[1])));
                                             playerGang.getAllyInvitation().remove(argsGang.getGangName().toLowerCase());
-                                            argsGang.getMembersSorted().keySet()
-                                                    .stream()
-                                                    .filter(teamMember -> Bukkit.getPlayer(teamMember) != null)
-                                                    .map(Bukkit::getPlayer)
-                                                    .forEach(teamMember ->
-                                                    {
-                                                        teamMember.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().REGRET_TO_BE_ALLY.replace("{name}", playerGang.getGangName())));
-                                                    });
+                                            sendTeamMessage(argsGang, plugin.getChatUtil().color(plugin.getChatUtil().REGRET_TO_BE_ALLY.replace("{name}", playerGang.getGangName())));
+
                                         } else
                                         {
                                             p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ASK_ALLY.replace("{name}", args[1])));
-                                            if (playerGang.getEnemies().contains(args[1]))
+                                            if (playerGang.getEnemies().values().contains(args[1]))
                                                 playerGang.getEnemies().remove(args[1]);
                                             playerGang.getAllyInvitation().add(argsGang.getGangName().toLowerCase());
-                                            argsGang.getMembersSorted().keySet()
-                                                    .stream()
-                                                    .filter(teamMember -> Bukkit.getPlayer(teamMember) != null)
-                                                    .map(Bukkit::getPlayer)
-                                                    .forEach(teamMember ->
-                                                    {
-                                                        teamMember.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().WISHES_TO_BE_ALLY.replace("{name}", playerGang.getGangName())));
-                                                    });
+                                            sendTeamMessage(argsGang, plugin.getChatUtil().color(plugin.getChatUtil().WISHES_TO_BE_ALLY.replace("{name}", playerGang.getGangName())));
                                         }
                                     }
                                 } else
@@ -134,10 +106,21 @@ public class AllyArgument implements CommandArguments
     private BiFunction<Gang, Gang, Boolean> gangEqualsFunction = Gang::equals;
     private BiConsumer<Gang, Gang> gangDeleteEnemiesConsumer = (gang1, gang2) ->
     {
-        if (gang1.getEnemies().contains(gang2.getGangName().toLowerCase()))
+        if (gang1.getEnemies().values().contains(gang2.getGangName().toLowerCase()))
             gang1.getEnemies().remove(gang2.getGangName().toLowerCase());
     };
-    private BiFunction<Gang, Gang, Boolean> gangIsAllyFunction = (gang1, gang2) -> gang1.getAllies().contains(gang2.getGangName().toLowerCase()) || gang2.getAllies().contains(gang1.getGangName().toLowerCase());
+    private BiFunction<Gang, Gang, Boolean> gangIsAllyFunction = (gang1, gang2) -> gang1.getAllies().values().contains(gang2.getGangName().toLowerCase()) || gang2.getAllies().values().contains(gang1.getGangName().toLowerCase());
 
+
+    private void sendTeamMessage(Gang gang, String msg){
+        gang.getMembersSorted().keySet()
+                .stream()
+                .filter(teamMember -> Bukkit.getPlayer(teamMember) != null)
+                .map(Bukkit::getPlayer)
+                .forEach(teamMember ->
+                {
+                    teamMember.sendMessage(msg);
+                });
+    }
 
 }

@@ -31,6 +31,8 @@ public class InfoMenu extends Menu
     private MainPlugin plugin;
     private boolean isOwnGang;
     private final GangManaging gangManaging;
+    private static final int MAX_LORE_ITEMS_SHOWN = 4;
+
 
     public InfoMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang, boolean isOwnGang)
     {
@@ -158,7 +160,6 @@ public class InfoMenu extends Menu
         super.setItem(InventoryUtility.DELETE_SLOT, new ItemBuilder(Material.BARRIER).setItemName("&4&lSlet bande").setLore("&fKlik her for at", "&fslette din bande").buildItem());
         return super.inventory;
     }
-
     private Function<Gang, String> levelDescFunc = (gang) ->
     {
         StringBuilder stringBuilder = new StringBuilder();
@@ -197,18 +198,29 @@ public class InfoMenu extends Menu
     private String getAllyList()
     {
         if (gang.getAllies().size() < 1) return "&cIngen..";
+        int size = gang.getAllies().size();
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("&2" + gang.getAllies().stream().collect(Collectors.joining("\n&e")));
+        String[] possibleAllies = gang.getEnemies().values().toArray(new String[]{});
+
+        for (int i = 0; i < MAX_LORE_ITEMS_SHOWN; i++){
+            stringBuilder.append("&c").append(possibleAllies[i]).append("\n&e");
+        }
+        if (size - MAX_LORE_ITEMS_SHOWN > 0) stringBuilder.append("&2&l+").append((size - MAX_LORE_ITEMS_SHOWN)).append("&aallierede mere!");
         stringBuilder.append("\n&cKlik for at fjerne eller se dine allierede.");
         return stringBuilder.toString();
     }
-
     private String getEnemiesList()
     {
         if (gang.getEnemies().size() < 1) return "&cIngen..";
+        int size = gang.getEnemies().size();
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("&c" + gang.getEnemies().stream().collect(Collectors.joining("\n&e")));
-        stringBuilder.append("\n&cKlik for at fjerne eller se dine allierede.");
+        String[] possibleEnemies = gang.getEnemies().values().toArray(new String[]{});
+
+        for (int i = 0; i < MAX_LORE_ITEMS_SHOWN; i++){
+            stringBuilder.append("&c").append(possibleEnemies[i]).append("\n&e");
+        }
+        if (size - MAX_LORE_ITEMS_SHOWN > 0) stringBuilder.append("&4&l+").append((size - MAX_LORE_ITEMS_SHOWN)).append("&crivaler mere!");
+        stringBuilder.append("\n&cKlik for at fjerne eller se dine rivaler.");
         return stringBuilder.toString();
     }
 

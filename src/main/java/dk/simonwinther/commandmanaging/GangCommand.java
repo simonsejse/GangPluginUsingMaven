@@ -41,7 +41,6 @@ public class GangCommand implements CommandExecutor
             new BankArgument(gangManaging, plugin),
             new AllianceChat(gangManaging, plugin),
             new BandeChat(gangManaging, plugin),
-            new AdminArgument(gangManaging, plugin),
             new SpawnBotArgument(),
             new GangDamageArgument(gangManaging, plugin)
         };
@@ -89,7 +88,7 @@ public class GangCommand implements CommandExecutor
             //Search for Player Gang
             if (Bukkit.getPlayer(args[0]) != null){
                 UUID argsUuid = Bukkit.getPlayer(args[0]).getUniqueId();
-                if (gangManaging.namesOfGang.containsKey(argsUuid))
+                if (gangManaging.userGangMap.containsKey(argsUuid))
                 {
                     p.openInventory(new InfoMenu(gangManaging, plugin, gangManaging.getGangByUuidFunction.apply(argsUuid), false).getInventory());
                     return true;

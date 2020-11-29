@@ -64,12 +64,6 @@ public class EventHandling implements Listener
     @EventHandler
     public void onGuiClick(InventoryClickEvent event)
     {
-        System.out.println(event.getClickedInventory());
-        System.out.println(event.getInventory());
-        System.out.println(event.getCurrentItem());
-        System.out.println(event.getClickedInventory().getType());
-        System.out.println(event.getView().getTopInventory().getType());
-
         if (event.getInventory() == null || event.getClickedInventory() == null || event.getCurrentItem() == null) return;
 
         if (event.getClickedInventory().getType() == InventoryType.PLAYER) return;
@@ -143,8 +137,8 @@ public class EventHandling implements Listener
                                 playerGang.getAllyInvitation().remove(message);
                                 argGang.getAllyInvitation().remove(playerGang.getGangName());
 
-                                playerGang.getAllies().add(message.toLowerCase());
-                                argGang.getAllies().add(playerGang.getGangName().toLowerCase());
+                                playerGang.getAllies().put(argGang.getGangId(), message.toLowerCase());
+                                argGang.getAllies().put(playerGang.getGangId(), playerGang.getGangName().toLowerCase());
 
                                 sendMessageToTeamMembers(argGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", playerGang.getGangName())));
                                 sendMessageToTeamMembers(playerGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", message)));
@@ -192,9 +186,9 @@ public class EventHandling implements Listener
 
                                 if (!playerGang.equals(argsGang))
                                 {
-                                    if (!playerGang.getEnemies().contains(message))
+                                    if (!playerGang.getEnemies().values().contains(message))
                                     {
-                                        gangManaging.addEnemyGang.accept(playerGang, argsGang);
+                                        this.gangManaging.addEnemyGang.accept(playerGang, argsGang);
                                     } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_ENEMIES));
                                 } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_ENEMY_OWN_GANG));
                             } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_GANG_MAX_ENEMIES));
