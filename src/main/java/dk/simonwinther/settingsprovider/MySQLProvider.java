@@ -3,14 +3,12 @@ package dk.simonwinther.settingsprovider;
 public class MySQLProvider
 {
     /* Constructor */
-    public MySQLProvider(){
-        this.sqlQueries = new SQLQueriesProvider();
-    }
+    public MySQLProvider(){ }
 
     /* Properties */
     private int port = 3306;
-    private String host = "mysql58.unoeuro.com", database="simon_winther_dk_db", username="simon_winther_dk", password="ay6bzcxk";
-    private final SQLQueriesProvider sqlQueries; //Final so it won't be shown in JSON file
+    private String host = "localhost", database="gangdata", username="root", password="";
+    //private final SQLQueriesProvider sqlQueries; //Final so it won't be shown in JSON file
     /* Getters and Setters */
 
     public String getHost()

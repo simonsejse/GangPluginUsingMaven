@@ -17,6 +17,7 @@ import dk.simonwinther.exceptions.ConfigFileNotFoundException;
 import dk.simonwinther.files.FileInterface;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.settingsprovider.CustomSettingsProvider;
+import dk.simonwinther.sqlprovider.SQLQueriesProvider;
 import dk.simonwinther.utility.ChatUtil;
 import dk.simonwinther.utility.GangManaging;
 import net.milkbowl.vault.chat.Chat;
@@ -34,6 +35,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,13 +54,15 @@ public final class MainPlugin extends JavaPlugin
     private CustomSettingsProvider customSettingsProvider;
     private ChatUtil chatUtil;
     private EventHandling eventHandling;
-    private final Logger log = Logger.getLogger("Minecraft");
-    private Economy econ = null;
     private static Permission perms = null;
     private Chat chat = null;
-
-    //private ConnectionProvider connectionProvider;
+    private Economy econ = null;
+    private ConnectionProvider connectionProvider;
+    private final Logger log = Logger.getLogger("Minecraft");
     private GangManaging gangManaging = null;
+    private final SQLQueriesProvider sqlQueriesProvider = new SQLQueriesProvider();
+    private final String[] tables = new String[]{"users", "memberInvitations", "gangMembers", "gangAllies", "gangPermissions", "gangs"};
+
 
     @Override
     public void onEnable()
@@ -86,8 +92,8 @@ public final class MainPlugin extends JavaPlugin
 
 
         //After initialising customSettingsProvider
-        //this.connectionProvider = new ConnectionProvider(customSettingsProvider);
-        //this.connectionProvider.openConnection();
+        this.connectionProvider = new ConnectionProvider(customSettingsProvider);
+        this.connectionProvider.openConnection();
 
         this.gangManaging = new GangManaging(this);
 
@@ -118,6 +124,32 @@ public final class MainPlugin extends JavaPlugin
                 .filter(p -> p.getOpenInventory().getTopInventory().getHolder() instanceof Menu)
                 .forEach(Player::closeInventory);
         saveData();
+    }
+
+    private void loadData(){
+        //Check all tables exists
+
+        try(Statement statement = connectionProvider.getConnection().createStatement()){
+            for(int i = 0;i<tables.length;i++){
+                try(ResultSet rs = connectionProvider.getConnection().getMetaData().getTables(null, null, tables[i], null)){
+                    if (!rs.next()){
+                        createTable(tables[i]);
+                    }
+                }catch(SQLException e){
+                    e.printStackTrace();
+                }
+            }
+        }catch(SQLException e ){
+            e.printStackTrace();
+        }
+    }
+
+    void createTable(String table){
+
+    }
+
+    private void saveData(){
+
     }
 
     private void registerEvents(Listener... listeners)
@@ -259,107 +291,6 @@ public final class MainPlugin extends JavaPlugin
     {
         return eventHandling;
     }
-
-    /* Saving and loading data old way using object output and input streams. */
-    private void loadData()
-    {
-        //TODO: Checking if connection provider throws NullPointerException
-        /*
-        File f = new File(getDataFolder() + File.separator + "Gangs");
-        if (f.listFiles() != null) {
-            File[] files = f.listFiles();
-            for(File file : files)
-            {
-                try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file)))
-                {
-                    Gang gang = (Gang) objectInputStream.readObject();
-                    String gangName = gang.getGangName();
-                    GangManaging.gangMap.put(gangName, gang);
-                } catch (IOException | ClassNotFoundException e)
-                {
-                    logMessage.accept("ObjectInputStream couldn't be established, or Gang object wasn't written right.");
-                }
-            }
-        }
-
-        File f2 = new File(getDataFolder() + File.separator + "Users");
-        if (f2.listFiles() != null){
-            File[] files = f2.listFiles();
-            for(File file2 : files){
-                try(DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file2))){
-                    String uuidString = file2.getName().substring(0, file2.getName().length()-4); //Remove .bin
-                    UUID uuid = UUID.fromString(uuidString);
-                    final String utf = dataInputStream.readUTF();
-                    GangManaging.namesOfGang.put(uuid, utf);
-                    final boolean value = dataInputStream.readBoolean();
-                    GangManaging.damageMap.put(uuid, value);
-                }catch(IOException e){
-                    logMessage.accept("ObjectInputStream couldn't be established, or Gang object wasn't written right.");
-                }
-            }
-        }
-         */
-        //TODO: Load from MySQL
-    }
-
-    private void saveData()
-    {
-        /*
-        GangManaging.getGangMap().values().forEach(gang ->
-        {
-            File file = new File(getDataFolder() + File.separator + "Gangs", gang.getGangName() + ".bin");
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                try
-                {
-                    file.createNewFile();
-                } catch (IOException e)
-                {
-                    file.delete();
-                    logMessage.accept("File couldn't be created! Trying again!");
-                    saveData(); //Recursion
-                }
-            }
-            try(ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(file))){
-                objectOutputStream.writeObject(gang);
-                objectOutputStream.flush();
-            } catch (IOException e)
-            {
-                file.delete();
-                logMessage.accept("Gang data couldn't be saved! Trying again!");
-                saveData(); //Recursion
-            }
-
-            GangManaging.namesOfGang.forEach((key, value) ->
-            {
-                File file2 = new File(getDataFolder() + File.separator + "Users", key+".bin");
-                if (!file2.getParentFile().exists()){
-                    file2.getParentFile().mkdirs();
-                    try
-                    {
-                        file2.getParentFile().createNewFile();
-                    } catch (IOException e)
-                    {
-                        logMessage.accept("File couldn't be created!");
-                    }
-                }
-                if (!GangManaging.damageMap.containsKey(key)) GangManaging.damageMap.put(key, false);
-
-                try(DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file2))){
-                    dataOutputStream.writeUTF(value);
-                    dataOutputStream.writeBoolean(GangManaging.damageMap.get(key));
-                    dataOutputStream.flush();
-                }catch(IOException e){
-                   logMessage.accept("Couldn't write Object penis!");
-                }
-            });
-
-        });
-         */
-        //TODO: Save into MySQL
-        // [ ]
-    }
-
 
     public void setMessageConfig(FileInterface messageConfig)
     {

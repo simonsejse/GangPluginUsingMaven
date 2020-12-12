@@ -1,4 +1,8 @@
-package dk.simonwinther.settingsprovider;
+package dk.simonwinther.sqlprovider;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class SQLQueriesProvider
 {
@@ -60,5 +64,47 @@ public class SQLQueriesProvider
             "\tPRIMARY KEY (`GangId`)\n" +
             ");";
 
+    private final static String CREATE_ALLY_INVITATION_TABLE = "CREATE TABLE `allyInvitations` (\n" +
+            "\t`GangId` INT(11),\n" +
+            "\t`InvitedGangName` VARCHAR(100)\n" +
+            ");";
+
+    private final static String CREATE_ENEMIES_TABLE = "CREATE TABLE `enemies` (\n" +
+            "\t`GangId` INT(11),\n" +
+            "\t`EnemyGangId` INT(11),\n" +
+            "\t`EnemyGangName` VARCHAR(255)\n" +
+            ");";
+
+    private final static String CREATE_LEVEL_SYSTEM_TABLE = "CREATE TABLE `enemies` (\n" +
+            "\t`GangId` INT(11),\n" +
+            "\t`Bread` INT(11),\n" +
+            "\t`Sugar` INT(11),\n" +
+            "\t`IronSword` INT(11),\n" +
+            "\t`IronHelmet` INT(11),\n" +
+            "\t`IronChestplate` INT(11),\n" +
+            "\t`IronLeggings` INT(11),\n" +
+            "\t`IronBoots` INT(11),\n" +
+            "\t`DiamondSword` INT(11),\n" +
+            "\t`DiamondHelmet` INT(11),\n" +
+            "\t`DiamondChestplate` INT(11),\n" +
+            "\t`DiamondLeggings` INT(11),\n" +
+            "\t`DiamondBoots` INT(11)\n" +
+            ");";
+
+    private final List<String> SQL_TABLES = Arrays.asList(
+            CREATE_USERS_TABLE,
+            CREATE_MEMBER_INVITATION_TABLE,
+            CREATE_MEMBERS_TABLE,
+            CREATE_GANG_ALLIES_TABLE,
+            CREATE_GANG_PERMISSIONS_TABLE,
+            CREATE_GANG_TABLE,
+            CREATE_ALLY_INVITATION_TABLE,
+            CREATE_ENEMIES_TABLE,
+            CREATE_LEVEL_SYSTEM_TABLE
+    );
+
+    public List<String> getTables(){
+        return this.SQL_TABLES;
+    }
 
 }
