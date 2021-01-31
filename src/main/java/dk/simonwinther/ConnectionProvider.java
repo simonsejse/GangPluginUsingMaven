@@ -1,7 +1,6 @@
 package dk.simonwinther;
 
 import dk.simonwinther.settingsprovider.CustomSettingsProvider;
-import org.bukkit.Bukkit;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,9 +25,12 @@ public class ConnectionProvider
             try
             {
                 Class.forName("com.mysql.jdbc.Driver");
-                this.connection = DriverManager.getConnection("jdbc:mysql://" + customSettingsProvider.getMySQLProvider().getHost()+ ":" + customSettingsProvider.getMySQLProvider().getPort() + "/" + customSettingsProvider.getMySQLProvider().getDatabase(), customSettingsProvider.getMySQLProvider().getUsername(), customSettingsProvider.getMySQLProvider().getPassword());
+
+                this.connection = DriverManager.getConnection("jdbc:mysql://u4_2HftuMX0Pl:OXmN!Kq.EaBpRkQF14mGCeks@127.0.0.1:3306/s4_db");
             } catch (ClassNotFoundException | SQLException e)
             {
+
+
                 Logger.getLogger(ConnectionProvider.class.getName()).log(Level.SEVERE, "ConnectionProvider couldn't establish connection check your config.json");
             }
         }

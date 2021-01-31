@@ -59,7 +59,7 @@ public class JoinArgument implements CommandArguments
                                 .forEach(globalPlayer ->
                                         globalPlayer.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_JOINED_GANG_GLOBAL.replace("{spiller}", p.getName()).replace("{name}", args[1]))));
 
-                    } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_FULL));
+                    } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_NOT_SPACE_ENOUGH));
                 } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_INVITED_TO_GANG));
             } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_DOES_NOT_EXISTS.replace("{name}", args[1])));
         } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_IN_GANG));

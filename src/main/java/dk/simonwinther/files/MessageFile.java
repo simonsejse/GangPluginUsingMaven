@@ -1,21 +1,28 @@
 package dk.simonwinther.files;
 
 import dk.simonwinther.MainPlugin;
+import dk.simonwinther.exceptions.ReadValueException;
 import dk.simonwinther.utility.ChatUtil;
+import dk.simonwinther.utility.UrlUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
+import java.util.logging.Level;
 
 public class MessageFile implements FileInterface
 {
 
+    private static final String MESSAGES_URL = "https://raw.githubusercontent.com/simonsejse/gang-messages.json/main/README.md";
+
     private File f;
     private YamlConfiguration yamlConfiguration;
+    private MainPlugin plugin;
 
     public MessageFile(MainPlugin plugin, String PATH){
         f = new File(plugin.getDataFolder(), PATH);
-        load();
+        this.plugin = plugin;
     }
 
     @Override
@@ -25,50 +32,34 @@ public class MessageFile implements FileInterface
     }
 
     @Override
-    public YamlConfiguration getYamlConfiguration()
+    public void initFile()
     {
-        return YamlConfiguration.loadConfiguration(getFile());
-    }
-
-    @Override
-    public void save()
-    {
-        try{
-            yamlConfiguration.save(getFile());
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void create()
-    {
-        if(!f.exists()){
-            f.getParentFile().mkdirs();
-            try{
+        if (!f.getParentFile().exists()) f.getParentFile().mkdirs();
+        if (!f.exists()){
+            FileOutputStream fileOutputStream = null;
+            try {
                 f.createNewFile();
-            }catch(IOException e){e.printStackTrace();}
-            ChatUtil.setup(this);
-            save();
+                fileOutputStream = new FileOutputStream(this.f);
+                String jsonData = UrlUtil.readValueFromUrl(MESSAGES_URL);
+                if (jsonData == null) throw new ReadValueException("Kunne ikke hente data from URL");
+
+                fileOutputStream.write(jsonData.getBytes());
+
+            } catch (IOException exception) {
+                Bukkit.getLogger().log(Level.SEVERE, "§cKunne ikke oprette/finde message.json filen");
+                this.plugin.getServer().getPluginManager().disablePlugin(plugin);
+            }catch(ReadValueException readValueException){
+                Bukkit.getLogger().log(Level.SEVERE, "§cJsonData er null, og vil kaste en nullpointerexception!");
+                this.plugin.getServer().getPluginManager().disablePlugin(plugin);
+            }finally{
+                try {
+                    fileOutputStream.close();
+                } catch (IOException exception) {
+                    Bukkit.getLogger().log(Level.SEVERE, "§cOutputStreamen blev ikke lukket ordentligt!");
+                    this.plugin.getServer().getPluginManager().disablePlugin(plugin);
+                }
+            }
         }
     }
 
-    @Override
-    public void load()
-    {
-        yamlConfiguration = YamlConfiguration.loadConfiguration(getFile());
-    }
-
-    @Override
-    public void set(String path, Object object)
-    {
-        yamlConfiguration.set(path, object);
-        save();
-    }
-
-    @Override
-    public String get(String path)
-    {
-        return String.valueOf(getYamlConfiguration().get(path));
-    }
 }

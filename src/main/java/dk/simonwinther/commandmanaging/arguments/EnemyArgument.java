@@ -48,20 +48,17 @@ public class EnemyArgument implements CommandArguments
                 if (gangManaging.gangExistsPredicate.test(args[1]))
                 {
                     Gang argsGang = gangManaging.getGangByNameFunction.apply(args[1]);
-                    if (argsGang.getEnemies().size() < playerGang.getMaxEnemies())
+                    if (playerGang.getEnemies().size() < playerGang.getMaxEnemies())
                     {
-                        if (playerGang.getEnemies().size() < playerGang.getMaxEnemies())
-                        {
 
-                            if (!playerGang.equals(argsGang))
+                        if (!playerGang.equals(argsGang))
+                        {
+                            if (!playerGang.getEnemies().values().contains(args[1].toLowerCase()))
                             {
-                                if (!playerGang.getEnemies().values().contains(args[1].toLowerCase()))
-                                {
-                                    gangManaging.addEnemyGang.accept(playerGang, argsGang);
-                                } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_ENEMIES));
-                            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_ENEMY_OWN_GANG));
-                        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_GANG_MAX_ENEMIES));
-                    }else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().OTHER_GANG_MAX_ENEMIES));
+                                gangManaging.addEnemyGang.accept(playerGang, argsGang);
+                            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_ENEMIES));
+                        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_ENEMY_OWN_GANG));
+                    } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_GANG_MAX_ENEMIES));
                 } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_DOES_NOT_EXISTS.replace("{name}", args[1])));
             } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
         } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));

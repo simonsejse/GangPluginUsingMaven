@@ -68,7 +68,7 @@ public class DeleteArgument implements CommandArguments
 
                     gangManaging.deleteGangConsumer.accept(playerUuid);
                     p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_LEFT_GANG.replace("{name}", gangName)));
-                } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().KICK_PLAYERS_TO_LEAVE_GANG));
+                } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PASS_OWNERSHIP));
 
             }
         } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));

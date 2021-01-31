@@ -60,6 +60,33 @@ public class GangCommand implements CommandExecutor
             p.sendMessage("Ud af gamemode! - ændres i config");
             return true;
         }
+        /**
+         * TODO:
+         *
+         * /bande ally - java.lang.ArrayIndexOutOfBoundsException: 1
+         * [05:41:15 WARN]: java.lang.ArrayIndexOutOfBoundsException: 1
+         * [05:41:15 WARN]:        at dk.simonwinther.commandmanaging.arguments.AllyArgument.perform(AllyArgument.java:52)
+         * [05:41:15 WARN]:        at dk.simonwinther.commandmanaging.GangCommand.lambda$onCommand$1(GangCommand.java:76)
+         * [05:41:15 WARN]:        at java.util.Optional.ifPresent(Optional.java:159)
+         * [05:41:15 WARN]:        at dk.simonwinther.commandmanaging.GangCommand.onCommand(GangCommand.java:72)
+         * [05:41:15 WARN]:        at org.bukkit.command.PluginCommand.execute(PluginCommand.java:44)
+         * [05:41:15 WARN]:        at org.bukkit.command.SimpleCommandMap.dispatch(SimpleCommandMap.java:141)
+         * [05:41:15 WARN]:        at org.bukkit.craftbukkit.v1_8_R3.CraftServer.dispatchCommand(CraftServer.java:641)
+         * [05:41:15 WARN]:        at net.minecraft.server.v1_8_R3.PlayerConnection.handleCommand(PlayerConnection.java:1162)
+         * [05:41:15 WARN]:        at net.minecraft.server.v1_8_R3.PlayerConnection.a(PlayerConnection.java:997)
+         * [05:41:15 WARN]:        at net.minecraft.server.v1_8_R3.PacketPlayInChat.a(PacketPlayInChat.java:45)
+         * [05:41:15 WARN]:        at net.minecraft.server.v1_8_R3.PacketPlayInChat.a(PacketPlayInChat.java:1)
+         * [05:41:15 WARN]:        at net.minecraft.server.v1_8_R3.PlayerConnectionUtils$1.run(SourceFile:13)
+         * [05:41:15 WARN]:        at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+         * [05:41:15 WARN]:        at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+         * [05:41:15 WARN]:        at net.minecraft.server.v1_8_R3.SystemUtils.a(SourceFile:44)
+         * [05:41:15 WARN]:        at net.minecraft.server.v1_8_R3.MinecraftServer.B(MinecraftServer.java:715)
+         * [05:41:15 WARN]:        at net.minecraft.server.v1_8_R3.DedicatedServer.B(DedicatedServer.java:374)
+         * [05:41:15 WARN]:        at net.minecraft.server.v1_8_R3.MinecraftServer.A(MinecraftServer.java:654)
+         * [05:41:15 WARN]:        at net.minecraft.server.v1_8_R3.MinecraftServer.run(MinecraftServer.java:557)
+         * [05:41:15 WARN]:        at java.lang.Thread.run(Thread.java:748)
+         */
+
         if (args.length > 0)
         {
             Optional<CommandArguments> commandArgumentsOptional = Arrays.stream(commandArgumentsList)

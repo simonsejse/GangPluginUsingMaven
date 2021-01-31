@@ -1,8 +1,9 @@
 package dk.simonwinther;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.sk89q.worldguard.bukkit.RegionContainer;
 import com.sk89q.worldguard.bukkit.RegionQuery;
@@ -13,11 +14,10 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dk.simonwinther.commandmanaging.ConfirmTransferCmd;
 import dk.simonwinther.commandmanaging.GangCommand;
 import dk.simonwinther.events.EventHandling;
-import dk.simonwinther.exceptions.ConfigFileNotFoundException;
 import dk.simonwinther.files.FileInterface;
+import dk.simonwinther.files.MessageFile;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.settingsprovider.CustomSettingsProvider;
-import dk.simonwinther.sqlprovider.SQLQueriesProvider;
 import dk.simonwinther.utility.ChatUtil;
 import dk.simonwinther.utility.GangManaging;
 import net.milkbowl.vault.chat.Chat;
@@ -33,11 +33,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
@@ -57,45 +53,40 @@ public final class MainPlugin extends JavaPlugin
     private static Permission perms = null;
     private Chat chat = null;
     private Economy econ = null;
-    private ConnectionProvider connectionProvider;
-    private final Logger log = Logger.getLogger("Minecraft");
     private GangManaging gangManaging = null;
-    private final SQLQueriesProvider sqlQueriesProvider = new SQLQueriesProvider();
-    private final String[] tables = new String[]{"users", "memberInvitations", "gangMembers", "gangAllies", "gangPermissions", "gangs"};
+
+    private final static Logger LOGGER = Logger.getLogger("Minecraft");
+    public final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    //private ConnectionProvider connectionProvider;
+    //private final SQLQueriesProvider sqlQueriesProvider = new SQLQueriesProvider();
+    //private final String[] tables = new String[]{"users", "memberInvitations", "gangMembers", "gangAllies", "gangPermissions", "gangs"};
 
 
     @Override
     public void onEnable()
     {
 
+        //Setup message.json
+        this.messageConfig = new MessageFile(this, "message.json");
+        this.messageConfig.initFile();
+
         try{
-            createFiles();
-        }catch(IOException | JsonSyntaxException e){
-            Logger.getLogger(MainPlugin.class.getName()).log(Level.WARNING, "Beware, Config.json file EXISTS but is corrupt! Fix config.json or delete to create a default config.json!");
-            this.customSettingsProvider = new CustomSettingsProvider(); //File corrupt, use default settings.
-        }catch(ConfigFileNotFoundException exception){
-            this.customSettingsProvider = new CustomSettingsProvider();
-            File config = new File(getDataFolder(), "config.json");
-            String json = new GsonBuilder().setPrettyPrinting().create().toJson(customSettingsProvider, CustomSettingsProvider.class);
-            try(FileWriter fileWriter = new FileWriter(config)){
-                fileWriter.write(json);
-                fileWriter.flush();
-            }catch(IOException e){
-                e.printStackTrace();
-            }
+            TypeReference<ChatUtil> chatUtilTypeReference = new TypeReference<ChatUtil>(){};
+            this.chatUtil = OBJECT_MAPPER.readValue(this.messageConfig.getFile(), chatUtilTypeReference);
+        }catch(IOException e){
+            Bukkit.getLogger().log(Level.SEVERE, "Du HAR fucket din message.json fil op!\nDisabler pluginnet.");
+            this.getServer().getPluginManager().disablePlugin(this);
         }
-
-        this.chatUtil = new ChatUtil(this);
-        if (!messageConfig.getFile().exists()){
-            this.messageConfig.create();
-        }
-
-
-        //After initialising customSettingsProvider
-        this.connectionProvider = new ConnectionProvider(customSettingsProvider);
-        this.connectionProvider.openConnection();
 
         this.gangManaging = new GangManaging(this);
+
+        //Setup config.json
+        this.customSettingsProvider = new CustomSettingsProvider();
+
+        //After initialising customSettingsProvider
+        //this.connectionProvider = new ConnectionProvider(customSettingsProvider);
+        //this.connectionProvider.openConnection();
+
 
         getCommand("bande").setExecutor(new GangCommand(gangManaging, this));
         getCommand("confirmtransfercmd").setExecutor(new ConfirmTransferCmd(this.gangManaging, this));
@@ -104,16 +95,19 @@ public final class MainPlugin extends JavaPlugin
 
         if (!setupEconomy())
         {
-            log.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
+            LOGGER.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+
 
         startScheduler();
         registerEvents(this.eventHandling);
         setupPermissions();
         setupChat();
-        loadData();
+
+        //loadData();
+
     }
 
     @Override
@@ -126,6 +120,7 @@ public final class MainPlugin extends JavaPlugin
         saveData();
     }
 
+    /*
     private void loadData(){
         //Check all tables exists
 
@@ -143,6 +138,7 @@ public final class MainPlugin extends JavaPlugin
             e.printStackTrace();
         }
     }
+     */
 
     void createTable(String table){
 
@@ -174,10 +170,13 @@ public final class MainPlugin extends JavaPlugin
 
     private final Supplier<String> schedulerUpdated = () -> "&8&l| &b&lBande &8&l| &2&l" + gangManaging.gangMap.keySet().size() + "&a bander er blevet automatisk gemt...!";
 
-    private void createFiles() throws IOException, JsonSyntaxException, ConfigFileNotFoundException
+    private void createFiles() throws IOException, JsonSyntaxException
     {
         File configFile = new File(getDataFolder(), "config.json");
-        if (!configFile.exists()) throw new ConfigFileNotFoundException();
+        if (!configFile.exists()){
+            if (!configFile.getParentFile().exists()) configFile.getParentFile().mkdirs();
+            configFile.createNewFile();
+        }
 
         StringBuilder json = new StringBuilder();
         //Throws IOException means JSON wasn't read right, therefore in catch create new instance of CustomSettingsProvider using default settings.

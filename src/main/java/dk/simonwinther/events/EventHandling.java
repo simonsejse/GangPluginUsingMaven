@@ -10,8 +10,11 @@ import dk.simonwinther.utility.GangManaging;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -177,20 +180,18 @@ public class EventHandling implements Listener
                     if (gangManaging.gangExistsPredicate.test(message))
                     {
                         Gang argsGang = gangManaging.getGangByNameFunction.apply(message);
-                        if (argsGang.getEnemies().size() < playerGang.getMaxEnemies())
+                        //TODO: Make it a function instead
+                        if (playerGang.getEnemies().size() < playerGang.getMaxEnemies())
                         {
-                            if (playerGang.getEnemies().size() < playerGang.getMaxEnemies())
-                            {
 
-                                if (!playerGang.equals(argsGang))
+                            if (!playerGang.equals(argsGang))
+                            {
+                                if (!playerGang.getEnemies().values().contains(message))
                                 {
-                                    if (!playerGang.getEnemies().values().contains(message))
-                                    {
-                                        this.gangManaging.addEnemyGang.accept(playerGang, argsGang);
-                                    } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_ENEMIES));
-                                } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_ENEMY_OWN_GANG));
-                            } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_GANG_MAX_ENEMIES));
-                        }else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().OTHER_GANG_MAX_ENEMIES));
+                                    this.gangManaging.addEnemyGang.accept(playerGang, argsGang);
+                                } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_ENEMIES));
+                            } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_ENEMY_OWN_GANG));
+                        } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_GANG_MAX_ENEMIES));
                     } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_DOES_NOT_EXISTS.replace("{name}", String.valueOf(message.charAt(0)).toUpperCase() + message.substring(1))));
                 } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
             } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
