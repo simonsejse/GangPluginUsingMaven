@@ -5,6 +5,7 @@ import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -12,11 +13,13 @@ import java.util.UUID;
 public class InfoArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private MessageProvider mp;
     private final GangManaging gangManaging;
 
     public InfoArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
     }
 
     @Override
@@ -44,7 +47,7 @@ public class InfoArgument implements CommandArguments
         UUID playerUuid = p.getUniqueId();
         if (!gangManaging.playerInGangPredicate.test(playerUuid))
         {
-            p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
+            p.sendMessage(this.mp.notInGang);
             return;
         }
         Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);

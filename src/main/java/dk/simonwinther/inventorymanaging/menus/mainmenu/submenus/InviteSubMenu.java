@@ -9,6 +9,7 @@ import dk.simonwinther.enums.ColorIndexEnum;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.MainMenu;
 import dk.simonwinther.utility.InventoryUtility;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -26,6 +27,7 @@ import java.util.regex.Pattern;
 public class InviteSubMenu extends Menu
 {
     private MainPlugin plugin;
+    private MessageProvider mp;
     private UUID playerUuid;
     private MainMenu mainMenu;
     private int slot;
@@ -34,6 +36,7 @@ public class InviteSubMenu extends Menu
     public InviteSubMenu(GangManaging gangManaging, MainPlugin plugin, MainMenu mainMenu, UUID playerUuid)
     {
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
         this.mainMenu = mainMenu;
         this.playerUuid = playerUuid;
         this.gangManaging = gangManaging;
@@ -79,17 +82,17 @@ public class InviteSubMenu extends Menu
                             if (gang.getMemberInvitations().contains(whoClicked.getName().toLowerCase()))
                             {
                                 this.gangManaging.joinGang(whoClicked.getUniqueId(), whoClicked.getName(), gangName);
-                                whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_JOINED_GANG.replace("{name}", gangName)));
+                                whoClicked.sendMessage(this.mp.successfullyJoinedGang.replace("{name}", gangName));
                                 Bukkit.getOnlinePlayers()
                                         .stream()
-                                        .forEach(globalPlayer -> globalPlayer.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_JOINED_GANG_GLOBAL.replace("{spiller}", globalPlayer.getName()).replace("{name}", gangName))));
+                                        .forEach(globalPlayer -> globalPlayer.sendMessage(mp.successfullyJoinedGangGlobal.replace("{spiller}", globalPlayer.getName()).replace("{name}", gangName)));
 
                             } else
-                                whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_INVITED_TO_GANG));
+                                whoClicked.sendMessage(this.mp.notInvitedToGang);
                         } else
-                            whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_DOES_NOT_EXISTS.replace("{name}", gangName)));
+                            whoClicked.sendMessage(this.mp.gangDoesNotExists.replace("{name}", gangName));
                     } else
-                        whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_IN_GANG));
+                        whoClicked.sendMessage(this.mp.alreadyInGang);
                 }
 
 

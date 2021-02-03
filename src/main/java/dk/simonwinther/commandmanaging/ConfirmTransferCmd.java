@@ -5,7 +5,7 @@ import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.enums.Level;
 import dk.simonwinther.enums.QuestPayEnum;
-import dk.simonwinther.utility.ChatUtil;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -34,7 +34,7 @@ public class ConfirmTransferCmd implements CommandExecutor
             plugin.getEventHandling().removeActiveMoneyPlayers.accept(player.getUniqueId());
             if (args[0].equalsIgnoreCase("yes")){
                 Gang gang = this.gangManaging.getGangByUuidFunction.apply(uuid);
-                Level level = Level.valueOf(ChatUtil.numbers[gang.getGangLevel()]);
+                Level level = Level.valueOf(MessageProvider.numbers[gang.getGangLevel()]);
                 if (gang.getLevelSystem().getPaidForQuest() >= level.getAmountToPay()[QuestPayEnum.AMOUNT_PAY_INDEX.value]){
                     player.sendMessage("Du har allerede betalt det du skulle i dette level!");
                 }else{

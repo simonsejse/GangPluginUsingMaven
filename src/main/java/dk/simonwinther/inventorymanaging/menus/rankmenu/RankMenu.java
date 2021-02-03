@@ -6,6 +6,7 @@ import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.enums.Rank;
 import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -25,9 +26,11 @@ public class RankMenu extends Menu
 
     private String nameOfArgs;
     private UUID playerUuid;
-    private String nameOfPlayer;
-    private final GangManaging gangManaging;
 
+    //TODO: Bruger slet ikke denne variabel
+    private final String nameOfPlayer;
+    private final GangManaging gangManaging;
+    private final MessageProvider mp;
 
 
 
@@ -63,6 +66,7 @@ public class RankMenu extends Menu
     {
         super();
         this.plugin = plugin;
+        this.mp = plugin.getMessageProvider();
         this.gang = gang;
         this.playerUuid = playerUuid;
         this.nameOfPlayer = nameOfPlayer;
@@ -100,17 +104,17 @@ public class RankMenu extends Menu
             case IRON_INGOT:
                 if (gang.getMembersSorted().get(getPlayerUuid()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getPlayerUuid()) >= Rank.MEMBER.getValue())
                     gang.getMembersSorted().compute(getArgsUuid(), (uuid, key) -> Rank.MEMBER.getValue());
-                else whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
+                else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case GOLD_INGOT:
                 if (gang.getMembersSorted().get(getPlayerUuid()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getPlayerUuid()) > Rank.OFFICER.getValue())
                     gang.getMembersSorted().compute(getArgsUuid(), (key, value) -> Rank.OFFICER.getValue());
-                else whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
+                else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case DIAMOND:
                 if (gang.getMembersSorted().get(getPlayerUuid()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getPlayerUuid()) >= Rank.CO_LEADER.getValue())
                     gang.getMembersSorted().compute(getArgsUuid(), (key, value) -> Rank.CO_LEADER.getValue());
-                else whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
+                else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case EMERALD:
                 if (gang.getMembersSorted().get(getPlayerUuid()) == Rank.LEADER.getValue())
@@ -124,10 +128,10 @@ public class RankMenu extends Menu
                             .forEach(p ->
                             {
                                 if (p != null)
-                                    p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NEW_LEADER.replace("{player}", whoClicked.getName()).replace("{name}", gang.getGangName()).replace("{newleader}", getNameOfArgs())));
+                                    p.sendMessage(this.mp.newLeader.replace("{player}", whoClicked.getName()).replace("{name}", gang.getGangName()).replace("{newleader}", getNameOfArgs()));
                             });
 
-                } else whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
+                } else whoClicked.sendMessage(this.mp.notHighRankEnough);
 
                 break;
         }

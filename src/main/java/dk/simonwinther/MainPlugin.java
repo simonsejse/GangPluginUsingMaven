@@ -18,7 +18,7 @@ import dk.simonwinther.files.FileInterface;
 import dk.simonwinther.files.MessageFile;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.settingsprovider.CustomSettingsProvider;
-import dk.simonwinther.utility.ChatUtil;
+import dk.simonwinther.utility.MessageProvider;
 import dk.simonwinther.utility.GangManaging;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
@@ -48,7 +48,7 @@ public final class MainPlugin extends JavaPlugin
     /* Properties */
     private FileInterface messageConfig;
     private CustomSettingsProvider customSettingsProvider;
-    private ChatUtil chatUtil;
+    private MessageProvider messageProvider;
     private EventHandling eventHandling;
     private static Permission perms = null;
     private Chat chat = null;
@@ -71,8 +71,8 @@ public final class MainPlugin extends JavaPlugin
         this.messageConfig.initFile();
 
         try{
-            TypeReference<ChatUtil> chatUtilTypeReference = new TypeReference<ChatUtil>(){};
-            this.chatUtil = OBJECT_MAPPER.readValue(this.messageConfig.getFile(), chatUtilTypeReference);
+            TypeReference<MessageProvider> chatUtilTypeReference = new TypeReference<MessageProvider>(){};
+            this.messageProvider = OBJECT_MAPPER.readValue(this.messageConfig.getFile(), chatUtilTypeReference);
         }catch(IOException e){
             Bukkit.getLogger().log(Level.SEVERE, "Du HAR fucket din message.json fil op!\nDisabler pluginnet.");
             this.getServer().getPluginManager().disablePlugin(this);
@@ -281,9 +281,9 @@ public final class MainPlugin extends JavaPlugin
         return messageConfig;
     }
 
-    public ChatUtil getChatUtil()
+    public MessageProvider getMessageProvider()
     {
-        return chatUtil;
+        return messageProvider;
     }
 
     public EventHandling getEventHandling()

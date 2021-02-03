@@ -4,17 +4,21 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class JoinArgument implements CommandArguments
 {
     private MainPlugin plugin;
+    private MessageProvider mp;
+
     private final GangManaging gangManaging;
 
     public JoinArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
     }
 
     @Override
@@ -51,18 +55,18 @@ public class JoinArgument implements CommandArguments
                     if (gang.getMembersSorted().size() < gang.getMaxMembers())
                     {
                         gangManaging.joinGang(p.getUniqueId(), p.getName(), args[1]);
-                        p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_JOINED_GANG.replace("{name}", args[1])));
+                        p.sendMessage(this.mp.successfullyJoinedGang.replace("{name}", args[1]));
                         //TODO: Check if filter works.
                         Bukkit.getOnlinePlayers()
                                 .stream()
                                 .filter(globalPlayer -> !p.getName().equalsIgnoreCase(globalPlayer.getName()))
                                 .forEach(globalPlayer ->
-                                        globalPlayer.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_JOINED_GANG_GLOBAL.replace("{spiller}", p.getName()).replace("{name}", args[1]))));
+                                        globalPlayer.sendMessage(this.mp.successfullyJoinedGangGlobal.replace("{spiller}", p.getName()).replace("{name}", args[1])));
 
-                    } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_NOT_SPACE_ENOUGH));
-                } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_INVITED_TO_GANG));
-            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_DOES_NOT_EXISTS.replace("{name}", args[1])));
-        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_IN_GANG));
+                    } else p.sendMessage(this.mp.gangNotSpaceEnough);
+                } else p.sendMessage(this.mp.notInvitedToGang);
+            } else p.sendMessage(this.mp.gangDoesNotExists.replace("{name}", args[1]));
+        } else p.sendMessage(this.mp.alreadyInGang);
     }
 
 

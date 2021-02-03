@@ -5,7 +5,7 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.enums.Level;
 import dk.simonwinther.enums.Rank;
 import dk.simonwinther.inventorymanaging.Menu;
-import dk.simonwinther.utility.ChatUtil;
+import dk.simonwinther.utility.MessageProvider;
 import dk.simonwinther.utility.GangManaging;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
@@ -34,6 +34,8 @@ import java.util.function.Function;
 public class EventHandling implements Listener
 {
     private MainPlugin plugin;
+    private MessageProvider mp;
+
     private final String npcName;
     private List<String> goAwayMessages;
     private List<String> deliveredMessages;
@@ -43,6 +45,7 @@ public class EventHandling implements Listener
     public EventHandling(GangManaging gangManaging, MainPlugin plugin)
     {
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
         this.npcName = this.plugin.getCustomSettingsProvider().getNpcProvider().getNpcName();
         this.goAwayMessages = this.plugin.getCustomSettingsProvider().getNpcProvider().getGoAwayMessages();
         this.deliveredMessages = this.plugin.getCustomSettingsProvider().getNpcProvider().getDeliveredMessages();
@@ -111,14 +114,16 @@ public class EventHandling implements Listener
             {
                 if (gangManaging.getGangByUuidFunction.apply(uuid).isPlayerInvited(message)){
                     gangManaging.removeInvitationConsumer.accept(uuid, message);
-                    player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_UNINVITED.replace("{args}", message)));
+                    player.sendMessage(this.mp.playerWasUninvited.replace("{args}", message));
                     return;
                 }
                 gangManaging.addInvitationConsumer.accept(uuid, message);
-                player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_INVITED.replace("{args}", message)));
-                if (Bukkit.getPlayer(message) != null) Bukkit.getPlayer(message).sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().INVITED_TO_GANG.replace("{name}", gangManaging.getGangByUuidFunction.apply(uuid).getGangName()).replace("{player}", player.getName())));
+                player.sendMessage(this.mp.playerWasInvited.replace("{args}", message));
+                if (Bukkit.getPlayer(message) != null) {
+                    Bukkit.getPlayer(message).sendMessage(this.mp.invitedToGang.replace("{name}", gangManaging.getGangByUuidFunction.apply(uuid).getGangName()).replace("{player}", player.getName()));
+                }
             } else
-                player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().HAS_NEVER_PLAYED.replace("{args}", message)));
+                player.sendMessage(this.mp.hasNeverPlayed.replace("{args}", message));
         } else if (allyChat.contains(uuid))
         {
             event.setCancelled(true);
@@ -141,31 +146,36 @@ public class EventHandling implements Listener
                                 playerGang.getAllies().put(argGang.getGangId(), message.toLowerCase());
                                 argGang.getAllies().put(playerGang.getGangId(), playerGang.getGangName().toLowerCase());
 
-                                sendMessageToTeamMembers(argGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", playerGang.getGangName())));
-                                sendMessageToTeamMembers(playerGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", message)));
+                                this.gangManaging.sendTeamMessage.accept(argGang, this.mp.allySuccessful.replace("{name}", playerGang.getGangName()));
+                                this.gangManaging.sendTeamMessage.accept(playerGang, this.mp.allySuccessful.replace("{name}", message));
                             } else
                             {
 
                                 playerGang.askAlly(message);
 
-                                player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ASK_ALLY.replace("{name}", message)));
+                                player.sendMessage(this.mp.askAlly.replace("{name}", message));
+
+                                this.gangManaging.sendTeamMessage.accept(argGang, this.mp.wishesToBeAlly.replace("{name}", playerGang.getGangName()));
+
+                                //TODO: Check if I've written more of these duplicate codes in other classes, there's a big probability that I have.
+                                /*
                                 argGang.getMembersSorted().keySet()
                                         .stream()
                                         .filter(_uuid -> Bukkit.getPlayer(_uuid) != null)
                                         .map(Bukkit::getPlayer)
-                                        .forEach(gangMembers -> gangMembers.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().WISHES_TO_BE_ALLY.replace("{name}", playerGang.getGangName()))));
-
+                                        .forEach(gangMembers -> gangMembers.sendMessage(this.mp.wishesToBeAlly.replace("{name}", playerGang.getGangName()))));
+                                 */
                             }
                         } else
                         {
                             playerGang.getAllyInvitation().remove(message);
-                            player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().UN_ALLY.replace("{name}", message)));
-                            sendMessageToTeamMembers(argGang, plugin.getChatUtil().color(plugin.getChatUtil().REGRET_TO_BE_ALLY.replace("{name}", playerGang.getGangName())));
+                            player.sendMessage(this.mp.unAlly.replace("{name}", message));
+                            this.gangManaging.sendTeamMessage.accept(argGang, this.mp.askAlly.replace("{name}", message));
                         }
-                    } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_ALLY_OWN_GANG));
-                } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_GANG_MAX_ALLYS));
+                    } else player.sendMessage(this.mp.cantAllyOwnGang);
+                } else player.sendMessage(this.mp.playerGangMaxAllies);
             } else
-                player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_DOES_NOT_EXISTS.replace("{name}", message)));
+                player.sendMessage(this.mp.gangDoesNotExists.replace("{name}", message));
         } else if (enemyChat.contains(uuid))
         {
             event.setCancelled(true);
@@ -189,12 +199,12 @@ public class EventHandling implements Listener
                                 if (!playerGang.getEnemies().values().contains(message))
                                 {
                                     this.gangManaging.addEnemyGang.accept(playerGang, argsGang);
-                                } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_ENEMIES));
-                            } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_ENEMY_OWN_GANG));
-                        } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_GANG_MAX_ENEMIES));
-                    } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_DOES_NOT_EXISTS.replace("{name}", String.valueOf(message.charAt(0)).toUpperCase() + message.substring(1))));
-                } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
-            } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
+                                } else player.sendMessage(this.mp.alreadyEnemies);
+                            } else player.sendMessage(this.mp.cantEnemyOwnGang);
+                        } else player.sendMessage(this.mp.playerGangMaxEnemies);
+                    } else player.sendMessage(this.mp.gangDoesNotExists.replace("{name}", String.valueOf(message.charAt(0)).toUpperCase() + message.substring(1)));
+                } else player.sendMessage(this.mp.notHighRankEnough);
+            } else player.sendMessage(this.mp.notInGang);
         } else if (createGang.contains(uuid))
         {
             event.setCancelled(true);
@@ -234,17 +244,6 @@ public class EventHandling implements Listener
         return stringBuilder.toString().length() != 0 ? stringBuilder.toString() : "&cReload..";
     }
 
-    public void sendMessageToTeamMembers(Gang gang, String msg)
-    {
-        gang.getMembersSorted()
-                .keySet()
-                .stream()
-                .filter(_uuid -> Bukkit.getPlayer(_uuid) != null)
-                .map(Bukkit::getPlayer)
-                .forEach(p -> p.sendMessage(msg));
-    }
-
-
     @EventHandler
     public void onAliMustafaClick(NPCRightClickEvent event){
         NPC npc = event.getNPC();
@@ -282,7 +281,7 @@ public class EventHandling implements Listener
             Rank rank = item.getType() != Material.AIR ? gang.getGangPermissions().accessToTransferItems : gang.getGangPermissions().accessToTransferMoney;
             if(this.gangManaging.isRankMinimumPredicate.test(uuid, rank))
             {
-                String gangLevelString = ChatUtil.numbers[gang.getGangLevel()];
+                String gangLevelString = MessageProvider.numbers[gang.getGangLevel()];
                 Level level = Level.valueOf(gangLevelString);
                 ItemStack playerItemInHand = player.getInventory().getItemInHand();
                 Material playerItemInHandType = playerItemInHand.getType();
@@ -299,7 +298,7 @@ public class EventHandling implements Listener
 
                         addActiveMoneyPlayers.accept(player.getUniqueId());
                     }else{
-                        player.sendMessage(plugin.getChatUtil().color(goAwayMessages.get(new Random().nextInt(goAwayMessages.size()))));
+                        player.sendMessage(goAwayMessages.get(new Random().nextInt(goAwayMessages.size())));
                     }
                     return;
                 }
@@ -307,7 +306,7 @@ public class EventHandling implements Listener
 
                 if (level.getAcceptedItems() == null)
                 {
-                    player.sendMessage(plugin.getChatUtil().color(goAwayMessages.get(new Random().nextInt(goAwayMessages.size()))));
+                    player.sendMessage(goAwayMessages.get(new Random().nextInt(goAwayMessages.size())));
                     return;
                 }
                 for (ItemStack acceptedItemStack : level.getAcceptedItems())
@@ -332,13 +331,13 @@ public class EventHandling implements Listener
                             gang.getLevelSystem().addValue(playerItemInHandType, amount);
 
                             String randomMessage = this.deliveredMessages.get(new Random().nextInt(this.deliveredMessages.size()));
-                            player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PREFIX + "&7"+randomMessage));
+                            player.sendMessage(this.mp.prefix + "&7"+randomMessage);
                         }
                         return;
                     }
                 }
-            } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
-        } else player.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
+            } else player.sendMessage(this.mp.notHighRankEnough);
+        } else player.sendMessage(this.mp.notInGang);
     }
 
 

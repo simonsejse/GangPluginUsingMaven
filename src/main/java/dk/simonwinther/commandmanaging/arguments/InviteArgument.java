@@ -3,6 +3,7 @@ package dk.simonwinther.commandmanaging.arguments;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -10,13 +11,15 @@ import java.util.UUID;
 
 public class InviteArgument implements CommandArguments
 {
-    private MainPlugin plugin;
+    private final MainPlugin plugin;
+    private final MessageProvider mp;
     private final GangManaging gangManaging;
 
     public InviteArgument(GangManaging gangManaging, MainPlugin plugin)
     {
         this.gangManaging = gangManaging;
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
     }
 
     @Override
@@ -59,22 +62,22 @@ public class InviteArgument implements CommandArguments
                                 {
                                     //Remove invitation
                                     gangManaging.removeInvitationConsumer.accept(playerUuid, args[1]);
-                                    p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_UNINVITED.replace("{args}", args[1])));
+                                    p.sendMessage(this.mp.playerWasUninvited.replace("{args}", args[1]));
                                     return;
                                 }
                                 if (Bukkit.getPlayer(args[1]) != null){
-                                    Bukkit.getPlayer(args[1]).sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().INVITED_TO_GANG.replace("{name}", gangManaging.gangNameFunction.apply(playerUuid)).replace("{player}", p.getName())));
+                                    Bukkit.getPlayer(args[1]).sendMessage(this.mp.invitedToGang.replace("{name}", gangManaging.gangNameFunction.apply(playerUuid)).replace("{player}", p.getName()));
                                 }
                                 //Invite player to gang
                                 gangManaging.addInvitationConsumer.accept(playerUuid, args[1]);
-                                p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_INVITED.replace("{args}", args[1])));
+                                p.sendMessage(this.mp.playerWasInvited.replace("{args}", args[1]));
 
 
-                            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_NOT_SPACE_ENOUGH));
-                        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
-                    } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SAME_GANG));
-                } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().HAS_NEVER_PLAYED.replace("{args}", args[1])));
-            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
-        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_INVITE_YOURSELF));
+                            } else p.sendMessage(this.mp.gangNotSpaceEnough);
+                        } else p.sendMessage(this.mp.notHighRankEnough);
+                    } else p.sendMessage(this.mp.sameGang);
+                } else p.sendMessage(this.mp.hasNeverPlayed.replace("{args}", args[1]));
+            } else p.sendMessage(this.mp.notInGang);
+        } else p.sendMessage(this.mp.cantInviteYourself);
     }
 }

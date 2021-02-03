@@ -4,18 +4,19 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
 public class EnemyArgument implements CommandArguments
 {
-    private MainPlugin plugin;
+    private MessageProvider mp;
     private final GangManaging gangManaging;
 
     public EnemyArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;
-        this.plugin = plugin;
+        this.mp = plugin.getMessageProvider();
     }
 
     @Override
@@ -56,11 +57,11 @@ public class EnemyArgument implements CommandArguments
                             if (!playerGang.getEnemies().values().contains(args[1].toLowerCase()))
                             {
                                 gangManaging.addEnemyGang.accept(playerGang, argsGang);
-                            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_ENEMIES));
-                        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_ENEMY_OWN_GANG));
-                    } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_GANG_MAX_ENEMIES));
-                } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_DOES_NOT_EXISTS.replace("{name}", args[1])));
-            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
-        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
+                            } else p.sendMessage(this.mp.alreadyEnemies);
+                        } else p.sendMessage(this.mp.cantEnemyOwnGang);
+                    } else p.sendMessage(this.mp.playerGangMaxEnemies);
+                } else p.sendMessage(this.mp.gangDoesNotExists.replace("{name}", args[1]));
+            } else p.sendMessage(this.mp.notHighRankEnough);
+        } else p.sendMessage(this.mp.notInGang);
     }
 }

@@ -3,17 +3,17 @@ package dk.simonwinther.commandmanaging.arguments;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.entity.Player;
 
 public class GangDamageArgument implements CommandArguments
 {
-
-    private final MainPlugin plugin;
     private final GangManaging gangManaging;
+    private final MessageProvider mp;
 
     public GangDamageArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;
-        this.plugin = plugin;
+        this.mp = plugin.getMessageProvider();
     }
     @Override
     public String getAlias()
@@ -38,6 +38,6 @@ public class GangDamageArgument implements CommandArguments
     {
         final boolean value = gangManaging.damageMap.get(p.getUniqueId());
         gangManaging.damageMap.compute(p.getUniqueId(), (uuid, bool) -> !value);
-        p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().TOGGLE_DAMAGE.replace("{value}", (!value ? "&aTil" : "&cFra"))));
+        p.sendMessage(this.mp.toggleDamage.replace("{value}", (!value ? "&aTil" : "&cFra")));
     }
 }

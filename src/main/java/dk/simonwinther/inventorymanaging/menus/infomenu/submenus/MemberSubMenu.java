@@ -11,6 +11,7 @@ import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.inventorymanaging.menus.rankmenu.RankMenu;
 import dk.simonwinther.utility.InventoryUtility;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -26,11 +27,13 @@ public class MemberSubMenu extends Menu
     private InfoMenu infoMenu;
     private Gang gang;
     private MainPlugin plugin;
+    private MessageProvider mp;
     private final GangManaging gangManaging;
 
     public MemberSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang)
     {
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
         this.infoMenu = infoMenu;
         this.gang = gang;
         this.gangManaging = gangManaging;
@@ -63,7 +66,7 @@ public class MemberSubMenu extends Menu
             case 47:
                 whoClicked.getOpenInventory().close();
                 plugin.getEventHandling().addInviteMemberChatConsumer.accept(whoClicked.getUniqueId());
-                whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().WHO_TO_INVITE_CHAT));
+                whoClicked.sendMessage(this.mp.whoToInviteChat);
                 break;
             default:
                 if (item.getType() != Material.SKULL_ITEM) return;
@@ -108,7 +111,7 @@ public class MemberSubMenu extends Menu
                             case NETHER_STAR:
                                 if (whoClicked.getName().equalsIgnoreCase(chosenPlayer))
                                 {
-                                    whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_RANK_YOURSELF));
+                                    whoClicked.sendMessage(mp.cantRankYourself);
                                     return;
                                 }
                                 whoClicked.openInventory(new RankMenu(gangManaging, plugin, gang, whoClickedUuid, whoClicked.getName(), getChosenPlayerUuid(), chosenPlayer).getInventory());
@@ -120,12 +123,10 @@ public class MemberSubMenu extends Menu
                                     {
                                         gangManaging.kickConsumer.accept(getChosenPlayerUuid());
                                         whoClicked.getOpenInventory().close();
-                                        whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_KICKED.replace("{args}", chosenPlayer)));
-                                        if(Bukkit.getPlayer(getChosenPlayerUuid()) != null) Bukkit.getPlayer(getChosenPlayerUuid()).sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().MEMBER_KICKED.replace("{name}", gang.getGangName())));
-                                    } else
-                                        whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().KICK_HIGHER_RANK));
-                                } else
-                                    whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
+                                        whoClicked.sendMessage(mp.playerWasKicked.replace("{args}", chosenPlayer));
+                                        if(Bukkit.getPlayer(getChosenPlayerUuid()) != null) Bukkit.getPlayer(getChosenPlayerUuid()).sendMessage(mp.memberKicked.replace("{name}", gang.getGangName()));
+                                    } else whoClicked.sendMessage(mp.playerWasKicked);
+                                } else whoClicked.sendMessage(mp.notHighRankEnough);
                                 break;
                         }
                     }
@@ -138,6 +139,7 @@ public class MemberSubMenu extends Menu
                 break;
         }
     }
+
 
     private int slot;
 

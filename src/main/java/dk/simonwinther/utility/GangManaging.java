@@ -12,12 +12,12 @@ import java.util.stream.Collectors;
 public class GangManaging
 {
     //Normally use dependency injection instead of singleton instance, but since it's a Utility class I never create an instance!
-    private MainPlugin plugin;
+    private MessageProvider mp;
 
     public GangManaging(MainPlugin plugin){
-        this.plugin = plugin;
-    }
+        this.mp = plugin.getMessageProvider();
 
+    }
     public final int GANG_COST = 10000;
 
     //UUID, Gang Name
@@ -55,7 +55,7 @@ public class GangManaging
 
         playerGang.getEnemies().put(enemyGangID, enemyGang.getGangName());
 
-        playerGang.getMembersSorted().keySet().stream().filter(uuid -> Bukkit.getPlayer(uuid) != null).map(Bukkit::getPlayer).forEach(teamMember -> teamMember.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ENEMY_SUCCESSFUL.replace("{name}", enemyGang.getGangName()))));
+        playerGang.getMembersSorted().keySet().stream().filter(uuid -> Bukkit.getPlayer(uuid) != null).map(Bukkit::getPlayer).forEach(teamMember -> teamMember.sendMessage(this.mp.enemySuccessful.replace("{name}", enemyGang.getGangName())));
         if (playerGang.getEnemies().keySet().contains(enemyGangID)){
             playerGang.getAllies().remove(enemyGangID);
             sendNoLongerEnemyMessage(enemyGang.getGangName(), playerGang.getMembersSorted());
@@ -93,6 +93,14 @@ public class GangManaging
         getGangByNameFunction.apply(gangName).addMember(uuid, lowerCaseFunc.apply(displayName), Rank.MEMBER);
         userGangMap.put(uuid, gangName);
     }
+    public BiConsumer<? super Gang, ? super String> sendTeamMessage = (gang, message) -> {
+        gang.getMembersSorted()
+                .keySet()
+                .stream()
+                .filter(uuid -> Bukkit.getPlayer(uuid) != null)
+                .map(Bukkit::getPlayer)
+                .forEach(player -> player.sendMessage(message));
+    };
     public Predicate<? super UUID> hasMemberSpacePredicate = uuid -> {
         Gang gang = getGangByUuidFunction.apply(uuid);
         return gang.getMembersSorted().size() < gang.getMaxMembers();
@@ -108,6 +116,6 @@ public class GangManaging
                 .stream()
                 .filter(uuid -> Bukkit.getPlayer(uuid) != null)
                 .map(Bukkit::getPlayer)
-                .forEach(member -> member.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NO_LONGER_ALLYS.replace("{name}", enemyGangName))));
+                .forEach(member -> member.sendMessage(this.mp.noLongerAllies.replace("{name}", enemyGangName)));
     }
 }

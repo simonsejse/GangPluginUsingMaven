@@ -3,6 +3,7 @@ package dk.simonwinther.commandmanaging.arguments;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -12,13 +13,16 @@ import java.util.function.Function;
 
 public class CreateArgument implements CommandArguments
 {
-    private MainPlugin plugin;
-    private GangManaging gangManager;
+    private final MainPlugin plugin;
+    private final GangManaging gangManager;
+    private final MessageProvider mp;
+
     private List<String> bannedWords;
 
     public CreateArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManager = gangManaging;
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
         bannedWords = plugin.getCustomSettingsProvider().getNpcProvider().getBannedWords();
     }
 
@@ -46,7 +50,7 @@ public class CreateArgument implements CommandArguments
     {
         if (args.length != 2)
         {
-            p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NO_SPACE));
+            p.sendMessage(this.mp.noSpace);
         } else
         {
             UUID playerUuid = p.getUniqueId();
@@ -57,19 +61,16 @@ public class CreateArgument implements CommandArguments
                     if (plugin.getEconomy().getBalance(Bukkit.getOfflinePlayer(p.getUniqueId())) >= gangManager.GANG_COST)
                     {
                         args[1] = args[1].replace(" ","");
-                        if (nameLengthFunc.apply(args[1])){
-                            if(!nameContainsWordsFunc.apply(args[1])){
-
-                                //Check player can afford, once added economy.
-                                gangManager.createNewGangBiConsumer.accept(playerUuid, args[1]);
-                                p.sendMessage((plugin.getChatUtil().color(plugin.getChatUtil().GANG_CREATED.replace("{name}", args[1]))));
-                                gangCreatedMsg(p, args[1]);
-                                plugin.getEconomy().withdrawPlayer(Bukkit.getOfflinePlayer(p.getUniqueId()), gangManager.GANG_COST);
-                            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CONTAINS_BAD_WORDS));
-                        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().MAX_MIN_GANG_NAME_LENGTH_REACHED));
-                    } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_AFFORD_GANG.replace("{0}", String.valueOf(gangManager.GANG_COST))));
-                } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().GANG_EXISTS.replace("{name}", args[1])));
-            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().ALREADY_IN_GANG));
+                        if (doesGangNameFollowRequirements(args[1])){
+                            //Check player can afford, once added economy.
+                            gangManager.createNewGangBiConsumer.accept(playerUuid, args[1]);
+                            p.sendMessage(this.mp.gangCreated.replace("{name}", args[1]));
+                            gangCreatedMsg(p, args[1]);
+                            plugin.getEconomy().withdrawPlayer(Bukkit.getOfflinePlayer(p.getUniqueId()), gangManager.GANG_COST);
+                        } else p.sendMessage(this.mp.gangNameDoesNotMeetRequirements);
+                    } else p.sendMessage(this.mp.cantAffordGang.replace("{0}", String.valueOf(gangManager.GANG_COST)));
+                } else p.sendMessage(this.mp.gangExists.replace("{name}", args[1]));
+            } else p.sendMessage(this.mp.alreadyInGang);
         }
     }
 
@@ -80,11 +81,15 @@ public class CreateArgument implements CommandArguments
                 {
                     //Check if player name is same as the guy who created, dont wanna send 2 messages.
                     if (!(_localPlayer.getName().equalsIgnoreCase(p.getName())))
-                        _localPlayer.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_CREATED_GANG_GLOBAL.replace("{player}", p.getName()).replace("{name}", gang)));
+                        _localPlayer.sendMessage(this.mp.successfullyCreatedGangGlobal.replace("{player}", p.getName()).replace("{name}", gang));
                 });
         p.sendMessage(ChatColor.translateAlternateColorCodes('&',"&c&l-"+gangManager.GANG_COST+"&f$"));
     }
 
-    public Function<String, Boolean> nameLengthFunc = (name) -> name.length() <= plugin.getChatUtil().MAX_GANG_NAME_LENGTH && name.length() >= plugin.getChatUtil().MIN_GANG_NAME_LENGTH;
-    public Function<String, Boolean> nameContainsWordsFunc = (name) -> bannedWords.stream().anyMatch(name::contains);
+    public boolean doesGangNameFollowRequirements(String gangName){
+        return gangName.length() <= mp.maxGangNameLength
+                && gangName.length() >= mp.minGangNameLength
+                && bannedWords.stream().anyMatch(gangName::contains);
+    }
+
 }

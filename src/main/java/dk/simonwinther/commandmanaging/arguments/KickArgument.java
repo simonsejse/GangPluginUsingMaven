@@ -1,9 +1,9 @@
 package dk.simonwinther.commandmanaging.arguments;
 
 import dk.simonwinther.MainPlugin;
+import dk.simonwinther.utility.MessageProvider;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
-import dk.simonwinther.exceptions.PlayerNotFoundException;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -11,12 +11,12 @@ import java.util.UUID;
 
 public class KickArgument implements CommandArguments
 {
-    private MainPlugin plugin;
+    private MessageProvider mp;
     private final GangManaging gangManaging;
 
     public KickArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;
-        this.plugin = plugin;
+        this.mp = plugin.getMessageProvider();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class KickArgument implements CommandArguments
         UUID playerUuid = p.getUniqueId();
         if (p.getName().toLowerCase().equals(args[1].trim()))
         {
-            p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_KICK_HIMSELF));
+            p.sendMessage(mp.playerKickHimself);
             return;
         }
         if (gangManaging.playerInGangPredicate.test(playerUuid))
@@ -63,19 +63,20 @@ public class KickArgument implements CommandArguments
                                 String gangName = gangManaging.gangNameFunction.apply(playerKickedUuid);
                                 gangManaging.kickConsumer.accept(playerKickedUuid);
                                 //Check if kicked player is online, only send message if online.
-                                p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_WAS_KICKED.replace("{args}", args[1])));
+                                p.sendMessage(this.mp.playerWasKicked.replace("{args}", args[1]));
                                 if (Bukkit.getPlayer(playerKickedUuid) != null)
-                                    Bukkit.getPlayer(playerKickedUuid).sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().MEMBER_KICKED.replace("{name}", gangName)));
-                            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().KICK_HIGHER_RANK));
-                        } else
-                            p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_SAME_GANG));
-                    } else
-                        p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PLAYER_NOT_IN_GANG));
+                                    Bukkit.getPlayer(playerKickedUuid).sendMessage(this.mp.memberKicked.replace("{name}", gangName));
+                            } else p.sendMessage(this.mp.kickHigherRank);
+                        } else p.sendMessage(this.mp.notInSameGang);
+                    } else p.sendMessage(this.mp.playerNotInGang);
                 } catch (Exception e)
                 {
-                    throw new PlayerNotFoundException("Spilleren findes ikke.");
+                    //TODO: fjern det lort her
+                    p.sendMessage("Spilleren findes ikke.");
                 }
-            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
-        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
+            } else p.sendMessage(this.mp.notHighRankEnough);
+
+        } else p.sendMessage(this.mp.notInGang);
+
     }
 }

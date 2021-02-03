@@ -11,6 +11,7 @@ import dk.simonwinther.inventorymanaging.menus.infomenu.submenus.ShopSubMenu;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.submenus.InviteSubMenu;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.submenus.OtherSubMenu;
 import dk.simonwinther.utility.InventoryUtility;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -25,11 +26,13 @@ public class MainMenu extends Menu
     private final MainPlugin plugin;
     private final UUID playerUuid;
     private final boolean isInGang;
+    private final MessageProvider mp;
     private final GangManaging gangManaging;
 
     public MainMenu(GangManaging gangManaging, MainPlugin plugin, UUID playerUuid, boolean isInGang)
     {
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
         this.playerUuid = playerUuid;
         this.isInGang = isInGang;
         this.gangManaging = gangManaging;
@@ -62,7 +65,7 @@ public class MainMenu extends Menu
         {
             if (!isInGang)
             {
-                whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CREATE_GANG_CHAT));
+                whoClicked.sendMessage(this.mp.createGangChat);
                 plugin.getEventHandling().addCreateGangConsumer.accept(playerUuid);
                 return;
             }

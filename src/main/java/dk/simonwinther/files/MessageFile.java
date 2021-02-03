@@ -2,13 +2,13 @@ package dk.simonwinther.files;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.exceptions.ReadValueException;
-import dk.simonwinther.utility.ChatUtil;
 import dk.simonwinther.utility.UrlUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.net.URL;
+import java.lang.reflect.Constructor;
 import java.util.logging.Level;
 
 public class MessageFile implements FileInterface
@@ -17,7 +17,6 @@ public class MessageFile implements FileInterface
     private static final String MESSAGES_URL = "https://raw.githubusercontent.com/simonsejse/gang-messages.json/main/README.md";
 
     private File f;
-    private YamlConfiguration yamlConfiguration;
     private MainPlugin plugin;
 
     public MessageFile(MainPlugin plugin, String PATH){

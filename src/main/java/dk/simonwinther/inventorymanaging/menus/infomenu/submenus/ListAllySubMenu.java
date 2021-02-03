@@ -9,6 +9,7 @@ import dk.simonwinther.enums.ColorIndexEnum;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.utility.InventoryUtility;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -27,6 +28,7 @@ public class ListAllySubMenu extends Menu
 {
     private final MainPlugin plugin;
     private InfoMenu infoMenu;
+    private final MessageProvider mp;
     private Gang gang;
     private final GangManaging gangManaging;
     private ItemBuilder skullBuilder;
@@ -34,6 +36,7 @@ public class ListAllySubMenu extends Menu
     public ListAllySubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang)
     {
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
         this.infoMenu = infoMenu;
         this.gang = gang;
         this.gangManaging = gangManaging;
@@ -61,7 +64,7 @@ public class ListAllySubMenu extends Menu
         {
             plugin.getEventHandling().addAllyConsumer.accept(uuid);
             whoClicked.getOpenInventory().close();
-            whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().WHO_TO_ALLY_CHAT));
+            whoClicked.sendMessage(this.mp.whoToAllyChat);
         } else if (slot == 47)
         {
             whoClicked.openInventory(new Menu(uuid)
@@ -111,8 +114,8 @@ public class ListAllySubMenu extends Menu
                         {
                             argGang.getAllyInvitation().remove(playerGang.getGangName());
 
-                            sendTeamMessage(argGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_DENIED.replace("{name}", playerGang.getGangName())));
-                            sendTeamMessage(playerGang, plugin.getChatUtil().color(plugin.getChatUtil().DENY_ALLY.replace("{name}", gangName)));
+                            gangManaging.sendTeamMessage.accept(argGang, mp.allyDenied.replace("{name}", playerGang.getGangName()));
+                            gangManaging.sendTeamMessage.accept(playerGang, mp.denyAlly.replace("{name}", gangName));
                             whoClicked.openInventory(ListAllySubMenu.this.getInventory());
 
                         } else if (clickType == ClickType.LEFT)
@@ -124,8 +127,8 @@ public class ListAllySubMenu extends Menu
                             argGang.getAllies().put(playerGang.getGangId(), playerGang.getGangName().toLowerCase());
                             playerGang.getAllies().put(argGang.getGangId(), gangName.toLowerCase());
 
-                            sendTeamMessage(playerGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", gangName)));
-                            sendTeamMessage(argGang, plugin.getChatUtil().color(plugin.getChatUtil().ALLY_SUCCESSFUL.replace("{name}", playerGang.getGangName())));
+                            gangManaging.sendTeamMessage.accept(playerGang, mp.allySuccessful.replace("{name}", gangName));
+                            gangManaging.sendTeamMessage.accept(argGang, mp.allySuccessful.replace("{name}", playerGang.getGangName()));
 
                             whoClicked.openInventory(ListAllySubMenu.this.getInventory());
                         }
@@ -178,7 +181,7 @@ public class ListAllySubMenu extends Menu
                     {
                         String gangName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
                         gang.getAllyInvitation().remove(gangName);
-                        whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().UN_ALLY.replace("{name}", gangName)));
+                        whoClicked.sendMessage(mp.unAlly.replace("{name}", gangName));
                         whoClicked.getOpenInventory().close();
                     }
                 }
@@ -198,21 +201,10 @@ public class ListAllySubMenu extends Menu
             localGang.getAllies().remove(playerGang.getGangName().toLowerCase());
             playerGang.getAllies().remove(gangName.toLowerCase());
 
-            localGang.getMembersSorted()
-                    .keySet()
-                    .stream()
-                    .filter(_uuid -> Bukkit.getPlayer(_uuid) != null)
-                    .map(Bukkit::getPlayer)
-                    .filter(Objects::nonNull)
-                    .forEach(p -> p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NO_LONGER_ALLYS.replace("{name}", playerGang.getGangName()))));
+            this.gangManaging.sendTeamMessage.accept(localGang, this.mp.noLongerAllies.replace("{name}", playerGang.getGangName()));
+            this.gangManaging.sendTeamMessage.accept(playerGang, this.mp.noLongerAllies.replace("{name}", gangName));
 
-            playerGang.getMembersSorted()
-                    .keySet()
-                    .stream()
-                    .filter(_uuid -> Bukkit.getPlayer(_uuid) != null)
-                    .map(Bukkit::getPlayer)
-                    .filter(Objects::nonNull)
-                    .forEach(p -> p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NO_LONGER_ALLYS.replace("{name}", gangName))));
+
 
         }
     }
@@ -245,16 +237,6 @@ public class ListAllySubMenu extends Menu
             }
         }.runTaskTimer(plugin, 0L, 40L);
         return super.inventory;
-    }
-
-    private void sendTeamMessage(Gang gang, String msg){
-        gang.getMembersSorted()
-                .keySet()
-                .stream()
-                .filter(uuid -> Bukkit.getPlayer(uuid) != null)
-                .map(Bukkit::getPlayer)
-                .forEach(p-> p.sendMessage(msg));
-
     }
 
 }

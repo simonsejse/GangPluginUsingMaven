@@ -4,18 +4,22 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
 public class BankArgument implements CommandArguments
 {
-    private MainPlugin plugin;
+    private final MainPlugin plugin;
+    private final MessageProvider mp;
+
     private final GangManaging gangManaging;
 
     public BankArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
     }
 
     @Override
@@ -41,7 +45,7 @@ public class BankArgument implements CommandArguments
     {
         if (args.length != 2)
         {
-            p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().MISSING_ARGUMENTS));
+            p.sendMessage(this.mp.missingArguments);
             return;
         }
 
@@ -55,15 +59,15 @@ public class BankArgument implements CommandArguments
                     amount = Integer.parseInt(args[1]);
                     Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
                     gang.depositMoney(amount);
-                    p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().INSERT_BANK.replace("{0}", String.valueOf(amount))));
+                    p.sendMessage(this.mp.insertBank.replace("{0}", String.valueOf(amount)));
 
                 } catch (NumberFormatException nfe)
                 {
                     p.sendMessage(args[1] + "er ikke et nummer.");
                 }
 
-            } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
-        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
+            } else p.sendMessage(this.mp.notHighRankEnough);
+        } else p.sendMessage(this.mp.notInGang);
 
     }
 }

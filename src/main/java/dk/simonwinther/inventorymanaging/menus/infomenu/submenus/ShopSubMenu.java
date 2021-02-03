@@ -10,6 +10,7 @@ import dk.simonwinther.enums.ColorIndexEnum;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.utility.InventoryUtility;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -18,7 +19,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class ShopSubMenu extends Menu
 {
-    private MainPlugin plugin;
+    private final MainPlugin plugin;
+    private final MessageProvider mp;
     private final GangManaging gangManaging;
     private InfoMenu infoMenu;
     private Gang gang;
@@ -38,6 +40,7 @@ public class ShopSubMenu extends Menu
     {
         this.gangManaging = gangManaging;
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
         this.infoMenu = new InfoMenu(gangManaging, plugin, gang, true);
         this.openedFromMainMenu = true;
         this.gang = gang;
@@ -46,6 +49,7 @@ public class ShopSubMenu extends Menu
     public ShopSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang)
     {
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
         this.infoMenu = infoMenu;
         this.openedFromMainMenu = false;
         this.gang = gang;
@@ -150,11 +154,11 @@ public class ShopSubMenu extends Menu
             }
             if (cost == 0)
             {
-                whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_ENOUGH_MONEY));
+                whoClicked.sendMessage(this.mp.notEnoughMoney);
                 return;
             }
             gang.removeMoney(cost);
-        } else plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH);
+        } else whoClicked.sendMessage(this.mp.notHighRankEnough);
         whoClicked.openInventory(this.getInventory());
     }
 

@@ -9,6 +9,7 @@ import dk.simonwinther.enums.ColorIndexEnum;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.utility.InventoryUtility;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -23,7 +24,8 @@ import java.util.logging.Level;
 
 public class BankSubMenu extends Menu
 {
-    private MainPlugin plugin;
+    private final MainPlugin plugin;
+    private final MessageProvider mp;
     private InfoMenu infoMenu;
     private Gang gang;
     private final GangManaging gangManaging;
@@ -32,6 +34,7 @@ public class BankSubMenu extends Menu
     {
 
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
         this.infoMenu = infoMenu;
         this.gang = gang;
         this.playerUuid = playerUuid;
@@ -110,12 +113,12 @@ public class BankSubMenu extends Menu
                 {
                     whoClicked.openInventory(infoMenu.getInventory());
                     plugin.getEconomy().withdrawPlayer(tempPlayer, deposit);
-                    whoClicked.sendMessage(plugin.getChatUtil().color("&c&l-" + MessageFormat.format("{0}", getDeposit())));
-                    whoClicked.sendMessage(plugin.getChatUtil().color("&a&l+" + MessageFormat.format("{0}", getDeposit())));
+                    whoClicked.sendMessage("§c§l-" + MessageFormat.format("{0}", getDeposit()));
+                    whoClicked.sendMessage("§a§l+" + MessageFormat.format("{0}", getDeposit()));
                     gang.depositMoney(deposit);
                 } else
-                    whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_ENOUGH_MONEY));
-            } else whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
+                    whoClicked.sendMessage(this.mp.notEnoughMoney);
+            } else whoClicked.sendMessage(this.mp.notHighRankEnough);
 
         } else if (item.getType().equals(Material.GOLD_NUGGET) || item.getType().equals(Material.GOLD_INGOT) || item.getType().equals(Material.GOLD_BLOCK))
         {

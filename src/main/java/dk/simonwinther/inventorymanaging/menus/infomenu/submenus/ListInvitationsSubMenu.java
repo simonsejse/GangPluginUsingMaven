@@ -7,6 +7,7 @@ import dk.simonwinther.enums.ColorDataEnum;
 import dk.simonwinther.enums.ColorIndexEnum;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.utility.InventoryUtility;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -18,11 +19,12 @@ import org.bukkit.inventory.ItemStack;
 public class ListInvitationsSubMenu extends Menu
 {
     private Gang gang;
-    private MemberSubMenu memberSubMenu;
-    private MainPlugin plugin;
+    private final MemberSubMenu memberSubMenu;
+
+    private final MessageProvider mp;
 
     public ListInvitationsSubMenu(MainPlugin plugin, Gang gang, MemberSubMenu memberSubMenu){
-        this.plugin = plugin;
+        this.mp = plugin.getMessageProvider();
         this.gang = gang;
         this.memberSubMenu = memberSubMenu;
     }
@@ -52,7 +54,7 @@ public class ListInvitationsSubMenu extends Menu
                 super.inventory.clear();
                 whoClicked.openInventory(this.getInventory());
 
-            }else whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_SAME_GANG));
+            }else whoClicked.sendMessage(this.mp.notInSameGang);
         }
     }
 

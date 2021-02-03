@@ -7,7 +7,7 @@ import dk.simonwinther.Gang;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.MainMenu;
-import dk.simonwinther.utility.ChatUtil;
+import dk.simonwinther.utility.MessageProvider;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.utility.InventoryUtility;
 import org.bukkit.Bukkit;
@@ -30,7 +30,9 @@ public class InfoMenu extends Menu
     private Gang gang;
     private MainPlugin plugin;
     private boolean isOwnGang;
+    private MessageProvider mp;
     private final GangManaging gangManaging;
+
     private static final int MAX_LORE_ITEMS_SHOWN = 4;
 
 
@@ -40,6 +42,7 @@ public class InfoMenu extends Menu
         this.gangManaging = gangManaging;
         this.plugin = plugin;
         this.gang = gang;
+        this.mp = this.plugin.getMessageProvider();
         this.isOwnGang = isOwnGang;
     }
 
@@ -70,21 +73,21 @@ public class InfoMenu extends Menu
         else if (slot == InventoryUtility.ECONOMY_SLOT) whoClicked.openInventory(new BankSubMenu(this.gangManaging, plugin, this, gang, uuid).getInventory());
         else if (slot == InventoryUtility.LEVEL_SLOT){
             if(gangManaging.isRankMinimumPredicate.test(uuid, gang.getGangPermissions().accessToLevelUp)){
-                Level level = Level.valueOf(ChatUtil.numbers[gang.getGangLevel()]);
+                Level level = Level.valueOf(MessageProvider.numbers[gang.getGangLevel()]);
                 boolean allMatch = Stream.of(level.getRequirements())  //Stream Stream<List<Predicate>>
                         .flatMap(Collection::stream) //  Stream<Predicate>
                         .allMatch(gangPredicate -> gangPredicate.test(gang));
                 if (allMatch){
                     //Levelup
                     gang.getLevelSystem().setGangLevel(gang.getGangLevel() + 1);
-                    whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().LEVELUP_SUCCESS.replace("{level}", String.valueOf(gang.getGangLevel()))));
+                    whoClicked.sendMessage(this.mp.levelUpSuccess.replace("{level}", String.valueOf(gang.getGangLevel())));
                     super.inventory.clear();
                     whoClicked.openInventory(this.getInventory());
                 }else{
                     //Not everything has been made!
-                    whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().STILL_MISSING_REQUIREMENTS));
+                    whoClicked.sendMessage(this.mp.stillMissingRequirements);
                 }
-            }else whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
+            }else whoClicked.sendMessage(this.mp.notHighRankEnough);
         }else if (slot == InventoryUtility.ALLY_SLOT) whoClicked.openInventory(new ListAllySubMenu(this.gangManaging, plugin, this, gang).getInventory());
         else if (slot == InventoryUtility.ENEMY_SLOT) whoClicked.openInventory(new ListEnemySubMenu(this.gangManaging, plugin, this, gang).getInventory());
         else if (slot == InventoryUtility.DELETE_SLOT)
@@ -163,7 +166,7 @@ public class InfoMenu extends Menu
     private Function<Gang, String> levelDescFunc = (gang) ->
     {
         StringBuilder stringBuilder = new StringBuilder();
-        Level level = Level.valueOf(ChatUtil.numbers[gang.getGangLevel()]);
+        Level level = Level.valueOf(MessageProvider.numbers[gang.getGangLevel()]);
         if (level.getRequirements().stream().allMatch(gangPredicate -> gangPredicate.test(gang))){
             return stringBuilder.append("&b").append("Klik for at gå i level ").append((gang.getGangLevel() + 1)).toString();
         }

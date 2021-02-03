@@ -9,6 +9,7 @@ import dk.simonwinther.enums.ColorIndexEnum;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.utility.InventoryUtility;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -21,7 +22,8 @@ import java.util.UUID;
 
 public class ListEnemySubMenu extends Menu
 {
-    private MainPlugin plugin;
+    private final MainPlugin plugin;
+    private final MessageProvider mp;
     private InfoMenu infoMenu;
     private final GangManaging gangManaging;
     private Gang gang;
@@ -31,6 +33,7 @@ public class ListEnemySubMenu extends Menu
     public ListEnemySubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang)
     {
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
         this.infoMenu = infoMenu;
         this.gang = gang;
         playersSkull = new ItemBuilder(Material.SKULL_ITEM, 1, SkullType.PLAYER).setPlayerSkull(gang.getOwnerName());
@@ -58,7 +61,7 @@ public class ListEnemySubMenu extends Menu
         else if (slot == 47)
         {
             plugin.getEventHandling().addEnemyChat.accept(uuid);
-            whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().WHO_TO_ENEMY_CHAT));
+            whoClicked.sendMessage(this.mp.whoToEnemyChat);
             whoClicked.getOpenInventory().close();
         } else if (slot == 51) whoClicked.openInventory(new Menu()
         {
@@ -104,10 +107,10 @@ public class ListEnemySubMenu extends Menu
             if (gang.getEnemies().values().contains(gangName))
             {
                 gang.getEnemies().remove(gangName);
-                whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().UN_ENEMY.replace("{name}", gangName)));
+                whoClicked.sendMessage(this.mp.unEnemy.replace("{name}", gangName));
             } else
             {
-                whoClicked.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().CANT_UN_ENEMY));
+                whoClicked.sendMessage(this.mp.cantUnEnemy);
             }
 
         }

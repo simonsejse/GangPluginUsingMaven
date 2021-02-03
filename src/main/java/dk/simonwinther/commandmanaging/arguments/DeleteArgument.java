@@ -4,6 +4,7 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -12,10 +13,12 @@ public class DeleteArgument implements CommandArguments
 {
     private MainPlugin plugin;
     private final GangManaging gangManaging;
+    private MessageProvider mp;
 
     public DeleteArgument(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;
         this.plugin = plugin;
+        this.mp = plugin.getMessageProvider();
     }
 
     @Override
@@ -67,11 +70,11 @@ public class DeleteArgument implements CommandArguments
                             .forEach(list -> list.remove(gangName));
 
                     gangManaging.deleteGangConsumer.accept(playerUuid);
-                    p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().SUCCESSFULLY_LEFT_GANG.replace("{name}", gangName)));
-                } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().PASS_OWNERSHIP));
+                    p.sendMessage(this.mp.successfullyLeftGang.replace("{name}", gangName));
+                } else p.sendMessage(this.mp.passOwnership);
 
             }
-        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
+        } else p.sendMessage(this.mp.notInGang);
 
     }
 }

@@ -4,21 +4,23 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
+import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class AllianceChat implements CommandArguments
 {
 
-    private MainPlugin plugin;
+    private final MainPlugin plugin;
     private final GangManaging gangManaging;
+    private final MessageProvider mp;
 
     public AllianceChat(GangManaging gangManaging, MainPlugin plugin){
         this.gangManaging = gangManaging;
         this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
     }
 
     @Override
@@ -72,9 +74,9 @@ public class AllianceChat implements CommandArguments
                             .forEach(alliancePlayer -> alliancePlayer.sendMessage("§8§l| §a§lALLIANCECHAT §8§l|§e "+p.getName()+" §8§l|§f "+message.toString()));
 
 
-                } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_HIGH_RANK_ENOUGH));
-            }else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().NOT_IN_GANG));
-        } else p.sendMessage(plugin.getChatUtil().color(plugin.getChatUtil().MISSING_ARGUMENTS));
+                } else p.sendMessage(this.mp.notHighRankEnough);
+            }else p.sendMessage(this.mp.notInGang);
+        } else p.sendMessage(this.mp.missingArguments);
 
     }
 }
