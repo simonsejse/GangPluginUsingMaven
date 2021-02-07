@@ -8,7 +8,7 @@ public class MessageProvider {
      *
      * All messages in here are READ using Jackson Object Mapper
      * URL for json data:
-     * https://github.com/simonsejse/gang-messages.json/blob/main/README.md
+     * https://raw.githubusercontent.com/simonsejse/gang-messages.json/main/README.md
      *
      */
     public String prefix;
