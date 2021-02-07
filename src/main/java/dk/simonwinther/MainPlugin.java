@@ -1,6 +1,7 @@
 package dk.simonwinther;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -14,6 +15,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dk.simonwinther.commandmanaging.ConfirmTransferCmd;
 import dk.simonwinther.commandmanaging.GangCommand;
 import dk.simonwinther.events.EventHandling;
+import dk.simonwinther.files.DefaultConfig;
 import dk.simonwinther.files.FileInterface;
 import dk.simonwinther.files.MessageFile;
 import dk.simonwinther.inventorymanaging.Menu;
@@ -31,9 +33,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,13 +47,17 @@ public final class MainPlugin extends JavaPlugin
 
     /* Properties */
     private FileInterface messageConfig;
+    private FileInterface defaultConfig;
+
     private CustomSettingsProvider customSettingsProvider;
     private MessageProvider messageProvider;
+
     private EventHandling eventHandling;
+    private GangManaging gangManaging = null;
+
     private static Permission perms = null;
     private Chat chat = null;
     private Economy econ = null;
-    private GangManaging gangManaging = null;
 
     private final static Logger LOGGER = Logger.getLogger("Minecraft");
     public final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -74,19 +78,23 @@ public final class MainPlugin extends JavaPlugin
             TypeReference<MessageProvider> chatUtilTypeReference = new TypeReference<MessageProvider>(){};
             this.messageProvider = OBJECT_MAPPER.readValue(this.messageConfig.getFile(), chatUtilTypeReference);
         }catch(IOException e){
-            Bukkit.getLogger().log(Level.SEVERE, "Du HAR fucket din message.json fil op!\nDisabler pluginnet.");
+            Bukkit.getLogger().log(Level.SEVERE, "Der er fejl i message.json filen!\nDisabler pluginnet.");
             this.getServer().getPluginManager().disablePlugin(this);
         }
 
         this.gangManaging = new GangManaging(this);
 
         //Setup config.json
-        this.customSettingsProvider = new CustomSettingsProvider();
+        this.defaultConfig = new DefaultConfig(this);
+        this.defaultConfig.initFile();
 
-        //After initialising customSettingsProvider
-        //this.connectionProvider = new ConnectionProvider(customSettingsProvider);
-        //this.connectionProvider.openConnection();
-
+        try{
+            TypeReference<CustomSettingsProvider> defaultConfigTypeReference = new TypeReference<CustomSettingsProvider>(){};
+            this.customSettingsProvider = OBJECT_MAPPER.readValue(this.defaultConfig.getFile(), defaultConfigTypeReference);
+        }catch(IOException e){
+            Bukkit.getLogger().log(Level.SEVERE, "Kunne ikke læse dataen fra config.json");
+            this.getPluginLoader().disablePlugin(this);
+        }
 
         getCommand("bande").setExecutor(new GangCommand(gangManaging, this));
         getCommand("confirmtransfercmd").setExecutor(new ConfirmTransferCmd(this.gangManaging, this));
@@ -169,24 +177,6 @@ public final class MainPlugin extends JavaPlugin
 
 
     private final Supplier<String> schedulerUpdated = () -> "&8&l| &b&lBande &8&l| &2&l" + gangManaging.gangMap.keySet().size() + "&a bander er blevet automatisk gemt...!";
-
-    private void createFiles() throws IOException, JsonSyntaxException
-    {
-        File configFile = new File(getDataFolder(), "config.json");
-        if (!configFile.exists()){
-            if (!configFile.getParentFile().exists()) configFile.getParentFile().mkdirs();
-            configFile.createNewFile();
-        }
-
-        StringBuilder json = new StringBuilder();
-        //Throws IOException means JSON wasn't read right, therefore in catch create new instance of CustomSettingsProvider using default settings.
-        FileReader fileReader = new FileReader(configFile);
-        for(int i = fileReader.read(); i != -1; i = fileReader.read()){
-            json.append((char) i);
-        }
-        //Throws JsonSyntaxException means JSON wasn't WRITTEN right, therefore in catch create new instance of CustomSettingsProvider using default settings.
-        this.customSettingsProvider = new Gson().fromJson(json.toString(), CustomSettingsProvider.class);
-    }
 
     public WorldGuardPlugin getWorldGuard()
     {
@@ -291,8 +281,4 @@ public final class MainPlugin extends JavaPlugin
         return eventHandling;
     }
 
-    public void setMessageConfig(FileInterface messageConfig)
-    {
-        this.messageConfig = messageConfig;
-    }
 }

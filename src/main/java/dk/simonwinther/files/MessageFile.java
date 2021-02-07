@@ -40,7 +40,7 @@ public class MessageFile implements FileInterface
                 f.createNewFile();
                 fileOutputStream = new FileOutputStream(this.f);
                 String jsonData = UrlUtil.readValueFromUrl(MESSAGES_URL);
-                if (jsonData == null) throw new ReadValueException("Kunne ikke hente data from URL");
+                if (jsonData == null) throw new ReadValueException("Kunne ikke hente data from URL\n§cJsonData er null, og vil kaste en NullPointerException!");
 
                 fileOutputStream.write(jsonData.getBytes());
 
@@ -48,7 +48,7 @@ public class MessageFile implements FileInterface
                 Bukkit.getLogger().log(Level.SEVERE, "§cKunne ikke oprette/finde message.json filen");
                 this.plugin.getServer().getPluginManager().disablePlugin(plugin);
             }catch(ReadValueException readValueException){
-                Bukkit.getLogger().log(Level.SEVERE, "§cJsonData er null, og vil kaste en nullpointerexception!");
+                Bukkit.getLogger().log(Level.SEVERE, readValueException.getMessage());
                 this.plugin.getServer().getPluginManager().disablePlugin(plugin);
             }finally{
                 try {

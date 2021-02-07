@@ -52,10 +52,6 @@ public class LevelSystem implements Serializable
         this.paidForQuest = paidForQuest;
     }
 
-    public LevelSystem(){
-
-    }
-
     public int getGangLevel()
     {
         return gangLevel;

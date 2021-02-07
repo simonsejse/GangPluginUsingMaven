@@ -5,16 +5,15 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.enums.Level;
 import dk.simonwinther.enums.Rank;
 import dk.simonwinther.inventorymanaging.Menu;
-import dk.simonwinther.utility.MessageProvider;
 import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.utility.MessageProvider;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.event.NPCClickEvent;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -33,8 +32,8 @@ import java.util.function.Function;
 
 public class EventHandling implements Listener
 {
-    private MainPlugin plugin;
-    private MessageProvider mp;
+    private final MainPlugin plugin;
+    private final MessageProvider mp;
 
     private final String npcName;
     private List<String> goAwayMessages;
@@ -46,9 +45,9 @@ public class EventHandling implements Listener
     {
         this.plugin = plugin;
         this.mp = this.plugin.getMessageProvider();
-        this.npcName = this.plugin.getCustomSettingsProvider().getNpcProvider().getNpcName();
-        this.goAwayMessages = this.plugin.getCustomSettingsProvider().getNpcProvider().getGoAwayMessages();
-        this.deliveredMessages = this.plugin.getCustomSettingsProvider().getNpcProvider().getDeliveredMessages();
+        this.npcName = this.plugin.getCustomSettingsProvider().npcSettingsProvider.npcName;
+        this.goAwayMessages = this.plugin.getCustomSettingsProvider().npcSettingsProvider.goAwayMessages;
+        this.deliveredMessages = this.plugin.getCustomSettingsProvider().npcSettingsProvider.deliveredMessages;
         this.gangManaging = gangManaging;
     }
 
@@ -233,35 +232,26 @@ public class EventHandling implements Listener
     public String getDate(UUID playerUuid)
     {
         StringBuilder stringBuilder = new StringBuilder();
-        lastOnline
-                .entrySet() //Map.Entry<UUID, Integer>
+        lastOnline.entrySet() //Map.Entry<UUID, Integer>
                 .stream() //Stream<Map.Entry<UUID, Integer>>
                 .filter(entry -> entry.getKey().equals(playerUuid))
                 .findAny()
                 .map(Map.Entry::getValue)
                 .ifPresent(stringBuilder::append);
-
         return stringBuilder.toString().length() != 0 ? stringBuilder.toString() : "&cReload..";
     }
 
     @EventHandler
-    public void onAliMustafaClick(NPCRightClickEvent event){
-        NPC npc = event.getNPC();
-
-        if (npc.getName().contains(npcName)){
-            Player player = event.getClicker();
-            playerCheck(player);
-        }
-    }
-
+    public void interactWithNPCLeft(NPCLeftClickEvent event){interactWithNPC(event.getClicker(), event.getNPC());}
     @EventHandler
-    public void onAliMustafaClick(NPCLeftClickEvent event){
-        NPC npc = event.getNPC();
-        if (npc.getName().contains(npcName)){
-            Player player = event.getClicker();
-            playerCheck(player);
-        }
+    public void interactWithNPCRight(NPCLeftClickEvent event){interactWithNPC(event.getClicker(), event.getNPC());}
+
+    private void interactWithNPC(Player whoInteract, NPC npc){
+        //if(npc.getName().equals(this.plugin.getCustomSettingsProvider().getNpcProvider().getNpcName())){
+        //    whoInteract.sendMessage("youre having sexual intercourse with npc");
+        //}
     }
+
 
 
     private final Set<UUID> activeMoneyPlayers = new HashSet<>();
@@ -269,7 +259,7 @@ public class EventHandling implements Listener
     public Consumer<UUID> addActiveMoneyPlayers = activeMoneyPlayers::add;
     public Function<UUID, Boolean> containsActiveMoneyPlayer = activeMoneyPlayers::contains;
 
-    private void playerCheck(Player player){
+    /*private void playerCheck(Player player){
 
         UUID uuid = player.getUniqueId();
         ItemStack item = player.getInventory().getItemInHand();
@@ -339,6 +329,8 @@ public class EventHandling implements Listener
             } else player.sendMessage(this.mp.notHighRankEnough);
         } else player.sendMessage(this.mp.notInGang);
     }
+
+     */
 
 
 

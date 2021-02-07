@@ -76,7 +76,7 @@ public enum Level
             " - Aflever {value} iron leggings til Ali Mustafa\n" +
             " - Aflever {value} iron boots til Ali Mustafa", new Integer[]{75000, 50000}),
     FIVE(Arrays.asList(
-            gang -> MainPlugin.getPlugin(MainPlugin.class).getBlockAtPlayerLoc(gang.getOwnerUuid()).toLowerCase().equals("b"),
+            gang -> MainPlugin.getPlugin(MainPlugin.class).getBlockAtPlayerLoc(gang.getOwnerUuid()).equalsIgnoreCase("b"),
             gang -> gang.getLevelSystem().getValueOfMaterial(Material.SUGAR) >= 10,
             gang -> gang.getLevelSystem().getPaidForQuest() >= 175000,
             gang -> gang.getAllyDamage() <= 90,

@@ -51,7 +51,7 @@ public class MessageProvider {
     public String alreadyAllies;
     public String alreadyEnemies;
     public String wishesToBeAlly;
-    public String regretToBeAlly;
+    public String regretToBeAlly; //TODO: wtf ?? check where this is supposted to be at
     public String passOwnership;
     public String cantAffordGang;
     public String askAlly;
@@ -69,7 +69,6 @@ public class MessageProvider {
     public String levelUpSuccess;
     public String insertBank;
     public String toggleDamage;
-    public int maxGangNameLength = 0, minGangNameLength = 0;
     public String gangNameDoesNotMeetRequirements;
     public String noSpace;
 

@@ -23,7 +23,8 @@ public class CreateArgument implements CommandArguments
         this.gangManager = gangManaging;
         this.plugin = plugin;
         this.mp = this.plugin.getMessageProvider();
-        bannedWords = plugin.getCustomSettingsProvider().getNpcProvider().getBannedWords();
+        //TODO: efficiency check
+        bannedWords = plugin.getCustomSettingsProvider().npcSettingsProvider.bannedWords;
     }
 
 
@@ -48,6 +49,7 @@ public class CreateArgument implements CommandArguments
     @Override
     public void perform(Player p, String... args)
     {
+        p.sendMessage(""+this.bannedWords);
         if (args.length != 2)
         {
             p.sendMessage(this.mp.noSpace);
@@ -87,9 +89,9 @@ public class CreateArgument implements CommandArguments
     }
 
     public boolean doesGangNameFollowRequirements(String gangName){
-        return gangName.length() <= mp.maxGangNameLength
-                && gangName.length() >= mp.minGangNameLength
-                && bannedWords.stream().anyMatch(gangName::contains);
+        return gangName.length() <= this.plugin.getCustomSettingsProvider().maxNameLength
+                && gangName.length() >= this.plugin.getCustomSettingsProvider().minNameLength
+                && !bannedWords.stream().anyMatch(gangName::contains);
     }
 
 }
