@@ -4,9 +4,8 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
-import dk.simonwinther.enums.Rank;
+import dk.simonwinther.constants.Rank;
 import dk.simonwinther.utility.MessageProvider;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -43,11 +42,11 @@ public class LeaveArgument implements CommandArguments
     @Override
     public void perform(Player p, String... args)
     {
-        UUID playerUuid = p.getUniqueId();
-        if (gangManaging.playerInGangPredicate.test(playerUuid)){
-            if (gangManaging.rankFunction.apply(playerUuid) != Rank.LEADER.getValue()){
-                Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
-                gangManaging.kick.accept(gang, playerUuid);
+        UUID playerUUID = p.getUniqueId();
+        if (gangManaging.playerInGangPredicate.test(playerUUID)){
+            if (gangManaging.rankFunction.apply(playerUUID) != Rank.LEADER.getValue()){
+                Gang gang = gangManaging.getGangByUuidFunction.apply(playerUUID);
+                gangManaging.kick.accept(gang, playerUUID);
 
                 p.sendMessage(this.mp.successfullyLeftGang.replace("{name}", gang.getGangName()));
 

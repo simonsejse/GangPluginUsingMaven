@@ -12,12 +12,12 @@ import java.util.UUID;
 public abstract class Menu implements InventoryHolder
 {
 
-    protected UUID playerUuid;
+    protected UUID playerUUID;
 
-    public Menu(UUID playerUuid)  //Chaining constructors
+    public Menu(UUID playerUUID)  //Chaining constructors
     {
         this();
-        this.playerUuid = playerUuid;
+        this.playerUUID = playerUUID;
     }
 
     public Menu()

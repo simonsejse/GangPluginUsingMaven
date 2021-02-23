@@ -50,12 +50,12 @@ public class AllianceChat implements CommandArguments
     @Override
     public void perform(Player p, String... args)
     {
-        UUID playerUuid = p.getUniqueId();
+        UUID playerUUID = p.getUniqueId();
         if (args.length >= 2){
-            if (gangManaging.playerInGangPredicate.test(playerUuid))
+            if (gangManaging.playerInGangPredicate.test(playerUUID))
             {
-                Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
-                if (gangManaging.isRankMinimumPredicate.test(playerUuid, gang.gangPermissions.accessToAllyChat)){
+                Gang gang = gangManaging.getGangByUuidFunction.apply(playerUUID);
+                if (gangManaging.isRankMinimumPredicate.test(playerUUID, gang.gangPermissions.accessToAllyChat)){
                     //Check if has permissions
                     final StringBuilder message = new StringBuilder();
                     Arrays.stream(args).skip(1).forEach(line -> message.append(line).append(" "));

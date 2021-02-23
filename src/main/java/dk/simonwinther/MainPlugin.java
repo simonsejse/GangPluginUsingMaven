@@ -1,11 +1,8 @@
 package dk.simonwinther;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.sk89q.worldguard.bukkit.RegionContainer;
 import com.sk89q.worldguard.bukkit.RegionQuery;
 import com.sk89q.worldguard.bukkit.WGBukkit;
@@ -20,8 +17,8 @@ import dk.simonwinther.files.FileInterface;
 import dk.simonwinther.files.MessageFile;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.settingsprovider.CustomSettingsProvider;
-import dk.simonwinther.utility.MessageProvider;
 import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.utility.MessageProvider;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -33,7 +30,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,7 +66,6 @@ public final class MainPlugin extends JavaPlugin
     @Override
     public void onEnable()
     {
-
         //Setup message.json
         this.messageConfig = new MessageFile(this, "message.json");
         this.messageConfig.initFile();
@@ -82,7 +78,6 @@ public final class MainPlugin extends JavaPlugin
             this.getServer().getPluginManager().disablePlugin(this);
         }
 
-        this.gangManaging = new GangManaging(this);
 
         //Setup config.json
         this.defaultConfig = new DefaultConfig(this);
@@ -96,6 +91,7 @@ public final class MainPlugin extends JavaPlugin
             this.getPluginLoader().disablePlugin(this);
         }
 
+        this.gangManaging = new GangManaging(this);
         getCommand("bande").setExecutor(new GangCommand(gangManaging, this));
         getCommand("confirmtransfercmd").setExecutor(new ConfirmTransferCmd(this.gangManaging, this));
 
@@ -191,13 +187,13 @@ public final class MainPlugin extends JavaPlugin
         return (WorldGuardPlugin) plugin;
     }
 
-    public String getBlockAtPlayerLoc(UUID playerUuid)
+    public String getBlockAtPlayerLoc(UUID playerUUID)
     {
-        if (Bukkit.getPlayer(playerUuid) == null) return "&cIkke online...";
+        if (Bukkit.getPlayer(playerUUID) == null) return "&cIkke online...";
 
         StringBuilder stringBuilder = new StringBuilder();
         RegionContainer container = WGBukkit.getPlugin().getRegionContainer();
-        Player player = Bukkit.getPlayer(playerUuid);
+        Player player = Bukkit.getPlayer(playerUUID);
 
         RegionQuery query = container.createQuery();
         ApplicableRegionSet applicableRegionSet = query.getApplicableRegions(player.getLocation());

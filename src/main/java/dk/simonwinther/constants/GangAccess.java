@@ -1,4 +1,4 @@
-package dk.simonwinther.enums;
+package dk.simonwinther.constants;
 
 public abstract class GangAccess
 {

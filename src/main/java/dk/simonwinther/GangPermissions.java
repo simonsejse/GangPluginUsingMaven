@@ -1,6 +1,6 @@
 package dk.simonwinther;
 
-import dk.simonwinther.enums.Rank;
+import dk.simonwinther.constants.Rank;
 
 import java.io.Serializable;
 

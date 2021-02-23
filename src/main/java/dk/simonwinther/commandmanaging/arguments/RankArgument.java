@@ -46,20 +46,23 @@ public class RankArgument implements CommandArguments
     @Override
     public void perform(Player p, String... args)
     {
-        UUID playerUuid = p.getUniqueId();
-        //Nested if-statements
+        UUID playerUUID = p.getUniqueId();
+
         if (!args[1].equalsIgnoreCase(p.getName())){
-            if (gangManaging.playerInGangPredicate.test(playerUuid))
+            if (gangManaging.playerInGangPredicate.test(playerUUID))
             {
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
                 if (offlinePlayer.hasPlayedBefore())
                 {
-                    if (gangManaging.playersInSameGangPredicate.test(p.getUniqueId(), offlinePlayer.getUniqueId()))
-                    {
-                        Gang tempGang = gangManaging.getGangByUuidFunction.apply(playerUuid);
-                        UUID argsUuid = Bukkit.getOfflinePlayer(args[1]).getUniqueId();
-                        p.openInventory(new RankMenu(this.gangManaging, plugin, tempGang, p.getUniqueId(), p.getName(), argsUuid, args[1]).getInventory());
-                    } else p.sendMessage(this.mp.notInSameGang);
+                    UUID otherPlayerUUID = offlinePlayer.getUniqueId();
+                    if(gangManaging.playerInGangPredicate.test(otherPlayerUUID)){
+                        Gang gang = this.gangManaging.getGangByUuidFunction.apply(playerUUID);
+                        Gang otherGang = this.gangManaging.getGangByUuidFunction.apply(otherPlayerUUID);
+                        if (gang.equals(otherGang))
+                        {
+                            p.openInventory(new RankMenu(this.gangManaging, plugin, gang, p.getUniqueId(), p.getName(), otherPlayerUUID, args[1]).getInventory());
+                        } else p.sendMessage(this.mp.notInSameGang);
+                    }else p.sendMessage(this.mp.playerNotInGang);
                 } else p.sendMessage(this.mp.hasNeverPlayed);
             } else p.sendMessage(this.mp.notInGang);
         }else p.sendMessage(this.mp.cantRankYourself);

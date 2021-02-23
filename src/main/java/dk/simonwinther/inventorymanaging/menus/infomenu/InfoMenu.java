@@ -1,6 +1,6 @@
 package dk.simonwinther.inventorymanaging.menus.infomenu;
 
-import dk.simonwinther.enums.*;
+import dk.simonwinther.constants.*;
 import dk.simonwinther.inventorymanaging.menus.infomenu.submenus.*;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
@@ -72,7 +72,7 @@ public class InfoMenu extends Menu
         else if (slot == InventoryUtility.MEMBERS_SLOT) whoClicked.openInventory(new MemberSubMenu(this.gangManaging, plugin, this, gang).getInventory());
         else if (slot == InventoryUtility.ECONOMY_SLOT) whoClicked.openInventory(new BankSubMenu(this.gangManaging, plugin, this, gang, uuid).getInventory());
         else if (slot == InventoryUtility.LEVEL_SLOT){
-            if(gangManaging.isRankMinimumPredicate.test(uuid, gang.getGangPermissions().accessToLevelUp)){
+            if(gangManaging.isRankMinimumPredicate.test(uuid, gang.gangPermissions.accessToLevelUp)){
                 Level level = Level.valueOf(MessageProvider.numbers[gang.getGangLevel()]);
                 boolean allMatch = Stream.of(level.getRequirements())  //Stream Stream<List<Predicate>>
                         .flatMap(Collection::stream) //  Stream<Predicate>

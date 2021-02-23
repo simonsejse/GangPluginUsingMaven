@@ -4,8 +4,8 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
-import dk.simonwinther.enums.ColorDataEnum;
-import dk.simonwinther.enums.ColorIndexEnum;
+import dk.simonwinther.constants.ColorDataEnum;
+import dk.simonwinther.constants.ColorIndexEnum;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.MainMenu;
 import dk.simonwinther.utility.InventoryUtility;
@@ -28,17 +28,17 @@ public class InviteSubMenu extends Menu
 {
     private MainPlugin plugin;
     private MessageProvider mp;
-    private UUID playerUuid;
+    private UUID playerUUID;
     private MainMenu mainMenu;
     private int slot;
     private final GangManaging gangManaging;
 
-    public InviteSubMenu(GangManaging gangManaging, MainPlugin plugin, MainMenu mainMenu, UUID playerUuid)
+    public InviteSubMenu(GangManaging gangManaging, MainPlugin plugin, MainMenu mainMenu, UUID playerUUID)
     {
         this.plugin = plugin;
         this.mp = this.plugin.getMessageProvider();
         this.mainMenu = mainMenu;
-        this.playerUuid = playerUuid;
+        this.playerUUID = playerUUID;
         this.gangManaging = gangManaging;
     }
 
@@ -129,7 +129,7 @@ public class InviteSubMenu extends Menu
         this.gangManaging.getGangMap()
                 .values()
                 .stream()
-                .filter(gang -> gang.getMemberInvitations().contains(Bukkit.getPlayer(playerUuid).getName().toLowerCase()))
+                .filter(gang -> gang.getMemberInvitations().contains(Bukkit.getPlayer(playerUUID).getName().toLowerCase()))
                 .forEach(gang ->
                 {
                     if (slot > 43) return;

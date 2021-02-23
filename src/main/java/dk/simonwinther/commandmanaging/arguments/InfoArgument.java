@@ -44,13 +44,13 @@ public class InfoArgument implements CommandArguments
     public void perform(Player p, String... args)
     {
         if (args.length > 1) return;
-        UUID playerUuid = p.getUniqueId();
-        if (!gangManaging.playerInGangPredicate.test(playerUuid))
+        UUID playerUUID = p.getUniqueId();
+        if (!gangManaging.playerInGangPredicate.test(playerUUID))
         {
             p.sendMessage(this.mp.notInGang);
             return;
         }
-        Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
+        Gang gang = gangManaging.getGangByUuidFunction.apply(playerUUID);
 
         p.openInventory(new InfoMenu(gangManaging, plugin, gang, true).getInventory());
     }

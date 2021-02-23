@@ -46,7 +46,6 @@ public class MessageProvider {
     public String cantAllyOwnGang;
     public String cantEnemyOwnGang;
     public String playerGangMaxAllies;
-    public String otherGangMaxAllys;
     public String playerGangMaxEnemies;
     public String alreadyAllies;
     public String alreadyEnemies;
@@ -71,5 +70,4 @@ public class MessageProvider {
     public String toggleDamage;
     public String gangNameDoesNotMeetRequirements;
     public String noSpace;
-
 }

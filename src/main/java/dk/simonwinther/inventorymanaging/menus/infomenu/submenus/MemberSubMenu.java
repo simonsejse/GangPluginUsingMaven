@@ -4,9 +4,9 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
-import dk.simonwinther.enums.ColorDataEnum;
-import dk.simonwinther.enums.ColorIndexEnum;
-import dk.simonwinther.enums.Rank;
+import dk.simonwinther.constants.ColorDataEnum;
+import dk.simonwinther.constants.ColorIndexEnum;
+import dk.simonwinther.constants.Rank;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.inventorymanaging.menus.rankmenu.RankMenu;
@@ -65,7 +65,7 @@ public class MemberSubMenu extends Menu
                 break;
             case 47:
                 whoClicked.getOpenInventory().close();
-                plugin.getEventHandling().addInviteMemberChatConsumer.accept(whoClicked.getUniqueId());
+                plugin.getEventHandling().addPlayerToAwaitInvitation.accept(whoClicked.getUniqueId());
                 whoClicked.sendMessage(this.mp.whoToInviteChat);
                 break;
             default:
@@ -114,24 +114,24 @@ public class MemberSubMenu extends Menu
                                     whoClicked.sendMessage(mp.cantRankYourself);
                                     return;
                                 }
-                                whoClicked.openInventory(new RankMenu(gangManaging, plugin, gang, whoClickedUuid, whoClicked.getName(), getChosenPlayerUuid(), chosenPlayer).getInventory());
+                                whoClicked.openInventory(new RankMenu(gangManaging, plugin, gang, whoClickedUuid, whoClicked.getName(), getChosenplayerUUID(), chosenPlayer).getInventory());
                                 break;
                             case BARRIER:
                                 if (gangManaging.isRankMinimumPredicate.test(whoClickedUuid, gang.gangPermissions.accessToKick))
                                 {
-                                    if (gangManaging.rankFunction.apply(whoClickedUuid) > gangManaging.rankFunction.apply(getChosenPlayerUuid()))
+                                    if (gangManaging.rankFunction.apply(whoClickedUuid) > gangManaging.rankFunction.apply(getChosenplayerUUID()))
                                     {
-                                        gangManaging.kickConsumer.accept(getChosenPlayerUuid());
+                                        gangManaging.kickConsumer.accept(getChosenplayerUUID());
                                         whoClicked.getOpenInventory().close();
                                         whoClicked.sendMessage(mp.playerWasKicked.replace("{args}", chosenPlayer));
-                                        if(Bukkit.getPlayer(getChosenPlayerUuid()) != null) Bukkit.getPlayer(getChosenPlayerUuid()).sendMessage(mp.memberKicked.replace("{name}", gang.getGangName()));
+                                        if(Bukkit.getPlayer(getChosenplayerUUID()) != null) Bukkit.getPlayer(getChosenplayerUUID()).sendMessage(mp.memberKicked.replace("{name}", gang.getGangName()));
                                     } else whoClicked.sendMessage(mp.playerWasKicked);
                                 } else whoClicked.sendMessage(mp.notHighRankEnough);
                                 break;
                         }
                     }
 
-                    public UUID getChosenPlayerUuid()
+                    public UUID getChosenplayerUUID()
                     {
                         return Bukkit.getOfflinePlayer(chosenPlayer).getUniqueId();
                     }

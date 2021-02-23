@@ -2,9 +2,9 @@ package dk.simonwinther.inventorymanaging.menus.infomenu.submenus;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
-import dk.simonwinther.enums.ColorDataEnum;
-import dk.simonwinther.enums.ColorIndexEnum;
-import dk.simonwinther.enums.GangAccess;
+import dk.simonwinther.constants.ColorDataEnum;
+import dk.simonwinther.constants.ColorIndexEnum;
+import dk.simonwinther.constants.GangAccess;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.utility.GangManaging;

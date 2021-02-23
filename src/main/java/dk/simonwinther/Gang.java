@@ -1,6 +1,6 @@
 package dk.simonwinther;
 
-import dk.simonwinther.enums.Rank;
+import dk.simonwinther.constants.Rank;
 import dk.simonwinther.levelsystem.LevelSystem;
 import org.bukkit.Bukkit;
 
@@ -11,6 +11,10 @@ public class Gang implements Serializable
 {
 
     private final long serialVersionUID = 2109381209382109L;
+
+    public Gang() {
+
+    }
 
     @Override
     public boolean equals(Object o)
@@ -54,6 +58,7 @@ public class Gang implements Serializable
         membersSorted.put(ownerUuid, Rank.LEADER.getValue());
     }
 
+
     private String gangName = "";
     private int gangId, gangBalance = 100, gangLevel = 1, maxMembers = 3, maxAllies = 2, maxEnemies = 3, gangDamage = 100, allyDamage = 100;
     private int guardKills = 0, prisonerKills = 0, officerKills = 0, deaths = 0;
@@ -70,11 +75,13 @@ public class Gang implements Serializable
     private Map<Integer, String> enemies = new HashMap<>(), allies = new HashMap<>();
     private List<String> memberInvitations = new ArrayList<>(), allyInvitation = new ArrayList<>();
 
+    public List<String> getAllyInvitation() {
+        return allyInvitation;
+    }
+
     public int getGangLevel(){
         return levelSystem.getGangLevel();
     }
-
-
 
     public boolean hasNameBeenChanged(){
         return nameBeenChanged;
@@ -128,14 +135,6 @@ public class Gang implements Serializable
         this.allyDamage = allyDamage;
     }
 
-    public GangPermissions getGangPermissions(){
-        return gangPermissions;
-    }
-
-    public void setGangPermissions(GangPermissions gangPermissions){
-        this.gangPermissions = gangPermissions;
-    }
-
     public int getDeaths(){
         return deaths;
     }
@@ -181,49 +180,18 @@ public class Gang implements Serializable
         this.prisonerKills = prisonerKills;
     }
 
-    public void inviteMember(String displayname)
-    {
-        memberInvitations.add(displayname.toLowerCase());
-    }
-
     public boolean isPlayerInvited(String displayname)
     {
         return memberInvitations.contains(displayname.toLowerCase());
     }
 
-    public void askAlly(String gangName)
-    {
-        allyInvitation.add(gangName);
-    }
 
     public List<String> getMemberInvitations()
     {
         return memberInvitations;
     }
 
-    public void setMemberInvitations(List<String> memberInvitations)
-    {
-        this.memberInvitations = memberInvitations;
-    }
-
-    public List<String> getAllyInvitation()
-    {
-        return allyInvitation;
-    }
-
-    public void setAllyInvitation(List<String> allyInvitation)
-    {
-        this.allyInvitation = allyInvitation;
-    }
-
     private Map<UUID, Integer> membersSorted = new LinkedHashMap<>();
-
-    //Sorting players by ID
-    //------------
-    //owner - 4
-    //co-leader - 3
-    //mod - 2
-    //member - 1
 
     public Map<UUID, Integer> getMembersSorted()
     {
@@ -275,6 +243,48 @@ public class Gang implements Serializable
         this.gangName = gangName;
     }
 
+
+    public boolean hasReachedMaxMembers(){
+        return this.membersSorted.size() < this.maxMembers;
+
+    }
+
+    public boolean hasReachedMaxAllies(){
+        return this.allies.size() < this.maxAllies;
+    }
+
+    public void addGangAlly(Gang gangAlly){
+        this.allies.put(gangAlly.getGangId(), gangAlly.getGangName().toLowerCase());
+    }
+
+    public void addAllyRequest(Gang otherGang){
+        this.allyInvitation.add(otherGang.getGangName().toLowerCase());
+    }
+
+    public void removeAllyRequest(String otherGangName){
+        this.allyInvitation.remove(otherGangName.toLowerCase());
+    }
+
+    public boolean hasRequestedAlly(String otherGangName)
+    {
+        return allyInvitation.contains(otherGangName.toLowerCase());
+    }
+
+    public boolean isGangAlly(Gang gang){
+        return this.allies.values().contains(gang.getGangName().toLowerCase());
+    }
+
+    public void removeMemberInvitation(String nameOfInvitedPlayer){
+        this.memberInvitations.remove(nameOfInvitedPlayer.toLowerCase());
+    }
+
+    public void addMemberInvitation(String nameOfInvitedPlayer){
+        this.memberInvitations.add(nameOfInvitedPlayer.toLowerCase());
+    }
+
+
+
+
     public UUID getOwnerUuid(){
         Optional<UUID> first = membersSorted.entrySet()
                 .stream()
@@ -320,10 +330,10 @@ public class Gang implements Serializable
         return "&cIngen..";
     }
 
-    public void addMember(UUID playerUuid, String displayName, Rank rank)
+    public void addMember(UUID playerUUID, String displayName, Rank rank)
     {
-        memberInvitations.remove(displayName);
-        membersSorted.put(playerUuid, rank.getValue());
+        memberInvitations.remove(displayName.toLowerCase());
+        membersSorted.put(playerUUID, rank.getValue());
     }
 
 

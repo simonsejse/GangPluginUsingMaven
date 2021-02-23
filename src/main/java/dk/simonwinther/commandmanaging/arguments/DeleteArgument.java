@@ -43,16 +43,16 @@ public class DeleteArgument implements CommandArguments
     public void perform(Player p, String... args)
     {
         if (args.length > 1) return;
-        UUID playerUuid = p.getUniqueId();
+        UUID playerUUID = p.getUniqueId();
 
-        if (gangManaging.playerInGangPredicate.test(playerUuid))
+        if (gangManaging.playerInGangPredicate.test(playerUUID))
         {
-            if (gangManaging.ownerOfGangPredicate.test(playerUuid))
+            if (gangManaging.ownerOfGangPredicate.test(playerUUID))
             {
-                if (gangManaging.getGangByUuidFunction.apply(playerUuid).getMembersSorted().size() <= 1)
+                if (gangManaging.getGangByUuidFunction.apply(playerUUID).getMembersSorted().size() <= 1)
                 {
                     //Last player inside gang, delete
-                    Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
+                    Gang gang = gangManaging.getGangByUuidFunction.apply(playerUUID);
                     String gangName = gang.getGangName();
 
                     //@Removes the gang from all other gang allies!
@@ -69,7 +69,7 @@ public class DeleteArgument implements CommandArguments
                             .map(Gang::getEnemies)
                             .forEach(list -> list.remove(gangName));
 
-                    gangManaging.deleteGangConsumer.accept(playerUuid);
+                    gangManaging.deleteGangConsumer.accept(playerUUID);
                     p.sendMessage(this.mp.successfullyLeftGang.replace("{name}", gangName));
                 } else p.sendMessage(this.mp.passOwnership);
 

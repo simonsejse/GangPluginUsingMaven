@@ -49,15 +49,15 @@ public class BankArgument implements CommandArguments
             return;
         }
 
-        UUID playerUuid = p.getUniqueId();
-        if (gangManaging.playerInGangPredicate.test(playerUuid))
+        UUID playerUUID = p.getUniqueId();
+        if (gangManaging.playerInGangPredicate.test(playerUUID))
         {
-            if (gangManaging.isRankMinimumPredicate.test(playerUuid, gangManaging.getGangByUuidFunction.apply(playerUuid).gangPermissions.accessToDeposit)){
+            if (gangManaging.isRankMinimumPredicate.test(playerUUID, gangManaging.getGangByUuidFunction.apply(playerUUID).gangPermissions.accessToDeposit)){
                 int amount;
                 try
                 {
                     amount = Integer.parseInt(args[1]);
-                    Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
+                    Gang gang = gangManaging.getGangByUuidFunction.apply(playerUUID);
                     gang.depositMoney(amount);
                     p.sendMessage(this.mp.insertBank.replace("{0}", String.valueOf(amount)));
 

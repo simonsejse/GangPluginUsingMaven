@@ -3,12 +3,12 @@ package dk.simonwinther.inventorymanaging.menus.infomenu.submenus;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
-import dk.simonwinther.enums.GangAccess;
+import dk.simonwinther.constants.GangAccess;
 import dk.simonwinther.utility.GangManaging;
 import dk.simonwinther.GangPermissions;
-import dk.simonwinther.enums.ColorDataEnum;
-import dk.simonwinther.enums.ColorIndexEnum;
-import dk.simonwinther.enums.Rank;
+import dk.simonwinther.constants.ColorDataEnum;
+import dk.simonwinther.constants.ColorIndexEnum;
+import dk.simonwinther.constants.Rank;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.utility.InventoryUtility;
 import org.bukkit.Bukkit;
@@ -31,12 +31,12 @@ public class AccessSubMenu extends Menu
     private int slotType;
     private final GangManaging gangManaging;
 
-    public AccessSubMenu(GangManaging gangManaging, MainPlugin plugin, PermissionSubMenu permissionSubMenu, UUID playerUuid, int slotType)
+    public AccessSubMenu(GangManaging gangManaging, MainPlugin plugin, PermissionSubMenu permissionSubMenu, UUID playerUUID, int slotType)
     {
         this.plugin = plugin;
         this.permissionSubMenu = permissionSubMenu;
-        this.gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
-        this.gangPermissions = gang.getGangPermissions();
+        this.gang = gangManaging.getGangByUuidFunction.apply(playerUUID);
+        this.gangPermissions = gang.gangPermissions;
         this.slotType = slotType;
         this.gangManaging = gangManaging;
     }

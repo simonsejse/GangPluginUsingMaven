@@ -4,7 +4,7 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
-import dk.simonwinther.enums.Rank;
+import dk.simonwinther.constants.Rank;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
@@ -25,7 +25,7 @@ public class RankMenu extends Menu
     private UUID argsUuid;
 
     private String nameOfArgs;
-    private UUID playerUuid;
+    private UUID playerUUID;
 
     //TODO: Bruger slet ikke denne variabel
     private final String nameOfPlayer;
@@ -52,23 +52,23 @@ public class RankMenu extends Menu
         this.nameOfArgs = nameOfArgs;
     }
 
-    public UUID getPlayerUuid()
+    public UUID getplayerUUID()
     {
-        return playerUuid;
+        return playerUUID;
     }
 
-    public void setPlayerUuid(UUID playerUuid)
+    public void setplayerUUID(UUID playerUUID)
     {
-        this.playerUuid = playerUuid;
+        this.playerUUID = playerUUID;
     }
 
-    public RankMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang, UUID playerUuid, String nameOfPlayer, UUID argsUuid, String nameOfArgs)
+    public RankMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang, UUID playerUUID, String nameOfPlayer, UUID argsUuid, String nameOfArgs)
     {
         super();
         this.plugin = plugin;
         this.mp = plugin.getMessageProvider();
         this.gang = gang;
-        this.playerUuid = playerUuid;
+        this.playerUUID = playerUUID;
         this.nameOfPlayer = nameOfPlayer;
         this.argsUuid = argsUuid;
         this.nameOfArgs = nameOfArgs;
@@ -90,7 +90,7 @@ public class RankMenu extends Menu
     @Override
     public void onGuiClick(int slot, ItemStack item, Player whoClicked, ClickType clickType)
     {
-        if (playerUuid.equals(argsUuid)){
+        if (playerUUID.equals(argsUuid)){
             whoClicked.getOpenInventory().close();
             whoClicked.sendMessage("Du kan ikke ændre din egen rang.");
             return;
@@ -102,25 +102,25 @@ public class RankMenu extends Menu
         switch (item.getType())
         {
             case IRON_INGOT:
-                if (gang.getMembersSorted().get(getPlayerUuid()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getPlayerUuid()) >= Rank.MEMBER.getValue())
+                if (gang.getMembersSorted().get(getplayerUUID()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getplayerUUID()) >= Rank.MEMBER.getValue())
                     gang.getMembersSorted().compute(getArgsUuid(), (uuid, key) -> Rank.MEMBER.getValue());
                 else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case GOLD_INGOT:
-                if (gang.getMembersSorted().get(getPlayerUuid()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getPlayerUuid()) > Rank.OFFICER.getValue())
+                if (gang.getMembersSorted().get(getplayerUUID()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getplayerUUID()) > Rank.OFFICER.getValue())
                     gang.getMembersSorted().compute(getArgsUuid(), (key, value) -> Rank.OFFICER.getValue());
                 else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case DIAMOND:
-                if (gang.getMembersSorted().get(getPlayerUuid()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getPlayerUuid()) >= Rank.CO_LEADER.getValue())
+                if (gang.getMembersSorted().get(getplayerUUID()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getplayerUUID()) >= Rank.CO_LEADER.getValue())
                     gang.getMembersSorted().compute(getArgsUuid(), (key, value) -> Rank.CO_LEADER.getValue());
                 else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case EMERALD:
-                if (gang.getMembersSorted().get(getPlayerUuid()) == Rank.LEADER.getValue())
+                if (gang.getMembersSorted().get(getplayerUUID()) == Rank.LEADER.getValue())
                 {
                     gang.getMembersSorted().compute(getArgsUuid(), (key, value) -> Rank.LEADER.getValue());
-                    gang.getMembersSorted().compute(getPlayerUuid(), (key, value) -> Rank.CO_LEADER.getValue());
+                    gang.getMembersSorted().compute(getplayerUUID(), (key, value) -> Rank.CO_LEADER.getValue());
                     gang.getMembersSorted().keySet()
                             .stream()
                             .filter(p -> Bukkit.getPlayer(p) != null)

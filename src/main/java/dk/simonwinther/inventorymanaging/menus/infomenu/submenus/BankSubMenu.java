@@ -4,8 +4,8 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
 import dk.simonwinther.utility.GangManaging;
-import dk.simonwinther.enums.ColorDataEnum;
-import dk.simonwinther.enums.ColorIndexEnum;
+import dk.simonwinther.constants.ColorDataEnum;
+import dk.simonwinther.constants.ColorIndexEnum;
 import dk.simonwinther.inventorymanaging.Menu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.utility.InventoryUtility;
@@ -30,14 +30,14 @@ public class BankSubMenu extends Menu
     private Gang gang;
     private final GangManaging gangManaging;
 
-    public BankSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang, UUID playerUuid)
+    public BankSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang, UUID playerUUID)
     {
 
         this.plugin = plugin;
         this.mp = this.plugin.getMessageProvider();
         this.infoMenu = infoMenu;
         this.gang = gang;
-        this.playerUuid = playerUuid;
+        this.playerUUID = playerUUID;
         this.gangManaging = gangManaging;
     }
 
@@ -73,7 +73,7 @@ public class BankSubMenu extends Menu
         setItem(33, new ItemBuilder(Material.GOLD_BLOCK).setItemName("&a&l+2500").buildItem());
         setItem(34, new ItemBuilder(Material.GOLD_BLOCK).setItemName("&a&l+5000").buildItem());
 
-        setItem(22, new ItemBuilder(Material.FLOWER_POT).setItemName("&a&lIndsæt penge").setLore("&fIndsæt penge i banken", "&fDin konto: &a$" + MessageFormat.format("{0}", plugin.getEconomy().getBalance(Bukkit.getPlayer(playerUuid)))).buildItem());
+        setItem(22, new ItemBuilder(Material.FLOWER_POT).setItemName("&a&lIndsæt penge").setLore("&fIndsæt penge i banken", "&fDin konto: &a$" + MessageFormat.format("{0}", plugin.getEconomy().getBalance(Bukkit.getPlayer(playerUUID)))).buildItem());
 
         setItem(13, new ItemBuilder(new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.RED.value[ColorIndexEnum.STAINED_GLASS.index])).setItemName("&c&lAnnuller").setLore("&fKlik her for at", "&fannullere").buildItem());
         place();
@@ -105,9 +105,9 @@ public class BankSubMenu extends Menu
             whoClicked.openInventory(infoMenu.getInventory());
         } else if (slot == 31)
         {
-            UUID playerUuid = whoClicked.getUniqueId();
+            UUID playerUUID = whoClicked.getUniqueId();
             Player tempPlayer = Bukkit.getPlayer(whoClicked.getUniqueId());
-            if (this.gangManaging.isRankMinimumPredicate.test(playerUuid, gang.gangPermissions.accessToDeposit))
+            if (this.gangManaging.isRankMinimumPredicate.test(playerUUID, gang.gangPermissions.accessToDeposit))
             {
                 if (plugin.getEconomy().getBalance(tempPlayer) >= deposit)
                 {

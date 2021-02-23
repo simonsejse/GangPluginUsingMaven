@@ -40,11 +40,11 @@ public class EnemyArgument implements CommandArguments
     @Override
     public void perform(Player p, String... args)
     {
-        UUID playerUuid = p.getUniqueId();
-        if (gangManaging.playerInGangPredicate.test(playerUuid))
+        UUID playerUUID = p.getUniqueId();
+        if (gangManaging.playerInGangPredicate.test(playerUUID))
         {
-            Gang playerGang = gangManaging.getGangByUuidFunction.apply(playerUuid);
-            if (gangManaging.isRankMinimumPredicate.test(playerUuid, playerGang.gangPermissions.accessToEnemy))
+            Gang playerGang = gangManaging.getGangByUuidFunction.apply(playerUUID);
+            if (gangManaging.isRankMinimumPredicate.test(playerUUID, playerGang.gangPermissions.accessToEnemy))
             {
                 if (gangManaging.gangExistsPredicate.test(args[1]))
                 {

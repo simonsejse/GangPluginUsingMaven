@@ -44,11 +44,11 @@ public class BandeChat implements CommandArguments
     public void perform(Player p, String... args)
     {
 
-        UUID playerUuid = p.getUniqueId();
+        UUID playerUUID = p.getUniqueId();
         if (args.length >= 2){
-            if (gangManaging.playerInGangPredicate.test(playerUuid)){
-                Gang gang = gangManaging.getGangByUuidFunction.apply(playerUuid);
-                if (gangManaging.isRankMinimumPredicate.test(playerUuid, gang.gangPermissions.accessToGangChat)){
+            if (gangManaging.playerInGangPredicate.test(playerUUID)){
+                Gang gang = gangManaging.getGangByUuidFunction.apply(playerUUID);
+                if (gangManaging.isRankMinimumPredicate.test(playerUUID, gang.gangPermissions.accessToGangChat)){
                     StringBuilder message = new StringBuilder();
                     final Consumer<String> messageConsumer = line -> message.append(line).append(" ");
                     Arrays.stream(args).skip(1).forEach(messageConsumer);

@@ -2,22 +2,27 @@ package dk.simonwinther.utility;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Gang;
-import dk.simonwinther.enums.Rank;
+import dk.simonwinther.constants.Rank;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
-public class GangManaging
-{
+public class GangManaging {
     //Normally use dependency injection instead of singleton instance, but since it's a Utility class I never create an instance!
+    private MainPlugin plugin;
     private MessageProvider mp;
+    private List<String> bannedWords;
 
-    public GangManaging(MainPlugin plugin){
-        this.mp = plugin.getMessageProvider();
-
+    public GangManaging(MainPlugin plugin) {
+        this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
+        this.bannedWords = this.plugin.getCustomSettingsProvider().npcSettingsProvider.bannedWords;
     }
+
     public final int GANG_COST = 10000;
 
     //UUID, Gang Name
@@ -27,12 +32,11 @@ public class GangManaging
 
     public Map<UUID, Boolean> damageMap = new HashMap<>();
 
-    public Map<String, Gang> getGangMap()
-    {
+    public Map<String, Gang> getGangMap() {
         return gangMap;
     }
 
-    public BiConsumer<? super UUID, String> createNewGangBiConsumer = (ownerUuid, gangName) -> {
+    public BiConsumer<? super UUID, String> addNewGangToMapsBiConsumer = (ownerUuid, gangName) -> {
         userGangMap.put(ownerUuid, gangName);
         gangMap.put(gangName, new Gang((this.gangMap.size() + 1), gangName, ownerUuid));
     };
@@ -40,14 +44,12 @@ public class GangManaging
     private Function<String, String> lowerCaseFunc = String::toLowerCase;
     public Function<? super UUID, Gang> getGangByUuidFunction = uuid -> gangMap.get(userGangMap.get(uuid));
     public Predicate<String> gangExistsPredicate = gangMap::containsKey;
-    public BiPredicate<Gang, String> gangContainsAllyInvitationPredicate = (gang, string) -> gang.getAllyInvitation().contains(string);
     public Function<? super UUID, Integer> rankFunction = uuid -> getGangByUuidFunction.apply(uuid).getMembersSorted().get(uuid);
 
     public BiConsumer<? super Gang, UUID> kick = (gang, uuid) -> {
         this.userGangMap.remove(uuid);
         gang.getMembersSorted().remove(uuid);
     };
-
     public BiPredicate<? super UUID, Rank> isRankMinimumPredicate = (uuid, rank) -> getGangByUuidFunction.apply(uuid).getMembersSorted().get(uuid) >= rank.getValue();
     public BiConsumer<? super Gang, ? super Gang> addEnemyGang = (playerGang, enemyGang) -> {
         int playerGangID = playerGang.getGangId();
@@ -56,17 +58,17 @@ public class GangManaging
         playerGang.getEnemies().put(enemyGangID, enemyGang.getGangName());
 
         playerGang.getMembersSorted().keySet().stream().filter(uuid -> Bukkit.getPlayer(uuid) != null).map(Bukkit::getPlayer).forEach(teamMember -> teamMember.sendMessage(this.mp.enemySuccessful.replace("{name}", enemyGang.getGangName())));
-        if (playerGang.getEnemies().keySet().contains(enemyGangID)){
+        if (playerGang.getEnemies().keySet().contains(enemyGangID)) {
             playerGang.getAllies().remove(enemyGangID);
             sendNoLongerEnemyMessage(enemyGang.getGangName(), playerGang.getMembersSorted());
         }
-        if (enemyGang.getEnemies().keySet().contains(playerGangID)){
+        if (enemyGang.getEnemies().keySet().contains(playerGangID)) {
             enemyGang.getEnemies().remove(playerGangID);
             sendNoLongerEnemyMessage(playerGang.getGangName(), enemyGang.getMembersSorted());
         }
     };
+
     public Function<String, Gang> getGangByNameFunction = gangMap::get;
-    public BiPredicate<? super UUID, ? super UUID> playersInSameGangPredicate = (uuid, uuid2) -> getGangByUuidFunction.apply(uuid).equals(getGangByUuidFunction.apply(uuid2));
     public Consumer<? super UUID> deleteGangConsumer = uuid -> {
         gangMap.remove(userGangMap.get(uuid));
         userGangMap.remove(uuid);
@@ -74,25 +76,25 @@ public class GangManaging
     public Function<String, List<Gang>> allyInvitationGangListFunction = gangName -> { //Enter gangname to check if other gangs contains that Gangname
         List<Gang> listOfGangs = new ArrayList<>();
         final Consumer<Gang> gangConsumer = listOfGangs::add;
-        final Predicate<Gang> gangPredicate = gang -> gang.getAllyInvitation().contains(gangName);
+        final Predicate<Gang> gangPredicate = gang -> gang.hasRequestedAlly(gangName.toLowerCase());
         gangMap.values().stream().filter(gangPredicate).forEach(gangConsumer);
         return listOfGangs;
     };
+
     public Function<String, List<Gang>> enemyGangListFunction = gangName -> { //Enter gangname to check if other gangs contains that Gangname
         return gangMap.values().stream().filter(gang -> gang.getEnemies().values().contains(gangName)).collect(Collectors.toList());
     };
     public Predicate<? super UUID> ownerOfGangPredicate = uuid -> getGangByUuidFunction.apply(uuid).getMembersSorted().get(uuid) == Rank.LEADER.getValue();
 
     public Predicate<? super UUID> playerInGangPredicate = userGangMap::containsKey;
-    public Function<? super UUID, String> gangNameFunction = userGangMap::get;
+
+    /**
+     * Cannot be a method inside Gang Object since you access userGangMap and is not smart to use DI for this class
+     */
     public Consumer<? super UUID> kickConsumer = uuid -> {
         getGangByUuidFunction.apply(uuid).getMembersSorted().remove(uuid);
         userGangMap.remove(uuid);
     };
-    public void joinGang(UUID uuid, String displayName, String gangName){
-        getGangByNameFunction.apply(gangName).addMember(uuid, lowerCaseFunc.apply(displayName), Rank.MEMBER);
-        userGangMap.put(uuid, gangName);
-    }
     public BiConsumer<? super Gang, ? super String> sendTeamMessage = (gang, message) -> {
         gang.getMembersSorted()
                 .keySet()
@@ -101,21 +103,130 @@ public class GangManaging
                 .map(Bukkit::getPlayer)
                 .forEach(player -> player.sendMessage(message));
     };
-    public Predicate<? super UUID> hasMemberSpacePredicate = uuid -> {
-        Gang gang = getGangByUuidFunction.apply(uuid);
-        return gang.getMembersSorted().size() < gang.getMaxMembers();
-    };
-    public BiConsumer<? super UUID, String> addInvitationConsumer = (uuid, s) -> getGangByUuidFunction.apply(uuid).inviteMember(s);
-    public BiPredicate<? super String, String> alreadyInvitedByGangNamePredicate = (gangName, nameOfInvitedPlayer) -> getGangByNameFunction.apply(gangName).isPlayerInvited(lowerCaseFunc.apply(nameOfInvitedPlayer));
-    public BiPredicate<? super UUID, String> alreadyInvitedByUuidPredicate = (uuid, nameOfInvitedPlayer) -> getGangByUuidFunction.apply(uuid).isPlayerInvited(lowerCaseFunc.apply(nameOfInvitedPlayer));
-    public BiConsumer<? super UUID, String> removeInvitationConsumer = (uuid, nameOfInvitedPlayer) -> getGangByUuidFunction.apply(uuid).getMemberInvitations().remove(lowerCaseFunc.apply(nameOfInvitedPlayer));
 
-    //
-    public void sendNoLongerEnemyMessage(String enemyGangName, Map<UUID, Integer> members){
+    public BiPredicate<? super String, String> alreadyInvitedByGangNamePredicate = (gangName, nameOfInvitedPlayer) -> getGangByNameFunction.apply(gangName).isPlayerInvited(lowerCaseFunc.apply(nameOfInvitedPlayer));
+
+    /**
+     * Make sure to check if player is in gang before invoking method
+     * @param gang gang instance of player can be optained from map
+     * @param p player object
+     * @param playerInvited the name of the invited player gets added to List<String> in the gang object
+     */
+    public void requestPlayerToJoinGang(Gang gang, Player p, String playerInvited) {
+        if (!p.getDisplayName().equalsIgnoreCase(playerInvited)) {
+            //TODO: check if getofflineplayer() == null might not work and has to use this instead
+            if (Bukkit.getOfflinePlayer(playerInvited).hasPlayedBefore()) {
+                if (isRankMinimumPredicate.test(p.getUniqueId(), gang.gangPermissions.accessToInvite)) {
+                    UUID playerInvitedUUID = Bukkit.getOfflinePlayer(playerInvited).getUniqueId();
+                    if (getGangByUuidFunction.apply(playerInvitedUUID) == null || !getGangByUuidFunction.apply(playerInvitedUUID).equals(gang)) {
+                        if (!gang.hasReachedMaxMembers()) {
+                            if (gang.isPlayerInvited(playerInvited)) {
+                                //Remove invitation
+                                gang.removeMemberInvitation(playerInvited);
+                                p.sendMessage(this.mp.playerWasUninvited.replace("{args}", playerInvited));
+                            } else {
+                                //Invite player to gang
+                                if (Bukkit.getPlayer(playerInvitedUUID) != null)
+                                    Bukkit.getPlayer(playerInvitedUUID).sendMessage(this.mp.invitedToGang.replace("{name}", gang.getGangName()).replace("{player}", p.getName()));
+                                gang.addMemberInvitation(playerInvited);
+                                p.sendMessage(this.mp.playerWasInvited.replace("{args}", playerInvited));
+                            }
+                        } else p.sendMessage(this.mp.gangNotSpaceEnough);
+                    } else p.sendMessage(this.mp.sameGang);
+                } else p.sendMessage(this.mp.notHighRankEnough);
+            } else p.sendMessage(this.mp.hasNeverPlayed);
+        } else p.sendMessage(this.mp.cantInviteYourself);
+    }
+
+    /**
+     * Make sure to check if player is in gang before invoking method
+     * @param gang gang instance
+     * @param otherGang name of other gang
+     * @param requester instance of the player who request for ally
+     */
+    public void requestAlly(Gang gang, Gang otherGang, Player requester) {
+        String gangName = gang.getGangName().toLowerCase();
+        String otherGangName = otherGang.getGangName().toLowerCase();
+        if (isRankMinimumPredicate.test(requester.getUniqueId(), gang.gangPermissions.accessToAlly)) {
+            if (!gang.isGangAlly(otherGang)) {
+                if (gang.hasReachedMaxAllies()) {
+                    if (!gang.equals(otherGang)) {
+                        if (gang.hasRequestedAlly(otherGangName)) {
+                            gang.removeAllyRequest(otherGangName);
+                            //requester.sendMessage(this.mp.unAlly.replace("{name}", message));
+                            sendTeamMessage.accept(gang, this.mp.regretToBeAlly.replace("{name}", otherGang.getGangName()));
+                        } else {
+                            /**
+                             * Our gang has not requested for ally before,
+                             * therefore we need to check if other gang is requesting ally too,
+                             * if they are, we need to ally them.
+                             */
+                            if (otherGang.hasRequestedAlly(gang.getGangName())) {
+                                gang.removeAllyRequest(otherGangName);
+                                otherGang.removeAllyRequest(gangName);
+
+                                gang.addGangAlly(otherGang);
+                                otherGang.addGangAlly(gang);
+
+                                sendTeamMessage.accept(gang, this.mp.allySuccessful.replace("{name}", otherGang.getGangName()));
+                                sendTeamMessage.accept(otherGang, this.mp.allySuccessful.replace("{name}", gang.getGangName()));
+                            } else {
+                                gang.addAllyRequest(otherGang);
+                                requester.sendMessage(this.mp.askAlly.replace("{name}", otherGang.getGangName()));
+                                sendTeamMessage.accept(otherGang, this.mp.wishesToBeAlly.replace("{name}", gang.getGangName()));
+                            }
+                        }
+                    } else requester.sendMessage(this.mp.cantAllyOwnGang);
+                } else requester.sendMessage(this.mp.playerGangMaxAllies);
+            } else requester.sendMessage(this.mp.alreadyAllies);
+        } else requester.sendMessage(this.mp.notHighRankEnough);
+    }
+
+    public void sendNoLongerEnemyMessage(String enemyGangName, Map<UUID, Integer> members) {
         members.keySet()
                 .stream()
                 .filter(uuid -> Bukkit.getPlayer(uuid) != null)
                 .map(Bukkit::getPlayer)
                 .forEach(member -> member.sendMessage(this.mp.noLongerAllies.replace("{name}", enemyGangName)));
+    }
+
+    public void joinGang(UUID uuid, String displayName, String gangName) {
+        getGangByNameFunction.apply(gangName).addMember(uuid, lowerCaseFunc.apply(displayName), Rank.MEMBER);
+        userGangMap.put(uuid, gangName);
+    }
+
+    public void createNewGang(Player player, String gangName) {
+        UUID playerUUID = player.getUniqueId();
+        if (!(playerInGangPredicate.test(playerUUID))) {
+            if (!(gangExistsPredicate.test(gangName))) {
+                if (this.plugin.getEconomy().getBalance(Bukkit.getOfflinePlayer(playerUUID)) >= GANG_COST) {
+                    if (doesGangNameFollowRequirements(gangName)) {
+                        gangName = gangName.replace(" ", "");
+                        addNewGangToMapsBiConsumer.accept(playerUUID, gangName);
+
+                        player.sendMessage(this.mp.gangCreated.replace("{name}", gangName));
+                        sendGlobalGangCreatedMessage(player, gangName);
+                        plugin.getEconomy().withdrawPlayer(Bukkit.getOfflinePlayer(playerUUID), GANG_COST);
+                    } else player.sendMessage(this.mp.gangNameDoesNotMeetRequirements);
+                } else player.sendMessage(this.mp.cantAffordGang.replace("{0}", String.valueOf(GANG_COST)));
+            } else player.sendMessage(this.mp.gangExists.replace("{name}", gangName));
+        } else player.sendMessage(this.mp.alreadyInGang);
+    }
+
+    public boolean doesGangNameFollowRequirements(String gangName) {
+        return gangName.length() <= this.plugin.getCustomSettingsProvider().maxNameLength
+                && gangName.length() >= this.plugin.getCustomSettingsProvider().minNameLength
+                && !bannedWords.stream().anyMatch(gangName::contains);
+    }
+
+    public void sendGlobalGangCreatedMessage(Player p, String gangName) {
+        Bukkit.getOnlinePlayers()
+                .forEach(_localPlayer ->
+                {
+                    //Check if player name is same as the guy who created, dont wanna send 2 messages.
+                    if (!(_localPlayer.getName().equalsIgnoreCase(p.getName())))
+                        _localPlayer.sendMessage(this.mp.successfullyCreatedGangGlobal.replace("{player}", p.getName()).replace("{name}", gangName));
+                });
+        p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&l-" + GANG_COST + "&f$"));
     }
 }
