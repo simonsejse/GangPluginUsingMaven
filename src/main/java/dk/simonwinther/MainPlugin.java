@@ -12,7 +12,8 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dk.simonwinther.commandmanaging.ConfirmTransferCmd;
 import dk.simonwinther.commandmanaging.GangCommand;
 import dk.simonwinther.events.EventHandling;
-import dk.simonwinther.files.DefaultConfig;
+import dk.simonwinther.files.SQLFile;
+import dk.simonwinther.files.SettingsConfig;
 import dk.simonwinther.files.FileInterface;
 import dk.simonwinther.files.MessageFile;
 import dk.simonwinther.inventorymanaging.Menu;
@@ -44,7 +45,8 @@ public final class MainPlugin extends JavaPlugin
 
     /* Properties */
     private FileInterface messageConfig;
-    private FileInterface defaultConfig;
+    private FileInterface settingsConfig;
+    private FileInterface sqlFile;
 
     private CustomSettingsProvider customSettingsProvider;
     private MessageProvider messageProvider;
@@ -58,7 +60,8 @@ public final class MainPlugin extends JavaPlugin
 
     private final static Logger LOGGER = Logger.getLogger("Minecraft");
     public final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    //private ConnectionProvider connectionProvider;
+
+    private ConnectionProvider connectionProvider;
     //private final SQLQueriesProvider sqlQueriesProvider = new SQLQueriesProvider();
     //private final String[] tables = new String[]{"users", "memberInvitations", "gangMembers", "gangAllies", "gangPermissions", "gangs"};
 
@@ -66,30 +69,12 @@ public final class MainPlugin extends JavaPlugin
     @Override
     public void onEnable()
     {
-        //Setup message.json
-        this.messageConfig = new MessageFile(this, "message.json");
-        this.messageConfig.initFile();
-
-        try{
-            TypeReference<MessageProvider> chatUtilTypeReference = new TypeReference<MessageProvider>(){};
-            this.messageProvider = OBJECT_MAPPER.readValue(this.messageConfig.getFile(), chatUtilTypeReference);
-        }catch(IOException e){
-            Bukkit.getLogger().log(Level.SEVERE, "Der er fejl i message.json filen!\nDisabler pluginnet.");
-            this.getServer().getPluginManager().disablePlugin(this);
-        }
+        initializeFiles();
 
 
-        //Setup config.json
-        this.defaultConfig = new DefaultConfig(this);
-        this.defaultConfig.initFile();
-
-        try{
-            TypeReference<CustomSettingsProvider> defaultConfigTypeReference = new TypeReference<CustomSettingsProvider>(){};
-            this.customSettingsProvider = OBJECT_MAPPER.readValue(this.defaultConfig.getFile(), defaultConfigTypeReference);
-        }catch(IOException e){
-            Bukkit.getLogger().log(Level.SEVERE, "Kunne ikke læse dataen fra config.json");
-            this.getPluginLoader().disablePlugin(this);
-        }
+        //Open connection
+        this.connectionProvider = new ConnectionProvider(this.customSettingsProvider.mySQLProfile);
+        this.connectionProvider.openConnection();
 
         this.gangManaging = new GangManaging(this);
         getCommand("bande").setExecutor(new GangCommand(gangManaging, this));
@@ -111,6 +96,41 @@ public final class MainPlugin extends JavaPlugin
         setupChat();
 
         //loadData();
+
+    }
+
+    private void initializeFiles() {
+        //Setup message.json
+        this.messageConfig = new MessageFile(this, "message.json");
+        this.messageConfig.initFile();
+
+        //Init file and write all json data from github page to then be read into a class
+        try{
+            TypeReference<MessageProvider> chatUtilTypeReference = new TypeReference<MessageProvider>(){};
+            this.messageProvider = OBJECT_MAPPER.readValue(this.messageConfig.getFile(), chatUtilTypeReference);
+        }catch(IOException e){
+            Bukkit.getLogger().log(Level.SEVERE, "Der er fejl i message.json filen!\nDisabler pluginnet.");
+            this.getServer().getPluginManager().disablePlugin(this);
+        }
+
+        //Setup config.json
+        this.settingsConfig = new SettingsConfig(this);
+        this.settingsConfig.initFile();
+
+        //Init file and write all json data from github page to then be read into a class
+        try{
+            TypeReference<CustomSettingsProvider> defaultConfigTypeReference = new TypeReference<CustomSettingsProvider>(){};
+            this.customSettingsProvider = OBJECT_MAPPER.readValue(this.settingsConfig.getFile(), defaultConfigTypeReference);
+        }catch(IOException e){
+            Bukkit.getLogger().log(Level.SEVERE, "Kunne ikke læse dataen fra config.json");
+            this.getPluginLoader().disablePlugin(this);
+        }
+
+        this.sqlFile = new SQLFile(this);
+        this.sqlFile.initFile();
+        //Init file to then use SQL Queries to create all tables.
+
+
 
     }
 

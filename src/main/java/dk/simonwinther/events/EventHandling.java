@@ -83,24 +83,43 @@ public class EventHandling implements Listener {
     public final Consumer<UUID> addPlayerToAwaitAllyRequest = awaitChatInputForAlly::add;
     public final Consumer<UUID> removePlayerFromAwaitAllyRequest = awaitChatInputForAlly::remove;
 
-    private final Set<UUID> enemyChat = new HashSet<>();
-    public Consumer<UUID> addEnemyChat = enemyChat::add;
-    private final Consumer<UUID> removeEnemyChat = enemyChat::remove;
+    private final Set<UUID> awaitChatInputForEnemy = new HashSet<>();
+    public Consumer<UUID> addPlayerToAwaitEnemyRequest = awaitChatInputForEnemy::add;
+    private final Consumer<UUID> removePlayerFromAwaitEnemyRequest = awaitChatInputForEnemy::remove;
 
     @EventHandler
     public void awaitPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         UUID playerUUID = player.getUniqueId();
 
-        if (awaitChatInputForGangCreation.contains(playerUUID))
+        if (awaitChatInputForGangCreation.contains(playerUUID)) {
+            event.setCancelled(true);
             performChatInputGangCreation(player, player.getUniqueId(), event.getMessage());
-        else if (awaitChatInputForInvitation.contains(playerUUID))
+        }else if (awaitChatInputForInvitation.contains(playerUUID)){
+            event.setCancelled(true);
             performChatInputInvitation(player, player.getUniqueId(), event.getMessage());
-        else if (awaitChatInputForAlly.contains(playerUUID))
+        }else if (awaitChatInputForAlly.contains(playerUUID)){
+            event.setCancelled(true);
             performChatInputAllyRequest(player, player.getUniqueId(), event.getMessage());
-
+        }else if (awaitChatInputForEnemy.contains(playerUUID)){
+            event.setCancelled(true);
+            performChatInputEnemyRequest(player, player.getUniqueId(),  event.getMessage());
+        }
     }
 
+
+    private void performChatInputEnemyRequest(Player player, UUID playerUUID, String otherGangName) {
+        //TODO: check if gang exists
+        this.removePlayerFromAwaitEnemyRequest.accept(playerUUID);
+        if(this.gangManaging.playerInGangPredicate.test(playerUUID)){
+            if (this.gangManaging.gangExistsPredicate.test(otherGangName)){
+                Gang playerGang = this.gangManaging.getGangByUuidFunction.apply(playerUUID);
+                this.gangManaging.requestEnemy(playerGang, otherGangName, player);
+
+            } else player.sendMessage(this.mp.gangDoesNotExists.replace("{name}", otherGangName));
+        }else player.sendMessage(this.mp.notInGang);
+
+    }
 
     private void performChatInputAllyRequest(Player player, UUID playerUUID, String otherGangName) {
         //TODO: check if gang exists
@@ -110,7 +129,7 @@ public class EventHandling implements Listener {
                 Gang playerGang = this.gangManaging.getGangByUuidFunction.apply(playerUUID);
                 Gang otherGang = this.gangManaging.getGangByNameFunction.apply(otherGangName);
                 this.gangManaging.requestAlly(playerGang, otherGang, player);
-            } else player.sendMessage(this.mp.gangDoesNotExists);
+            } else player.sendMessage(this.mp.gangDoesNotExists.replace("{name}", otherGangName));
         }else player.sendMessage(this.mp.notInGang);
 
     }

@@ -48,7 +48,6 @@ public class MessageProvider {
     public String playerGangMaxAllies;
     public String playerGangMaxEnemies;
     public String alreadyAllies;
-    public String alreadyEnemies;
     public String wishesToBeAlly;
     public String regretToBeAlly; //TODO: wtf ?? check where this is supposted to be at
     public String passOwnership;
@@ -69,5 +68,6 @@ public class MessageProvider {
     public String insertBank;
     public String toggleDamage;
     public String gangNameDoesNotMeetRequirements;
+    public String progessBar;
     public String noSpace;
 }

@@ -14,7 +14,7 @@ import java.util.logging.Level;
 public class MessageFile implements FileInterface
 {
 
-    private static final String MESSAGES_URL = "https://raw.githubusercontent.com/simonsejse/gang-messages.json/main/README.md";
+    private static final String MESSAGES_URL = "https://raw.githubusercontent.com/simonsejse/gang-files/main/gang-messages.json";
 
     private File f;
     private MainPlugin plugin;

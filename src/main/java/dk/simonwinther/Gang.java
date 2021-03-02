@@ -243,12 +243,17 @@ public class Gang implements Serializable
         this.gangName = gangName;
     }
 
+    public void addEnemyGang(int gangID, String otherGangName){
+        this.enemies.put(gangID, otherGangName.toLowerCase());
+    }
 
     public boolean hasReachedMaxMembers(){
         return this.membersSorted.size() < this.maxMembers;
 
     }
-
+    public boolean isGangEnemy(String otherGangName){
+        return this.enemies.values().contains(otherGangName.toLowerCase());
+    }
     public boolean hasReachedMaxAllies(){
         return this.allies.size() < this.maxAllies;
     }
@@ -337,5 +342,7 @@ public class Gang implements Serializable
     }
 
 
-
+    public void removeEnemyGang(int gangID) {
+        this.enemies.remove(gangID);
+    }
 }

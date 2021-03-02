@@ -80,8 +80,9 @@ public class BankSubMenu extends Menu
         return super.inventory;
     }
 
-    void place(){replace();}
-    void replace(){
+    void place(){updateItem();}
+
+    void updateItem(){
         setItem(31, new ItemBuilder(new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.GREEN.value[ColorIndexEnum.STAINED_GLASS.index])).setItemName("&a&lAccepter").setLore("&fKlik her for at", "&findsætte: &2&l" + MessageFormat.format("{0}"+"&a$", deposit)).buildItem());
     }
 
@@ -116,8 +117,7 @@ public class BankSubMenu extends Menu
                     whoClicked.sendMessage("§c§l-" + MessageFormat.format("{0}", getDeposit()));
                     whoClicked.sendMessage("§a§l+" + MessageFormat.format("{0}", getDeposit()));
                     gang.depositMoney(deposit);
-                } else
-                    whoClicked.sendMessage(this.mp.notEnoughMoney);
+                } else whoClicked.sendMessage(this.mp.notEnoughMoney);
             } else whoClicked.sendMessage(this.mp.notHighRankEnough);
 
         } else if (item.getType().equals(Material.GOLD_NUGGET) || item.getType().equals(Material.GOLD_INGOT) || item.getType().equals(Material.GOLD_BLOCK))
@@ -149,7 +149,7 @@ public class BankSubMenu extends Menu
                     Bukkit.getLogger().log(Level.SEVERE, "En hilsen fra Simon, at der er en fejl i banken...");
                 }
             }
-            replace();
+            updateItem();
         }
     }
 }

@@ -46,28 +46,12 @@ public class GangManaging {
     public Predicate<String> gangExistsPredicate = gangMap::containsKey;
     public Function<? super UUID, Integer> rankFunction = uuid -> getGangByUuidFunction.apply(uuid).getMembersSorted().get(uuid);
 
+    public BiConsumer<? super Gang, ? super String> sendTeamMessage = (gang, message) -> gang.getMembersSorted().keySet().stream().filter(uuid -> Bukkit.getPlayer(uuid) != null).map(Bukkit::getPlayer).forEach(player -> player.sendMessage(message));
     public BiConsumer<? super Gang, UUID> kick = (gang, uuid) -> {
         this.userGangMap.remove(uuid);
         gang.getMembersSorted().remove(uuid);
     };
     public BiPredicate<? super UUID, Rank> isRankMinimumPredicate = (uuid, rank) -> getGangByUuidFunction.apply(uuid).getMembersSorted().get(uuid) >= rank.getValue();
-    public BiConsumer<? super Gang, ? super Gang> addEnemyGang = (playerGang, enemyGang) -> {
-        int playerGangID = playerGang.getGangId();
-        int enemyGangID = enemyGang.getGangId();
-
-        playerGang.getEnemies().put(enemyGangID, enemyGang.getGangName());
-
-        playerGang.getMembersSorted().keySet().stream().filter(uuid -> Bukkit.getPlayer(uuid) != null).map(Bukkit::getPlayer).forEach(teamMember -> teamMember.sendMessage(this.mp.enemySuccessful.replace("{name}", enemyGang.getGangName())));
-        if (playerGang.getEnemies().keySet().contains(enemyGangID)) {
-            playerGang.getAllies().remove(enemyGangID);
-            sendNoLongerEnemyMessage(enemyGang.getGangName(), playerGang.getMembersSorted());
-        }
-        if (enemyGang.getEnemies().keySet().contains(playerGangID)) {
-            enemyGang.getEnemies().remove(playerGangID);
-            sendNoLongerEnemyMessage(playerGang.getGangName(), enemyGang.getMembersSorted());
-        }
-    };
-
     public Function<String, Gang> getGangByNameFunction = gangMap::get;
     public Consumer<? super UUID> deleteGangConsumer = uuid -> {
         gangMap.remove(userGangMap.get(uuid));
@@ -95,16 +79,48 @@ public class GangManaging {
         getGangByUuidFunction.apply(uuid).getMembersSorted().remove(uuid);
         userGangMap.remove(uuid);
     };
-    public BiConsumer<? super Gang, ? super String> sendTeamMessage = (gang, message) -> {
-        gang.getMembersSorted()
-                .keySet()
-                .stream()
-                .filter(uuid -> Bukkit.getPlayer(uuid) != null)
-                .map(Bukkit::getPlayer)
-                .forEach(player -> player.sendMessage(message));
-    };
 
     public BiPredicate<? super String, String> alreadyInvitedByGangNamePredicate = (gangName, nameOfInvitedPlayer) -> getGangByNameFunction.apply(gangName).isPlayerInvited(lowerCaseFunc.apply(nameOfInvitedPlayer));
+
+
+    /**
+     *
+     * @param playerGang
+     * @param player
+     */
+    public void requestEnemy(Gang playerGang, String otherGangName, Player player) {
+        {
+
+            UUID playerUUID = player.getUniqueId();
+            if (playerInGangPredicate.test(playerUUID))
+            {
+                if (isRankMinimumPredicate.test(playerUUID, playerGang.gangPermissions.accessToEnemy))
+                {
+                    if (gangExistsPredicate.test(otherGangName))
+                    {
+
+                        //TODO: Make it a function instead
+                        if (playerGang.getEnemies().size() < playerGang.getMaxEnemies())
+                        {
+                            Gang otherGang = getGangByNameFunction.apply(otherGangName);
+                            if (!playerGang.equals(otherGang))
+                            {
+                                int enemyGangID = otherGang.getGangId();
+                                if (playerGang.isGangEnemy(otherGangName))
+                                {
+                                    playerGang.removeEnemyGang(enemyGangID);
+                                    sendNoLongerEnemyMessage(otherGangName, playerGang.getMembersSorted());
+                                    return;
+                                }
+                                playerGang.addEnemyGang(enemyGangID, otherGangName);
+                                sendTeamMessage.accept(playerGang, this.mp.enemySuccessful.replace("{name}", otherGangName));
+                            } else player.sendMessage(this.mp.cantEnemyOwnGang);
+                        } else player.sendMessage(this.mp.playerGangMaxEnemies);
+                    } else player.sendMessage(this.mp.gangDoesNotExists.replace("{name}", String.valueOf(otherGangName.charAt(0)).toUpperCase() + otherGangName.substring(1)));
+                } else player.sendMessage(this.mp.notHighRankEnough);
+            } else player.sendMessage(this.mp.notInGang);
+        }
+    }
 
     /**
      * Make sure to check if player is in gang before invoking method
@@ -199,7 +215,8 @@ public class GangManaging {
         UUID playerUUID = player.getUniqueId();
         if (!(playerInGangPredicate.test(playerUUID))) {
             if (!(gangExistsPredicate.test(gangName))) {
-                if (this.plugin.getEconomy().getBalance(Bukkit.getOfflinePlayer(playerUUID)) >= GANG_COST) {
+                double playerBalance = this.plugin.getEconomy().getBalance(Bukkit.getOfflinePlayer(playerUUID));
+                if (playerBalance >= GANG_COST) {
                     if (doesGangNameFollowRequirements(gangName)) {
                         gangName = gangName.replace(" ", "");
                         addNewGangToMapsBiConsumer.accept(playerUUID, gangName);
@@ -208,7 +225,10 @@ public class GangManaging {
                         sendGlobalGangCreatedMessage(player, gangName);
                         plugin.getEconomy().withdrawPlayer(Bukkit.getOfflinePlayer(playerUUID), GANG_COST);
                     } else player.sendMessage(this.mp.gangNameDoesNotMeetRequirements);
-                } else player.sendMessage(this.mp.cantAffordGang.replace("{0}", String.valueOf(GANG_COST)));
+                } else {
+                    player.sendMessage(this.mp.cantAffordGang.replace("{0}", String.valueOf(GANG_COST)));
+                    player.sendMessage(this.mp.progessBar.replace("{bar}",ProgessBar.buildProgressBar((int) playerBalance, GANG_COST)+""));
+                }
             } else player.sendMessage(this.mp.gangExists.replace("{name}", gangName));
         } else player.sendMessage(this.mp.alreadyInGang);
     }
@@ -229,4 +249,6 @@ public class GangManaging {
                 });
         p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&l-" + GANG_COST + "&f$"));
     }
+
+
 }

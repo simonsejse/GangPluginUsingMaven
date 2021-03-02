@@ -60,7 +60,7 @@ public class ListEnemySubMenu extends Menu
         if (slot == InventoryUtility.BACK_SLOT) whoClicked.openInventory(infoMenu.getInventory());
         else if (slot == 47)
         {
-            plugin.getEventHandling().addEnemyChat.accept(uuid);
+            plugin.getEventHandling().addPlayerToAwaitEnemyRequest.accept(uuid);
             whoClicked.sendMessage(this.mp.whoToEnemyChat);
             whoClicked.getOpenInventory().close();
         } else if (slot == 51) whoClicked.openInventory(new Menu()

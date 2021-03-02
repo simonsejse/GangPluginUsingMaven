@@ -8,6 +8,8 @@ public class CustomSettingsProvider
      */
     public String accessToToiletsPermission, accessToFarmPermission, accessToLaboratoryPermission;
     public int maxNameLength, minNameLength;
+
     public NPCSettingsProvider npcSettingsProvider;
+    public MySQLProfile mySQLProfile;
 
 }

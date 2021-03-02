@@ -28,7 +28,6 @@ public class ItemBuilder
 
     public ItemBuilder(Material type, int amount, SkullType skullType){
         this(new ItemStack(type, amount, (short) skullType.ordinal()));
-        SkullMeta
     }
 
     public ItemBuilder(ItemStack itemStack)

@@ -52,6 +52,7 @@ public class BankArgument implements CommandArguments
         UUID playerUUID = p.getUniqueId();
         if (gangManaging.playerInGangPredicate.test(playerUUID))
         {
+            //TODO: forgot to check if player has money
             if (gangManaging.isRankMinimumPredicate.test(playerUUID, gangManaging.getGangByUuidFunction.apply(playerUUID).gangPermissions.accessToDeposit)){
                 int amount;
                 try

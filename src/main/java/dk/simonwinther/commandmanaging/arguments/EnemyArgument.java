@@ -43,25 +43,8 @@ public class EnemyArgument implements CommandArguments
         UUID playerUUID = p.getUniqueId();
         if (gangManaging.playerInGangPredicate.test(playerUUID))
         {
-            Gang playerGang = gangManaging.getGangByUuidFunction.apply(playerUUID);
-            if (gangManaging.isRankMinimumPredicate.test(playerUUID, playerGang.gangPermissions.accessToEnemy))
-            {
-                if (gangManaging.gangExistsPredicate.test(args[1]))
-                {
-                    Gang argsGang = gangManaging.getGangByNameFunction.apply(args[1]);
-                    if (playerGang.getEnemies().size() < playerGang.getMaxEnemies())
-                    {
-
-                        if (!playerGang.equals(argsGang))
-                        {
-                            if (!playerGang.getEnemies().values().contains(args[1].toLowerCase()))
-                            {
-                                gangManaging.addEnemyGang.accept(playerGang, argsGang);
-                            } else p.sendMessage(this.mp.alreadyEnemies);
-                        } else p.sendMessage(this.mp.cantEnemyOwnGang);
-                    } else p.sendMessage(this.mp.playerGangMaxEnemies);
-                } else p.sendMessage(this.mp.gangDoesNotExists.replace("{name}", args[1]));
-            } else p.sendMessage(this.mp.notHighRankEnough);
+            Gang playerGang = this.gangManaging.getGangByUuidFunction.apply(playerUUID);
+            this.gangManaging.requestEnemy(playerGang, args[1], p);
         } else p.sendMessage(this.mp.notInGang);
     }
 }

@@ -10,13 +10,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 
-public class DefaultConfig implements FileInterface{
+public class SettingsConfig implements FileInterface{
 
     private final File f;
     private final MainPlugin plugin;
-    private static final String configJsonURL = "https://raw.githubusercontent.com/simonsejse/gang-config.json/main/README.md";
+    private static final String configJsonURL = "https://raw.githubusercontent.com/simonsejse/gang-files/main/gang-config.json";
 
-    public DefaultConfig(MainPlugin plugin){
+    public SettingsConfig(MainPlugin plugin){
         this.f = new File(plugin.getDataFolder(), "config.yml");
         this.plugin = plugin;
     }
@@ -33,7 +33,7 @@ public class DefaultConfig implements FileInterface{
             try{
                 f.createNewFile();
                 try(FileOutputStream fileOutputStream = new FileOutputStream(this.f)){
-                    String jsonData = UrlUtil.readValueFromUrl(DefaultConfig.configJsonURL);
+                    String jsonData = UrlUtil.readValueFromUrl(SettingsConfig.configJsonURL);
                     if (jsonData == null) throw new ReadValueException("Kunne ikke hente data from URL\n§cJsonData er null, og vil kaste en NullPointerException!");
 
                     fileOutputStream.write(jsonData.getBytes());

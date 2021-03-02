@@ -12,8 +12,8 @@ public class UrlUtil {
 
 
     /**
-     *
-     * @param url The url for the wesite we want to read value from
+     *s
+     * @param url The url for the website we want to read value from
      * @return returns the HTML code on the site
      * @throws IOException in case it couldn't read from the website it will return null,
      * *> therefore very important to check if String returned is null.
