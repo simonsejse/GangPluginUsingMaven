@@ -2,12 +2,11 @@ package dk.simonwinther.events;
 
 import dk.simonwinther.Gang;
 import dk.simonwinther.MainPlugin;
-import dk.simonwinther.inventorymanaging.Menu;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.utility.MessageProvider;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.npc.NPC;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,17 +27,17 @@ public class EventHandling implements Listener {
     private final MessageProvider mp;
 
     private final String npcName;
-    private List<String> goAwayMessages;
-    private List<String> deliveredMessages;
+    private final List<String> goAwayMessages;
+    private final List<String> deliveredMessages;
 
     private final GangManaging gangManaging;
 
     public EventHandling(GangManaging gangManaging, MainPlugin plugin) {
         this.plugin = plugin;
         this.mp = this.plugin.getMessageProvider();
-        this.npcName = this.plugin.getCustomSettingsProvider().npcSettingsProvider.npcName;
-        this.goAwayMessages = this.plugin.getCustomSettingsProvider().npcSettingsProvider.goAwayMessages;
-        this.deliveredMessages = this.plugin.getCustomSettingsProvider().npcSettingsProvider.deliveredMessages;
+        this.npcName = this.plugin.getConfiguration().npcSettingsProvider.npcName;
+        this.goAwayMessages = this.plugin.getConfiguration().npcSettingsProvider.goAwayMessages;
+        this.deliveredMessages = this.plugin.getConfiguration().npcSettingsProvider.deliveredMessages;
         this.gangManaging = gangManaging;
     }
 
@@ -64,10 +63,10 @@ public class EventHandling implements Listener {
 
 
         InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof Menu) {
+        if (holder instanceof AbstractMenu) {
             event.setCancelled(true);
-            Menu menu = (Menu) holder;
-            menu.onGuiClick(event.getSlot(), event.getCurrentItem(), (Player) event.getWhoClicked(), event.getClick());
+            AbstractMenu abstractMenu = (AbstractMenu) holder;
+            abstractMenu.onGuiClick(event.getSlot(), event.getCurrentItem(), (Player) event.getWhoClicked(), event.getClick());
         }
     }
 

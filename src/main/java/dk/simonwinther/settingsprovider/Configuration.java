@@ -1,15 +1,19 @@
 package dk.simonwinther.settingsprovider;
 
-public class CustomSettingsProvider
-{
+import dk.simonwinther.utility.MessageProvider;
 
-    /**
-     * All data is read from JSON Object Mapper in MainPlugin.java
-     */
+import java.util.List;
+
+public class Configuration {
+
+    //TODO: check on region enter 'toilet' if they have this permissions
     public String accessToToiletsPermission, accessToFarmPermission, accessToLaboratoryPermission;
+
     public int maxNameLength, minNameLength;
+    public List<String> bannedWords;
 
     public NPCSettingsProvider npcSettingsProvider;
     public MySQLProfile mySQLProfile;
+    public MessageProvider messageProvider;
 
 }

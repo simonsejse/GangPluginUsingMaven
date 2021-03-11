@@ -3,10 +3,10 @@ package dk.simonwinther.inventorymanaging.menus.infomenu.submenus;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.utility.InventoryUtility;
 import dk.simonwinther.utility.MessageProvider;
@@ -22,7 +22,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.List;
 import java.util.UUID;
 
-public class ListAllySubMenu extends Menu
+public class ListAllySubMenu extends AbstractMenu
 {
     private final MainPlugin plugin;
     private InfoMenu infoMenu;
@@ -65,7 +65,7 @@ public class ListAllySubMenu extends Menu
             whoClicked.sendMessage(this.mp.whoToAllyChat);
         } else if (slot == 47)
         {
-            whoClicked.openInventory(new Menu(uuid)
+            whoClicked.openInventory(new AbstractMenu(uuid)
             {
                 private int slot;
 
@@ -135,7 +135,7 @@ public class ListAllySubMenu extends Menu
             }.getInventory());
         } else if (slot == 51)
         {
-            whoClicked.openInventory(new Menu(uuid)
+            whoClicked.openInventory(new AbstractMenu(uuid)
             {
                 private int slot;
 

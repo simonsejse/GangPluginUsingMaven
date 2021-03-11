@@ -2,11 +2,24 @@ package dk.simonwinther;
 
 import dk.simonwinther.constants.Rank;
 
+import javax.persistence.*;
 import java.io.Serializable;
+
 
 public class GangPermissions implements Serializable
 {
+
     private final long serialVersionUID = 98798793217321L;
+
+    public GangPermissions(int gangID){
+        this.gangID = gangID;
+    }
+
+    public GangPermissions(){
+
+    }
+
+    private int gangID;
 
     public Rank accessToGangShop = Rank.CO_LEADER
             , accessToTransferMoney = Rank.OFFICER
@@ -21,75 +34,128 @@ public class GangPermissions implements Serializable
             , accessToAllyChat = Rank.OFFICER;
 
 
-    public boolean accessToToilets = false, accessToFarm = false, accessToLab = false;
+    public boolean accessToToilets = false;
+    public boolean accessToFarm = false;
+    public boolean accessToLab = false;
 
-    public void setAccessToGangShop(Rank accessToGangShop)
-    {
+
+    public int getGangID() {
+        return gangID;
+    }
+
+    public void setGangID(int gangID) {
+        this.gangID = gangID;
+    }
+
+    public Rank getAccessToGangShop() {
+        return accessToGangShop;
+    }
+
+    public void setAccessToGangShop(Rank accessToGangShop) {
         this.accessToGangShop = accessToGangShop;
     }
 
-    public void setAccessToTransferMoney(Rank accessToTransferMoney)
-    {
+    public Rank getAccessToTransferMoney() {
+        return accessToTransferMoney;
+    }
+
+    public void setAccessToTransferMoney(Rank accessToTransferMoney) {
         this.accessToTransferMoney = accessToTransferMoney;
     }
 
-    public void setAccessToTransferItems(Rank accessToTransferItems)
-    {
+    public Rank getAccessToTransferItems() {
+        return accessToTransferItems;
+    }
+
+    public void setAccessToTransferItems(Rank accessToTransferItems) {
         this.accessToTransferItems = accessToTransferItems;
     }
 
-    public void setAccessToKick(Rank accessToKick)
-    {
+    public Rank getAccessToKick() {
+        return accessToKick;
+    }
+
+    public void setAccessToKick(Rank accessToKick) {
         this.accessToKick = accessToKick;
     }
 
-    public void setAccessToDeposit(Rank accessToDeposit)
-    {
+    public Rank getAccessToDeposit() {
+        return accessToDeposit;
+    }
+
+    public void setAccessToDeposit(Rank accessToDeposit) {
         this.accessToDeposit = accessToDeposit;
     }
 
-    public void setAccessToEnemy(Rank accessToEnemy)
-    {
+    public Rank getAccessToEnemy() {
+        return accessToEnemy;
+    }
+
+    public void setAccessToEnemy(Rank accessToEnemy) {
         this.accessToEnemy = accessToEnemy;
     }
 
-    public void setAccessToAlly(Rank accessToAlly)
-    {
+    public Rank getAccessToAlly() {
+        return accessToAlly;
+    }
+
+    public void setAccessToAlly(Rank accessToAlly) {
         this.accessToAlly = accessToAlly;
     }
 
-    public void setAccessToInvite(Rank accessToInvite)
-    {
+    public Rank getAccessToInvite() {
+        return accessToInvite;
+    }
+
+    public void setAccessToInvite(Rank accessToInvite) {
         this.accessToInvite = accessToInvite;
     }
 
-    public void setAccessToLevelUp(Rank accessToLevelUp)
-    {
+    public Rank getAccessToLevelUp() {
+        return accessToLevelUp;
+    }
+
+    public void setAccessToLevelUp(Rank accessToLevelUp) {
         this.accessToLevelUp = accessToLevelUp;
     }
 
-    public void setAccessToGangChat(Rank accessToGangChat)
-    {
+    public Rank getAccessToGangChat() {
+        return accessToGangChat;
+    }
+
+    public void setAccessToGangChat(Rank accessToGangChat) {
         this.accessToGangChat = accessToGangChat;
     }
 
-    public void setAccessToAllyChat(Rank accessToAllyChat)
-    {
+    public Rank getAccessToAllyChat() {
+        return accessToAllyChat;
+    }
+
+    public void setAccessToAllyChat(Rank accessToAllyChat) {
         this.accessToAllyChat = accessToAllyChat;
     }
 
-    public void setAccessToToilets(boolean accessToToilets)
-    {
+    public boolean isAccessToToilets() {
+        return accessToToilets;
+    }
+
+    public void setAccessToToilets(boolean accessToToilets) {
         this.accessToToilets = accessToToilets;
     }
 
-    public void setAccessToFarm(boolean accessToFarm)
-    {
+    public boolean isAccessToFarm() {
+        return accessToFarm;
+    }
+
+    public void setAccessToFarm(boolean accessToFarm) {
         this.accessToFarm = accessToFarm;
     }
 
-    public void setAccessToLab(boolean accessToLab)
-    {
+    public boolean isAccessToLab() {
+        return accessToLab;
+    }
+
+    public void setAccessToLab(boolean accessToLab) {
         this.accessToLab = accessToLab;
     }
 }

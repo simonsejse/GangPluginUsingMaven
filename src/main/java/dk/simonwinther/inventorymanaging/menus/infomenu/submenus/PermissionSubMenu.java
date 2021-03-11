@@ -5,9 +5,9 @@ import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
 import dk.simonwinther.constants.GangAccess;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.utility.InventoryUtility;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -15,7 +15,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class PermissionSubMenu extends Menu
+public class PermissionSubMenu extends AbstractMenu
 {
 
     private InfoMenu infoMenu;

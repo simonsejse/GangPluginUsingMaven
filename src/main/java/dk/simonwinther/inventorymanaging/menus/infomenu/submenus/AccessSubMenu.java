@@ -4,12 +4,12 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
 import dk.simonwinther.constants.GangAccess;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.GangPermissions;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
 import dk.simonwinther.constants.Rank;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.utility.InventoryUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -22,7 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import java.text.MessageFormat;
 import java.util.UUID;
 
-public class AccessSubMenu extends Menu
+public class AccessSubMenu extends AbstractMenu
 {
     private MainPlugin plugin;
     private PermissionSubMenu permissionSubMenu;

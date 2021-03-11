@@ -3,11 +3,11 @@ package dk.simonwinther.inventorymanaging.menus.infomenu.submenus;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
 import dk.simonwinther.constants.Rank;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.inventorymanaging.menus.rankmenu.RankMenu;
 import dk.simonwinther.utility.InventoryUtility;
@@ -22,7 +22,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.UUID;
 
-public class MemberSubMenu extends Menu
+public class MemberSubMenu extends AbstractMenu
 {
     private InfoMenu infoMenu;
     private Gang gang;
@@ -73,7 +73,7 @@ public class MemberSubMenu extends Menu
 
                 String chosenPlayer = ChatColor.stripColor(item.getItemMeta().getDisplayName());
 
-                whoClicked.openInventory(new Menu()
+                whoClicked.openInventory(new AbstractMenu()
                 {
 
 

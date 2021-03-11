@@ -3,7 +3,7 @@ package dk.simonwinther.commandmanaging.arguments;
 import dk.simonwinther.Gang;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.utility.MessageProvider;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

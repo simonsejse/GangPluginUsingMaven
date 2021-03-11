@@ -4,52 +4,14 @@ import dk.simonwinther.constants.Rank;
 import dk.simonwinther.levelsystem.LevelSystem;
 import org.bukkit.Bukkit;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 
+@Entity
+@Table(name = "gangs")
 public class Gang implements Serializable
 {
-
-    private final long serialVersionUID = 2109381209382109L;
-
-    public Gang() {
-
-    }
-
-    @Override
-    public boolean equals(Object o)
-    {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Gang gang = (Gang) o;
-        return gangId == gang.gangId &&
-                gangBalance == gang.gangBalance &&
-                gangLevel == gang.gangLevel &&
-                maxMembers == gang.maxMembers &&
-                maxAllies == gang.maxAllies &&
-                maxEnemies == gang.maxEnemies &&
-                gangDamage == gang.gangDamage &&
-                allyDamage == gang.allyDamage &&
-                guardKills == gang.guardKills &&
-                prisonerKills == gang.prisonerKills &&
-                officerKills == gang.officerKills &&
-                deaths == gang.deaths &&
-                nameBeenChanged == gang.nameBeenChanged &&
-                Objects.equals(gangName, gang.gangName) &&
-                Objects.equals(gangPermissions, gang.gangPermissions) &&
-                Objects.equals(levelSystem, gang.levelSystem) &&
-                Objects.equals(enemies, gang.enemies) &&
-                Objects.equals(allies, gang.allies) &&
-                Objects.equals(memberInvitations, gang.memberInvitations) &&
-                Objects.equals(allyInvitation, gang.allyInvitation) &&
-                Objects.equals(membersSorted, gang.membersSorted);
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(gangName, gangId, gangBalance, gangLevel, maxMembers, maxAllies, maxEnemies, gangDamage, allyDamage, guardKills, prisonerKills, officerKills, deaths, gangPermissions, levelSystem, nameBeenChanged, enemies, allies, memberInvitations, allyInvitation, membersSorted);
-    }
 
     public Gang(int gangId, String gangName, UUID ownerUuid)
     {
@@ -58,101 +20,35 @@ public class Gang implements Serializable
         membersSorted.put(ownerUuid, Rank.LEADER.getValue());
     }
 
+    public Gang() {
+
+    }
 
     private String gangName = "";
-    private int gangId, gangBalance = 100, gangLevel = 1, maxMembers = 3, maxAllies = 2, maxEnemies = 3, gangDamage = 100, allyDamage = 100;
-    private int guardKills = 0, prisonerKills = 0, officerKills = 0, deaths = 0;
-
+    private int gangId;
+    private int gangBalance = 100;
+    private int gangLevel = 1;
+    private int maxMembers = 3;
+    private int maxAllies = 2;
+    private int maxEnemies = 3;
+    private int gangDamage = 100;
+    private int allyDamage = 100;
+    private int guardKills = 0;
+    private int prisonerKills = 0;
+    private int officerKills = 0;
+    private int deaths = 0;
     private boolean nameBeenChanged = false;
 
-    public GangPermissions gangPermissions = new GangPermissions();
-    private LevelSystem levelSystem = new LevelSystem();
-
-    public LevelSystem getLevelSystem(){
-        return levelSystem;
-    }
-
-    private Map<Integer, String> enemies = new HashMap<>(), allies = new HashMap<>();
-    private List<String> memberInvitations = new ArrayList<>(), allyInvitation = new ArrayList<>();
-
-    public List<String> getAllyInvitation() {
-        return allyInvitation;
-    }
-
-    public int getGangLevel(){
-        return levelSystem.getGangLevel();
-    }
-
-    public boolean hasNameBeenChanged(){
-        return nameBeenChanged;
-    }
-
-    public void setNameBeenChanged(boolean nameBeenChanged){
-        this.nameBeenChanged = nameBeenChanged;
-    }
+    private LevelSystem levelSystem = new LevelSystem(this.gangId);
+    public GangPermissions gangPermissions = new GangPermissions(this.gangId);
+    private Map<UUID, Integer> membersSorted = new LinkedHashMap<>();
+    private Map<Integer, String> enemies = new HashMap<>();
+    private Map<Integer, String> allies = new HashMap<>();
+    private List<String> memberInvitations = new ArrayList<>();
+    private List<String> allyInvitation = new ArrayList<>();
 
     public void removeMoney(int money){
         this.gangBalance -= money;
-    }
-
-    public Gang getInstance(){
-        return this;
-    }
-
-    public Map<Integer, String> getEnemies()
-    {
-        return enemies;
-    }
-
-    public Map<Integer, String> getAllies()
-    {
-        return allies;
-    }
-
-    public int getMaxEnemies()
-    {
-        return maxEnemies;
-    }
-
-    public void setMaxEnemies(int maxEnemies)
-    {
-        this.maxEnemies = maxEnemies;
-    }
-
-    public int getGangDamage(){
-        return gangDamage;
-    }
-
-    public int getAllyDamage(){
-        return allyDamage;
-    }
-
-    public void setGangDamage(int gangDamage){
-        this.gangDamage = gangDamage;
-    }
-
-    public void setAllyDamage(int allyDamage){
-        this.allyDamage = allyDamage;
-    }
-
-    public int getDeaths(){
-        return deaths;
-    }
-
-    public int getOfficerKills(){
-        return officerKills;
-    }
-
-    public int getAmountOfMembers(){
-        return membersSorted.size();
-    }
-
-    public int getAmountOfAllies(){
-        return allies.size();
-    }
-
-    public int getAmountOfEnemys(){
-        return enemies.size();
     }
 
     public void depositMoney(int amount)
@@ -160,87 +56,9 @@ public class Gang implements Serializable
         gangBalance += amount;
     }
 
-    public int getGuardKills()
-    {
-        return guardKills;
-    }
-
-    public void setGuardKills(int guardKills)
-    {
-        this.guardKills = guardKills;
-    }
-
-    public int getPrisonerKills()
-    {
-        return prisonerKills;
-    }
-
-    public void setPrisonerKills(int prisonerKills)
-    {
-        this.prisonerKills = prisonerKills;
-    }
-
     public boolean isPlayerInvited(String displayname)
     {
         return memberInvitations.contains(displayname.toLowerCase());
-    }
-
-
-    public List<String> getMemberInvitations()
-    {
-        return memberInvitations;
-    }
-
-    private Map<UUID, Integer> membersSorted = new LinkedHashMap<>();
-
-    public Map<UUID, Integer> getMembersSorted()
-    {
-        return membersSorted;
-    }
-
-    public int getGangId()
-    {
-        return gangId;
-    }
-
-    public int getGangBalance()
-    {
-        return gangBalance;
-    }
-
-    public void setGangBalance(int gangBalance)
-    {
-        this.gangBalance = gangBalance;
-    }
-
-    public int getMaxMembers()
-    {
-        return maxMembers;
-    }
-
-    public void setMaxMembers(int maxMembers)
-    {
-        this.maxMembers = maxMembers;
-    }
-
-    public int getMaxAllies()
-    {
-        return maxAllies;
-    }
-
-    public void setMaxAllies(int maxAllies)
-    {
-        this.maxAllies = maxAllies;
-    }
-
-    public String getGangName()
-    {
-        return gangName;
-    }
-
-    public void setGangName(String gangName)
-    {
-        this.gangName = gangName;
     }
 
     public void addEnemyGang(int gangID, String otherGangName){
@@ -286,8 +104,6 @@ public class Gang implements Serializable
     public void addMemberInvitation(String nameOfInvitedPlayer){
         this.memberInvitations.add(nameOfInvitedPlayer.toLowerCase());
     }
-
-
 
 
     public UUID getOwnerUuid(){
@@ -344,5 +160,174 @@ public class Gang implements Serializable
 
     public void removeEnemyGang(int gangID) {
         this.enemies.remove(gangID);
+    }
+
+
+    public String getGangName() {
+        return gangName;
+    }
+
+    public void setGangName(String gangName) {
+        this.gangName = gangName;
+    }
+
+    public int getGangId() {
+        return gangId;
+    }
+
+    public void setGangId(int gangId) {
+        this.gangId = gangId;
+    }
+
+    public int getGangBalance() {
+        return gangBalance;
+    }
+
+    public void setGangBalance(int gangBalance) {
+        this.gangBalance = gangBalance;
+    }
+
+    public int getGangLevel() {
+        return gangLevel;
+    }
+
+    public void setGangLevel(int gangLevel) {
+        this.gangLevel = gangLevel;
+    }
+
+    public int getMaxMembers() {
+        return maxMembers;
+    }
+
+    public void setMaxMembers(int maxMembers) {
+        this.maxMembers = maxMembers;
+    }
+
+    public int getMaxAllies() {
+        return maxAllies;
+    }
+
+    public void setMaxAllies(int maxAllies) {
+        this.maxAllies = maxAllies;
+    }
+
+    public int getMaxEnemies() {
+        return maxEnemies;
+    }
+
+    public void setMaxEnemies(int maxEnemies) {
+        this.maxEnemies = maxEnemies;
+    }
+
+    public int getGangDamage() {
+        return gangDamage;
+    }
+
+    public void setGangDamage(int gangDamage) {
+        this.gangDamage = gangDamage;
+    }
+
+    public int getAllyDamage() {
+        return allyDamage;
+    }
+
+    public void setAllyDamage(int allyDamage) {
+        this.allyDamage = allyDamage;
+    }
+
+    public int getGuardKills() {
+        return guardKills;
+    }
+
+    public void setGuardKills(int guardKills) {
+        this.guardKills = guardKills;
+    }
+
+    public int getPrisonerKills() {
+        return prisonerKills;
+    }
+
+    public void setPrisonerKills(int prisonerKills) {
+        this.prisonerKills = prisonerKills;
+    }
+
+    public int getOfficerKills() {
+        return officerKills;
+    }
+
+    public void setOfficerKills(int officerKills) {
+        this.officerKills = officerKills;
+    }
+
+    public int getDeaths() {
+        return deaths;
+    }
+
+    public void setDeaths(int deaths) {
+        this.deaths = deaths;
+    }
+
+    public boolean isNameBeenChanged() {
+        return nameBeenChanged;
+    }
+
+    public void setNameBeenChanged(boolean nameBeenChanged) {
+        this.nameBeenChanged = nameBeenChanged;
+    }
+
+    public GangPermissions getGangPermissions() {
+        return gangPermissions;
+    }
+
+    public void setGangPermissions(GangPermissions gangPermissions) {
+        this.gangPermissions = gangPermissions;
+    }
+
+    public LevelSystem getLevelSystem() {
+        return levelSystem;
+    }
+
+    public void setLevelSystem(LevelSystem levelSystem) {
+        this.levelSystem = levelSystem;
+    }
+
+    public Map<UUID, Integer> getMembersSorted() {
+        return membersSorted;
+    }
+
+    public void setMembersSorted(Map<UUID, Integer> membersSorted) {
+        this.membersSorted = membersSorted;
+    }
+
+    public Map<Integer, String> getEnemies() {
+        return enemies;
+    }
+
+    public void setEnemies(Map<Integer, String> enemies) {
+        this.enemies = enemies;
+    }
+
+    public Map<Integer, String> getAllies() {
+        return allies;
+    }
+
+    public void setAllies(Map<Integer, String> allies) {
+        this.allies = allies;
+    }
+
+    public List<String> getMemberInvitations() {
+        return memberInvitations;
+    }
+
+    public void setMemberInvitations(List<String> memberInvitations) {
+        this.memberInvitations = memberInvitations;
+    }
+
+    public List<String> getAllyInvitation() {
+        return allyInvitation;
+    }
+
+    public void setAllyInvitation(List<String> allyInvitation) {
+        this.allyInvitation = allyInvitation;
     }
 }

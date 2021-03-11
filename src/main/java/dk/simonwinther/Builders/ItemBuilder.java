@@ -25,7 +25,6 @@ public class ItemBuilder
         itemMeta = itemStack.getItemMeta();
     }
 
-
     public ItemBuilder(Material type, int amount, SkullType skullType){
         this(new ItemStack(type, amount, (short) skullType.ordinal()));
     }

@@ -5,10 +5,10 @@ import dk.simonwinther.inventorymanaging.menus.infomenu.submenus.*;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
 import dk.simonwinther.MainPlugin;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.MainMenu;
 import dk.simonwinther.utility.MessageProvider;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.utility.InventoryUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -24,7 +24,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class InfoMenu extends Menu
+public class InfoMenu extends AbstractMenu
 {
 
     private Gang gang;
@@ -96,7 +96,7 @@ public class InfoMenu extends Menu
             @Anonymous class: Using anonymous class of the menu class to open a confirm or cancel menu
             @param: the player's UUID
              */
-            whoClicked.openInventory(new Menu(uuid)
+            whoClicked.openInventory(new AbstractMenu(uuid)
             {
                 @Override
                 public Inventory getInventory()
@@ -153,7 +153,7 @@ public class InfoMenu extends Menu
         {
             e.printStackTrace();
         }
-        super.setItem(InventoryUtility.LIMITS_SLOT, new ItemBuilder(Material.ENDER_CHEST).setItemName("&e&lBegræsninger").setLore(MessageFormat.format("&6Medlemmer&f: &2&l{0}&f ud af &c&l{1}", gang.getAmountOfMembers(), gang.getMaxMembers()), MessageFormat.format("&6Allierede&f: &2&l{0}&f ud af &c&l{1}", gang.getAmountOfAllies(), gang.getMaxAllies()), MessageFormat.format("&6Rivaler&f: &2&l{0}&f ud af &c&l{1}", gang.getAmountOfEnemys(), gang.getMaxEnemies()), MessageFormat.format("&6Bande skade&f: &c&l{0}%", gang.getGangDamage()), MessageFormat.format("&6Alliance skade&f: &c&l{0}%", gang.getAllyDamage()), "&6Adgang til:", "&8 »&e Toiletterne: " + (gang.gangPermissions.accessToToilets ? "&aJa" : "&cNej"), "&8 »&e Gården: " + (gang.gangPermissions.accessToToilets ? "&aJa" : "&cNej"), "&8 »&e Laboratoriet: " + (gang.gangPermissions.accessToLab ? "&aJa" : "&cNej")).buildItem());
+        super.setItem(InventoryUtility.LIMITS_SLOT, new ItemBuilder(Material.ENDER_CHEST).setItemName("&e&lBegræsninger").setLore(MessageFormat.format("&6Medlemmer&f: &2&l{0}&f ud af &c&l{1}", gang.getMembersSorted().size(), gang.getMaxMembers()), MessageFormat.format("&6Allierede&f: &2&l{0}&f ud af &c&l{1}", gang.getAllies().size(), gang.getMaxAllies()), MessageFormat.format("&6Rivaler&f: &2&l{0}&f ud af &c&l{1}", gang.getEnemies().size(), gang.getMaxEnemies()), MessageFormat.format("&6Bande skade&f: &c&l{0}%", gang.getGangDamage()), MessageFormat.format("&6Alliance skade&f: &c&l{0}%", gang.getAllyDamage()), "&6Adgang til:", "&8 »&e Toiletterne: " + (gang.gangPermissions.accessToToilets ? "&aJa" : "&cNej"), "&8 »&e Gården: " + (gang.gangPermissions.accessToToilets ? "&aJa" : "&cNej"), "&8 »&e Laboratoriet: " + (gang.gangPermissions.accessToLab ? "&aJa" : "&cNej")).buildItem());
         super.setItem(InventoryUtility.LEVEL_SLOT, new ItemBuilder(Material.OBSIDIAN).setItemName("&5&lKrav til level "+(gang.getGangLevel() + 1)).setLore("&8&m----------------------", levelDescFunc.apply(gang)).buildItem());
         super.setItem(InventoryUtility.ALLY_SLOT, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.GREEN.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&a&lAllierede &e" + gang.getAllies().size() + "&7/&6" + gang.getMaxAllies()).setLore(getAllyList()).buildItem());
         super.setItem(InventoryUtility.ENEMY_SLOT, new ItemBuilder(new ItemStack(Material.STAINED_CLAY, 1, ColorDataEnum.RED.value[ColorIndexEnum.STAINED_CLAY.index])).setItemName("&4&lRivaler &c" + gang.getEnemies().size() + "&7/&4" + gang.getMaxEnemies()).setLore(getEnemiesList()).buildItem());
@@ -190,8 +190,6 @@ public class InfoMenu extends Menu
                 stringBuilder.append("&C&l✘").append("&7").append(requirement).append("\n");
             }
         }
-
-
         stringBuilder.append("&bDit level: &f&l").append(gang.getGangLevel());
         return stringBuilder.toString();
     };

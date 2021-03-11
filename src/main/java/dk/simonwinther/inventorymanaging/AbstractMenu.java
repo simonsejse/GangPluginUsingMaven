@@ -9,29 +9,24 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public abstract class Menu implements InventoryHolder
+public abstract class AbstractMenu implements InventoryHolder
 {
 
     protected UUID playerUUID;
+    protected Inventory inventory;
+    protected abstract String getName();
+    protected abstract int getSize();
 
-    public Menu(UUID playerUUID)  //Chaining constructors
+    public AbstractMenu(UUID playerUUID)
     {
         this();
         this.playerUUID = playerUUID;
     }
 
-    public Menu()
+    public AbstractMenu()
     {
-        inventory = Bukkit.createInventory(this, getSize(), getName());
+        this.inventory = Bukkit.createInventory(this, getSize(), getName());
     }
-
-
-
-    protected abstract String getName();
-
-    protected abstract int getSize();
-
-    protected Inventory inventory;
 
     protected void setItem(int index, ItemStack item)
     {

@@ -2,7 +2,7 @@ package dk.simonwinther.commandmanaging.arguments;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Gang;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
 import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
@@ -42,6 +42,7 @@ public class AllianceChat implements CommandArguments
     }
 
     /*
+    TODO: understa
     public <K, V extends Comparable<? super V>> Map<K, V> getLowestToHighest(@NotNull Map<K, V> map, @Nullable Integer limit){
 
     }

@@ -1,8 +1,10 @@
-package dk.simonwinther.utility;
+package dk.simonwinther.manager;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Gang;
 import dk.simonwinther.constants.Rank;
+import dk.simonwinther.utility.MessageProvider;
+import dk.simonwinther.utility.ProgessBar;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -13,36 +15,37 @@ import java.util.stream.Collectors;
 
 public class GangManaging {
     //Normally use dependency injection instead of singleton instance, but since it's a Utility class I never create an instance!
-    private MainPlugin plugin;
-    private MessageProvider mp;
-    private List<String> bannedWords;
+    private final MainPlugin plugin;
+    private final MessageProvider mp;
+    private final List<String> bannedWords;
 
     public GangManaging(MainPlugin plugin) {
         this.plugin = plugin;
         this.mp = this.plugin.getMessageProvider();
-        this.bannedWords = this.plugin.getCustomSettingsProvider().npcSettingsProvider.bannedWords;
+        this.bannedWords = this.plugin.getConfiguration().bannedWords;
     }
 
     public final int GANG_COST = 10000;
 
-    //UUID, Gang Name
-    public Map<UUID, String> userGangMap = new HashMap<>();
-    //Gang Name, Gang Instance
+    /**
+     * UUID, GangInfo -> {name, id
+     */
+    public Map<UUID, GangInfo> userGangMap = new HashMap<>();
+    /**
+     * Gang Name, Gang Instance
+     */
     public Map<String, Gang> gangMap = new HashMap<>();
 
     public Map<UUID, Boolean> damageMap = new HashMap<>();
 
-    public Map<String, Gang> getGangMap() {
-        return gangMap;
-    }
-
     public BiConsumer<? super UUID, String> addNewGangToMapsBiConsumer = (ownerUuid, gangName) -> {
-        userGangMap.put(ownerUuid, gangName);
-        gangMap.put(gangName, new Gang((this.gangMap.size() + 1), gangName, ownerUuid));
+        int gangID = (this.gangMap.size() + 1);
+        userGangMap.put(ownerUuid, new GangInfo(gangID, gangName));
+        gangMap.put(gangName, new Gang(gangID, gangName, ownerUuid));
     };
 
     private Function<String, String> lowerCaseFunc = String::toLowerCase;
-    public Function<? super UUID, Gang> getGangByUuidFunction = uuid -> gangMap.get(userGangMap.get(uuid));
+    public Function<? super UUID, Gang> getGangByUuidFunction = uuid -> gangMap.get(userGangMap.get(uuid).getGangName());
     public Predicate<String> gangExistsPredicate = gangMap::containsKey;
     public Function<? super UUID, Integer> rankFunction = uuid -> getGangByUuidFunction.apply(uuid).getMembersSorted().get(uuid);
 
@@ -98,8 +101,6 @@ public class GangManaging {
                 {
                     if (gangExistsPredicate.test(otherGangName))
                     {
-
-                        //TODO: Make it a function instead
                         if (playerGang.getEnemies().size() < playerGang.getMaxEnemies())
                         {
                             Gang otherGang = getGangByNameFunction.apply(otherGangName);
@@ -169,7 +170,6 @@ public class GangManaging {
                     if (!gang.equals(otherGang)) {
                         if (gang.hasRequestedAlly(otherGangName)) {
                             gang.removeAllyRequest(otherGangName);
-                            //requester.sendMessage(this.mp.unAlly.replace("{name}", message));
                             sendTeamMessage.accept(gang, this.mp.regretToBeAlly.replace("{name}", otherGang.getGangName()));
                         } else {
                             /**
@@ -207,11 +207,13 @@ public class GangManaging {
     }
 
     public void joinGang(UUID uuid, String displayName, String gangName) {
-        getGangByNameFunction.apply(gangName).addMember(uuid, lowerCaseFunc.apply(displayName), Rank.MEMBER);
-        userGangMap.put(uuid, gangName);
+        Gang gang = getGangByNameFunction.apply(gangName);
+        gang.addMember(uuid, lowerCaseFunc.apply(displayName), Rank.MEMBER);
+        userGangMap.put(uuid, new GangInfo(gang.getGangId(), gangName));
     }
 
     public void createNewGang(Player player, String gangName) {
+
         UUID playerUUID = player.getUniqueId();
         if (!(playerInGangPredicate.test(playerUUID))) {
             if (!(gangExistsPredicate.test(gangName))) {
@@ -227,15 +229,15 @@ public class GangManaging {
                     } else player.sendMessage(this.mp.gangNameDoesNotMeetRequirements);
                 } else {
                     player.sendMessage(this.mp.cantAffordGang.replace("{0}", String.valueOf(GANG_COST)));
-                    player.sendMessage(this.mp.progessBar.replace("{bar}",ProgessBar.buildProgressBar((int) playerBalance, GANG_COST)+""));
+                    player.sendMessage(this.mp.progessBar.replace("{bar}", ProgessBar.buildProgressBar((int) playerBalance, GANG_COST)+""));
                 }
             } else player.sendMessage(this.mp.gangExists.replace("{name}", gangName));
         } else player.sendMessage(this.mp.alreadyInGang);
     }
 
     public boolean doesGangNameFollowRequirements(String gangName) {
-        return gangName.length() <= this.plugin.getCustomSettingsProvider().maxNameLength
-                && gangName.length() >= this.plugin.getCustomSettingsProvider().minNameLength
+        return gangName.length() <= this.plugin.getConfiguration().maxNameLength
+                && gangName.length() >= this.plugin.getConfiguration().minNameLength
                 && !bannedWords.stream().anyMatch(gangName::contains);
     }
 
@@ -247,8 +249,8 @@ public class GangManaging {
                     if (!(_localPlayer.getName().equalsIgnoreCase(p.getName())))
                         _localPlayer.sendMessage(this.mp.successfullyCreatedGangGlobal.replace("{player}", p.getName()).replace("{name}", gangName));
                 });
+
         p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&l-" + GANG_COST + "&f$"));
+
     }
-
-
 }

@@ -266,8 +266,6 @@ public enum Level
 
 
 
-
-
     private List<Predicate<Gang>> requirements;
     private ItemStack[] acceptedItems;
     private String requirementDesc;

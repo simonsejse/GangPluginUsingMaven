@@ -3,10 +3,10 @@ package dk.simonwinther.inventorymanaging.menus.mainmenu.submenus;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.MainMenu;
 import dk.simonwinther.utility.InventoryUtility;
 import dk.simonwinther.utility.MessageProvider;
@@ -24,7 +24,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class InviteSubMenu extends Menu
+public class InviteSubMenu extends AbstractMenu
 {
     private MainPlugin plugin;
     private MessageProvider mp;
@@ -126,7 +126,7 @@ public class InviteSubMenu extends Menu
     private void addInviteItemsToInventory()
     {
         slot = 10;
-        this.gangManaging.getGangMap()
+        this.gangManaging.gangMap
                 .values()
                 .stream()
                 .filter(gang -> gang.getMemberInvitations().contains(Bukkit.getPlayer(playerUUID).getName().toLowerCase()))

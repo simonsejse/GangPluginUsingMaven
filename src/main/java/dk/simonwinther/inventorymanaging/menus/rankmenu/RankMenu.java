@@ -3,9 +3,9 @@ package dk.simonwinther.inventorymanaging.menus.rankmenu;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.Rank;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -16,7 +16,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public class RankMenu extends Menu
+public class RankMenu extends AbstractMenu
 {
     private MainPlugin plugin;
 
@@ -52,15 +52,6 @@ public class RankMenu extends Menu
         this.nameOfArgs = nameOfArgs;
     }
 
-    public UUID getplayerUUID()
-    {
-        return playerUUID;
-    }
-
-    public void setplayerUUID(UUID playerUUID)
-    {
-        this.playerUUID = playerUUID;
-    }
 
     public RankMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang, UUID playerUUID, String nameOfPlayer, UUID argsUuid, String nameOfArgs)
     {
@@ -95,32 +86,32 @@ public class RankMenu extends Menu
             whoClicked.sendMessage("Du kan ikke ændre din egen rang.");
             return;
         }
-        if (!this.gangManaging.playerInGangPredicate.test(whoClicked.getUniqueId())) {
+        if (!this.gangManaging.playerInGangPredicate.test(this.playerUUID)) {
             whoClicked.getOpenInventory().close();
             return;
         }
         switch (item.getType())
         {
             case IRON_INGOT:
-                if (gang.getMembersSorted().get(getplayerUUID()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getplayerUUID()) >= Rank.MEMBER.getValue())
+                if (gang.getMembersSorted().get(this.playerUUID) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(this.playerUUID) >= Rank.MEMBER.getValue())
                     gang.getMembersSorted().compute(getArgsUuid(), (uuid, key) -> Rank.MEMBER.getValue());
                 else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case GOLD_INGOT:
-                if (gang.getMembersSorted().get(getplayerUUID()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getplayerUUID()) > Rank.OFFICER.getValue())
+                if (gang.getMembersSorted().get(this.playerUUID) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(this.playerUUID) > Rank.OFFICER.getValue())
                     gang.getMembersSorted().compute(getArgsUuid(), (key, value) -> Rank.OFFICER.getValue());
                 else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case DIAMOND:
-                if (gang.getMembersSorted().get(getplayerUUID()) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(getplayerUUID()) >= Rank.CO_LEADER.getValue())
+                if (gang.getMembersSorted().get(this.playerUUID) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(this.playerUUID) >= Rank.CO_LEADER.getValue())
                     gang.getMembersSorted().compute(getArgsUuid(), (key, value) -> Rank.CO_LEADER.getValue());
                 else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case EMERALD:
-                if (gang.getMembersSorted().get(getplayerUUID()) == Rank.LEADER.getValue())
+                if (gang.getMembersSorted().get(this.playerUUID) == Rank.LEADER.getValue())
                 {
                     gang.getMembersSorted().compute(getArgsUuid(), (key, value) -> Rank.LEADER.getValue());
-                    gang.getMembersSorted().compute(getplayerUUID(), (key, value) -> Rank.CO_LEADER.getValue());
+                    gang.getMembersSorted().compute(this.playerUUID, (key, value) -> Rank.CO_LEADER.getValue());
                     gang.getMembersSorted().keySet()
                             .stream()
                             .filter(p -> Bukkit.getPlayer(p) != null)

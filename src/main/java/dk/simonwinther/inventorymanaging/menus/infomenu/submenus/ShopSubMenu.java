@@ -4,20 +4,21 @@ import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.MainMenu;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.utility.InventoryUtility;
 import dk.simonwinther.utility.MessageProvider;
+import dk.simonwinther.utility.ShopCostUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class ShopSubMenu extends Menu
+public class ShopSubMenu extends AbstractMenu
 {
     private final MainPlugin plugin;
     private final MessageProvider mp;
@@ -25,15 +26,6 @@ public class ShopSubMenu extends Menu
     private InfoMenu infoMenu;
     private Gang gang;
     private final boolean openedFromMainMenu;
-    private final int gangDamageCost = 10000;
-    private final int allyDamageCost = 15000;
-    private final int gangChangeNameCost = 25000;
-    private final int maxMembersCost = 10000;
-    private final int maxAlliesCost = 20000;
-    private final int maxEnemiesCost = 15000;
-    private final int accessToToiletCost = 10000;
-    private final int accessToFarmCost = 100000;
-    private final int accessToLabCost = 250000;
 
 
     public ShopSubMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang) //In case opening directly without opening the InfoMenu
@@ -74,7 +66,7 @@ public class ShopSubMenu extends Menu
     {
         if (item.getType() != Material.BED && item.getType() != Material.INK_SACK) return;
         if (slot == InventoryUtility.BACK_SLOT) {
-            Inventory inventory = null;
+            Inventory inventory;
             if (openedFromMainMenu) inventory = new MainMenu(gangManaging, plugin, whoClicked.getUniqueId(), true).getInventory();
             else inventory = infoMenu.getInventory();
             whoClicked.openInventory(inventory);
@@ -87,67 +79,68 @@ public class ShopSubMenu extends Menu
             switch (slot)
             {
                 case 10:
-                    if (balance >= gangDamageCost && gang.getGangDamage() > 0)
+                    if (balance >= ShopCostUtil.GANG_DAMAGE && gang.getGangDamage() > 0)
                     {
-                        cost = gangDamageCost;
+                        cost = ShopCostUtil.GANG_DAMAGE;
                         gang.setGangDamage(gang.getGangDamage() - 1);
                     }
                     break;
                 case 11:
-                    if (balance >= allyDamageCost && gang.getAllyDamage() > 0)
+                    if (balance >= ShopCostUtil.ALLY_DAMAGE && gang.getAllyDamage() > 0)
                     {
-                        cost = allyDamageCost;
+                        cost = ShopCostUtil.ALLY_DAMAGE;
                         gang.setAllyDamage(gang.getAllyDamage() - 1);
                     }
                     break;
                 case 15:
-                    if (balance >= gangChangeNameCost && !gang.hasNameBeenChanged())
+                    if (balance >= ShopCostUtil.CHANGE_NAME && !gang.isNameBeenChanged())
                     {
-                        //Change name
+                        cost = ShopCostUtil.CHANGE_NAME;
+                        //TODO: Change name
                     }
                     break;
                 case 16:
                     break;
                 //sugarcane
                 case 28:
-                    if (balance >= maxMembersCost && gang.getMaxMembers() < 20)
+                    if (balance >= ShopCostUtil.MAX_MEMBERS && gang.getMaxMembers() < 20)
                     {
-                        cost = maxMembersCost;
+                        cost = ShopCostUtil.MAX_MEMBERS;
                         gang.setMaxMembers(gang.getMaxMembers() + 1);
                     }
                     break;
                 case 29:
-                    if (balance >= maxAlliesCost && gang.getMaxAllies() < 10)
+                    if (balance >= ShopCostUtil.MAX_ALLIES && gang.getMaxAllies() < 10)
                     {
-                        cost = maxAlliesCost;
+                        cost = ShopCostUtil.MAX_ALLIES;
                         gang.setMaxAllies(gang.getMaxAllies() + 1);
                     }
                     break;
                 case 30:
-                    if (balance >= maxEnemiesCost && gang.getMaxEnemies() < 15)
+                    if (balance >= ShopCostUtil.MAX_ENEMIES && gang.getMaxEnemies() < 15)
                     {
-                        cost = maxEnemiesCost;
+                        cost = ShopCostUtil.MAX_ENEMIES;
                         gang.setMaxEnemies(gang.getMaxEnemies() + 1);
                     }
                     break;
                 case 32:
-                    if (balance >= accessToToiletCost && !gang.gangPermissions.accessToToilets)
+                    if (balance >= ShopCostUtil.ACCESS_TOILET && !gang.gangPermissions.accessToToilets)
                     {
-                        cost = accessToToiletCost;
+                        cost = ShopCostUtil.ACCESS_TOILET;
                         gang.gangPermissions.setAccessToToilets(true);
                     }
                     break;
                 case 33:
-                    if (balance >= accessToFarmCost && !gang.gangPermissions.accessToFarm)
+                    if (balance >= ShopCostUtil.ACCESS_TO_FARM && !gang.gangPermissions.accessToFarm)
                     {
-                        cost = accessToFarmCost;
+                        cost = ShopCostUtil.ACCESS_TO_FARM;
                         gang.gangPermissions.setAccessToFarm(true);
                     }
                     break;
                 case 34:
-                    if (balance >= accessToLabCost && !gang.gangPermissions.accessToLab)
+                    if (balance >= ShopCostUtil.ACCESS_TO_LAB && !gang.gangPermissions.accessToLab)
                     {
-                        cost = accessToLabCost;
+                        cost = ShopCostUtil.ACCESS_TO_LAB;
                         gang.gangPermissions.setAccessToLab(true);
                     }
                     break;
@@ -172,7 +165,7 @@ public class ShopSubMenu extends Menu
                 new ItemBuilder(new ItemStack(Material.INK_SACK, Math.min(gang.getGangDamage(), 64), ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lBande skade")
                         .setLore("&7Køb 1% mindre bande skade", "&7Nuværende: &f"
-                                + gang.getGangDamage() + "%", "&7Pris: &f" + gangDamageCost)
+                                + gang.getGangDamage() + "%", "&7Pris: &f" + ShopCostUtil.GANG_DAMAGE)
                         .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, 1, ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index])).setItemName("&7&lMinimum nået!")
                 .setLore("&fDin bande skade er", "&fallerede på 0%")
@@ -186,7 +179,7 @@ public class ShopSubMenu extends Menu
                 new ItemBuilder(new ItemStack(Material.INK_SACK, Math.min(gang.getAllyDamage(), 64), ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lAlliance skade")
                         .setLore("&7Køb 1% mindre alliance skade", "&7Nuværende: &f"
-                                + gang.getAllyDamage() + "%", "&7Pris: &f" + allyDamageCost).buildItem()
+                                + gang.getAllyDamage() + "%", "&7Pris: &f" + ShopCostUtil.ALLY_DAMAGE).buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, 1, ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lMinimum nået!")
                 .setLore("&fDin alliance skade er", "&fallerede på 0%")
@@ -197,9 +190,9 @@ public class ShopSubMenu extends Menu
                 .setAmount(4)
                 .buildItem());
 
-        setItem(15, gangLevel >= 8 ? (!gang.hasNameBeenChanged() ?
+        setItem(15, gangLevel >= 8 ? (!gang.isNameBeenChanged() ?
                 new ItemBuilder(new ItemStack(Material.INK_SACK, 1, ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index])).setItemName("&d&lSkift navn")
-                        .setLore("&7Klik for at skifte din bandes navn", "&7Pris: &f$" + gangChangeNameCost)
+                        .setLore("&7Klik for at skifte din bandes navn", "&7Pris: &f$" + ShopCostUtil.CHANGE_NAME)
                         .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, 1, ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lAllerede gjort")
@@ -226,7 +219,7 @@ public class ShopSubMenu extends Menu
                 new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxMembers(), ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lAntal medlemmer")
                         .setLore("&7Køb plads til 1 medlem mere", "&7Nuværende: &f"
-                                + gang.getMaxMembers() + " medlemmer", "&7Pris: &f$" + maxMembersCost)
+                                + gang.getMaxMembers() + " medlemmer", "&7Pris: &f$" + ShopCostUtil.MAX_MEMBERS)
                         .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxMembers(), ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lMaskimum nået!")
@@ -236,7 +229,7 @@ public class ShopSubMenu extends Menu
                 new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxAllies(), ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lAntal allierede")
                         .setLore("&7Køb plads til 1 allierede mere", "&7Nuværende: &f"
-                                + gang.getMaxAllies() + " medlemmer", "&7Pris: &f$" + maxAlliesCost)
+                                + gang.getMaxAllies() + " medlemmer", "&7Pris: &f$" + ShopCostUtil.MAX_ALLIES)
                         .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxAllies(), ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lMaskimum nået!")
@@ -251,7 +244,7 @@ public class ShopSubMenu extends Menu
                 new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxEnemies(), ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lAntal rivaler")
                         .setLore("&7Køb plads til 1 rival mere", "&7Nuværende: &f"
-                                + gang.getMaxEnemies() + " medlemmer", "&7Pris: &f$" + maxEnemiesCost)
+                                + gang.getMaxEnemies() + " medlemmer", "&7Pris: &f$" + ShopCostUtil.MAX_ENEMIES)
                         .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxEnemies(), ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lMaskimum nået!")
@@ -266,7 +259,7 @@ public class ShopSubMenu extends Menu
         setItem(32, gangLevel >= 3 ? (!gang.gangPermissions.accessToToilets ?
                 new ItemBuilder(new ItemStack(Material.INK_SACK, 1, ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lToiletterne")
-                        .setLore("&7Køb adgang til toiletterne i C", "&7Pris: &f$" + accessToToiletCost)
+                        .setLore("&7Køb adgang til toiletterne i C", "&7Pris: &f$" + ShopCostUtil.ACCESS_TOILET)
                         .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, 1, ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lAllerede købt")
@@ -280,7 +273,7 @@ public class ShopSubMenu extends Menu
         setItem(33, (gangLevel >= 5) ? (!gang.gangPermissions.accessToFarm ?
                 new ItemBuilder(new ItemStack(Material.INK_SACK, 1, ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lGården")
-                        .setLore("&7Køb adgang til gården i B", "&7Pris: &f$" + accessToFarmCost)
+                        .setLore("&7Køb adgang til gården i B", "&7Pris: &f$" + ShopCostUtil.ACCESS_TO_FARM)
                         .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, 1, ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lAllerede købt")
@@ -295,7 +288,7 @@ public class ShopSubMenu extends Menu
         setItem(34, gangLevel >= 7 ? (!gang.gangPermissions.accessToLab ?
                 new ItemBuilder(new ItemStack(Material.INK_SACK, 1, ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lLaboratoriet")
-                        .setLore("&7Køb adgang til laboratoriet i A", "&7Pris: &f$" + accessToLabCost)
+                        .setLore("&7Køb adgang til laboratoriet i A", "&7Pris: &f$" + ShopCostUtil.ACCESS_TO_LAB)
                         .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, 1, ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lAllerede købt")

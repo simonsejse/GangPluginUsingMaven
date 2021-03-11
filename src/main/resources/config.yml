@@ -1,0 +1,116 @@
+ #   ██████╗░░█████╗░███╗░░██╗██████╗░███████╗
+ #   ██╔══██╗██╔══██╗████╗░██║██╔══██╗██╔════╝
+ #   ██████╦╝███████║██╔██╗██║██║░░██║█████╗░░
+ #   ██╔══██╗██╔══██║██║╚████║██║░░██║██╔══╝░░
+ #   ██████╦╝██║░░██║██║░╚███║██████╔╝███████╗
+ #   ╚═════╝░╚═╝░░╚═╝╚═╝░░╚══╝╚═════╝░╚══════╝
+ # Af Simon Winther:
+ # simonsejse.github.io
+
+#permissions to toilets
+accessToToiletsPermission: 'adgang.toilets'
+#permissions to farm
+accessToFarmPermission: 'adgang.farm'
+#permissions to laboratory
+accessToLaboratoryPermission: 'adgang.laboratory'
+
+#The maximum length of a gang name
+maxNameLength: 12
+#The minimum length of a gang name
+minNameLength: 4
+
+#Banned words for the gang name
+bannedWords:
+  - 'tissemand'
+  - 'tissemænd'
+  - 'fisse'
+  - 'pik'
+  - 'patter'
+  - 'luder'
+  - 'fede'
+  - 'homo'
+  - 'bøsse'
+  - 'penis'
+
+#Settings for the NPC, here you can edit all the details for the NPC like the name and the message it sends.
+npcSettingsProvider:
+  npcName: 'Ali Mustafa'
+  goAwayMessages:
+    - 'Gå væk!!!'
+    - 'Jeg vil ikke have noget!!!'
+    - 'Føj!!'
+  deliveredMessages:
+    - 'Tak du gamle!'
+    - 'Uha, stoffer!!'
+    - 'Jeg håber for dig det er god kvalitet!'
+    - 'MERE!! Jeg vil have mere!'
+
+#Profile settings for MYSQL
+mySQLProfile:
+  database: 'gangdatabase'
+  host: 'localhost'
+  username: 'root'
+  password: ''
+  port: 3306
+
+#All messages to be sent to the player
+messageProvider:
+  prefix: '§8§l| §cBande §8§l| '
+  missingArguments: '§cDu mangler argumenter!'
+  alreadyInGang: '§bDu er allerede i en bande!'
+  gangExists: '§cBanden med navnet §7{name}§c eksistere allerede.'
+  gangDoesNotExists: '§cBanden med navnet §7{name}§c eksistere ikke.'
+  gangCreated: '§aDu har oprettet en bande med navnet {name}'
+  successfullyCreatedGangGlobal: '§a{player}§7 har oprettet en bande med navnet §2{name}.'
+  notInGang: '§cDu er ikke i en bande.'
+  successfullyLeftGang: '§cDu har forladt banden §8§l’§7{name}§8§l’§c'
+  memberLeftGang: '§9{oldmember}§b har forladt jeres bande.'
+  notHighRankEnough: '§cKommandoen du forsøger at bruge er kun for folk med højere rang i banden.\nEventuelt bed lederen om at give jer tilladelse via tilladelse menuen.'
+  playerNotInGang: '§cSpilleren er ikke i en bande.'
+  notInSameGang: '§cSpilleren er ikke i samme bande som dig.'
+  memberKicked: '§cDu er blevet smidt ud af banden §8§l’§4{name}§8§l’§7.'
+  playerWasKicked: '§cYou\’ve kicked the player §4{args}§c from the gang.'
+  playerKickHimself: '§cDu kan ikke kicke dig selv fra banden, brug derimod /bande leave.'
+  playerWasUninvited: '§4{args}§c er ikke længere inviteret til din bande.'
+  playerWasInvited: '§2{args}§a er blevet inviteret til banden.'
+  sameGang: '§cDu kan ikke invitere en spiller som allerede er i din bande.'
+  cantInviteYourself: '§cDu kan ikke invitere dig selv.'
+  notInvitedToGang: '§cDu er ikke inviteret til banden.'
+  invitedToGang: '§aDu er blevet inviteret til at joine banden §2{name}§a af §2{player}'
+  hasNeverPlayed: '§4{args}§c har aldrig været på serveren.'
+  gangNotSpaceEnough: '§cBanden har nået sit maksimale antal af spilleren, opgrader ved brug af /bande eller /bande shop.'
+  successfullyJoinedGang: '§aDu er nu med i banden §a{name}'
+  successfullyJoinedGangGlobal: '§2{spiller}§a er nu en del af banden §2{name}'
+  newLeader: '§2{player}§a er ikke længere lederen af §2{name}§a. Byd jeres nye leder velkommen - §2{newleader}'
+  cantRankYourself: '§cDu kan ikke ændre din egen rank.'
+  allySuccessful: '§2{name}§a er nu jeres allierede.'
+  enemySuccessful: '§4{name}§c er nu jeres rival.'
+  unEnemy: '§2{name}§7 er ikke længere jeres rival!'
+  cantUnEnemy: '§cDin bande er §4IKKE§c rival med denne bande.'
+  cantAllyOwnGang: '§cDu kan ikke alliere din egen bande.'
+  cantEnemyOwnGang: '§cDu kan ikke have din egen bande som rival.'
+  playerGangMaxAllies: '§cBanden har nået sit maksimale antal af allierede. Opgrader vha. /bande menuen eller /bande shop.'
+  playerGangMaxEnemies: '§cDin bande har nået sit maksimale antal af rivaler, opgrader vha. /bande menuen eller /bande shop.'
+  alreadyAllies: '§cDu er allerede allieret med denne bande.'
+  wishesToBeAlly: '§2{name}§a vil gerne være jeres allierede.'
+  regretToBeAlly: '§4{name}§c ønsker ikke længere at være allierede med jer.'
+  passOwnership: '§cDu kan ikke forlade banden før alle er ude eller du har givet en anden ejerskab af banden.'
+  cantAffordGang: '§cDu har ikke råd til at oprette en bande! Det koster: §f§l{0}$'
+  askAlly: '§aDu har spurgt §2{name} §aom alliance!'
+  unAlly: '§cDu ønsker ikke længere alliance med §4{name}!'
+  kickHigherRank: '§cDu kan ikke smide nogen ud som er i højere rang end dig.'
+  notEnoughMoney: '§cDu har ikke råd til dette.'
+  whoToInviteChat: '§cSkriv i chatten hvem du vil invitere til banden.'
+  whoToAllyChat: '§cSkriv i chatten hvilken bande du vil alliere.'
+  whoToEnemyChat: '§cSkriv i chatten hvem du ønsker at blive rival med.'
+  createGangChat: '§cSkriv navnet på banden du ønsker at oprette.\nSkriv !stop for at annullere.'
+  denyAlly: '§aDu ønsker ikke længere at være allierede med §2{name}!'
+  allyDenied: '§cBanden §4{name}§c afslog jeres invitation til at være allierede.'
+  noLongerAllies: '§7Banden §f{name}§7 er ikke længere jeres allierede!'
+  stillMissingRequirements: '§cDin bande mangler stadig nogle krav til Ali Mustafa!'
+  levelUpSuccess: '§a§lTILLYKKE! §7Din bande er nu i level: {level}'
+  insertBank: '§7Du har indsat §2§l{0}$§7 i din bande bank'
+  toggleDamage: '§7Du har skiftet bande skade: {value}'
+  gangNameDoesNotMeetRequirements: '§7Bandenavnet opfylder ikke kravene.'
+  progessBar: '§7Progess {bar}'
+  noSpace: 'Intet mellemrum i bandenavnet!'

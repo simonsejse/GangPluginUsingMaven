@@ -1,8 +1,6 @@
 package dk.simonwinther;
 
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sk89q.worldguard.bukkit.RegionContainer;
 import com.sk89q.worldguard.bukkit.RegionQuery;
 import com.sk89q.worldguard.bukkit.WGBukkit;
@@ -12,13 +10,9 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dk.simonwinther.commandmanaging.ConfirmTransferCmd;
 import dk.simonwinther.commandmanaging.GangCommand;
 import dk.simonwinther.events.EventHandling;
-import dk.simonwinther.files.SQLFile;
-import dk.simonwinther.files.SettingsConfig;
-import dk.simonwinther.files.FileInterface;
-import dk.simonwinther.files.MessageFile;
-import dk.simonwinther.inventorymanaging.Menu;
-import dk.simonwinther.settingsprovider.CustomSettingsProvider;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
+import dk.simonwinther.manager.GangManaging;
+import dk.simonwinther.settingsprovider.Configuration;
 import dk.simonwinther.utility.MessageProvider;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
@@ -30,26 +24,24 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class MainPlugin extends JavaPlugin
 {
 
-    /* Properties */
-    private FileInterface messageConfig;
-    private FileInterface settingsConfig;
-    private FileInterface sqlFile;
-
-    private CustomSettingsProvider customSettingsProvider;
-    private MessageProvider messageProvider;
+    private Configuration configuration;
 
     private EventHandling eventHandling;
     private GangManaging gangManaging = null;
@@ -59,22 +51,17 @@ public final class MainPlugin extends JavaPlugin
     private Economy econ = null;
 
     private final static Logger LOGGER = Logger.getLogger("Minecraft");
-    public final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private final Consumer<String> log = (string) -> Bukkit.getConsoleSender().sendMessage(ChatColor.RED + string);
 
-    private ConnectionProvider connectionProvider;
-    //private final SQLQueriesProvider sqlQueriesProvider = new SQLQueriesProvider();
+    //private ConnectionProvider connectionProvider;
     //private final String[] tables = new String[]{"users", "memberInvitations", "gangMembers", "gangAllies", "gangPermissions", "gangs"};
-
 
     @Override
     public void onEnable()
     {
-        initializeFiles();
-
-
-        //Open connection
-        this.connectionProvider = new ConnectionProvider(this.customSettingsProvider.mySQLProfile);
-        this.connectionProvider.openConnection();
+        this.saveDefaultConfig();
+        setupDiscord();
+        initializeConfiguration();
 
         this.gangManaging = new GangManaging(this);
         getCommand("bande").setExecutor(new GangCommand(gangManaging, this));
@@ -90,7 +77,7 @@ public final class MainPlugin extends JavaPlugin
         }
 
 
-        startScheduler();
+        startSchedulers();
         registerEvents(this.eventHandling);
         setupPermissions();
         setupChat();
@@ -99,78 +86,30 @@ public final class MainPlugin extends JavaPlugin
 
     }
 
-    private void initializeFiles() {
-        //Setup message.json
-        this.messageConfig = new MessageFile(this, "message.json");
-        this.messageConfig.initFile();
-
-        //Init file and write all json data from github page to then be read into a class
-        try{
-            TypeReference<MessageProvider> chatUtilTypeReference = new TypeReference<MessageProvider>(){};
-            this.messageProvider = OBJECT_MAPPER.readValue(this.messageConfig.getFile(), chatUtilTypeReference);
-        }catch(IOException e){
-            Bukkit.getLogger().log(Level.SEVERE, "Der er fejl i message.json filen!\nDisabler pluginnet.");
-            this.getServer().getPluginManager().disablePlugin(this);
-        }
-
-        //Setup config.json
-        this.settingsConfig = new SettingsConfig(this);
-        this.settingsConfig.initFile();
-
-        //Init file and write all json data from github page to then be read into a class
-        try{
-            TypeReference<CustomSettingsProvider> defaultConfigTypeReference = new TypeReference<CustomSettingsProvider>(){};
-            this.customSettingsProvider = OBJECT_MAPPER.readValue(this.settingsConfig.getFile(), defaultConfigTypeReference);
-        }catch(IOException e){
-            Bukkit.getLogger().log(Level.SEVERE, "Kunne ikke læse dataen fra config.json");
-            this.getPluginLoader().disablePlugin(this);
-        }
-
-        this.sqlFile = new SQLFile(this);
-        this.sqlFile.initFile();
-        //Init file to then use SQL Queries to create all tables.
-
-
-
-    }
-
-    @Override
-    public void onDisable()
-    {
-        Bukkit.getOnlinePlayers()
-                .stream()
-                .filter(p -> p.getOpenInventory().getTopInventory().getHolder() instanceof Menu)
-                .forEach(Player::closeInventory);
-        saveData();
-    }
-
-    /*
-    private void loadData(){
-        //Check all tables exists
-
-        try(Statement statement = connectionProvider.getConnection().createStatement()){
-            for(int i = 0;i<tables.length;i++){
-                try(ResultSet rs = connectionProvider.getConnection().getMetaData().getTables(null, null, tables[i], null)){
-                    if (!rs.next()){
-                        createTable(tables[i]);
-                    }
-                }catch(SQLException e){
-                    e.printStackTrace();
-                }
-            }
-        }catch(SQLException e ){
-            e.printStackTrace();
-        }
-    }
-     */
-
-    void createTable(String table){
-
-    }
 
     private void saveData(){
 
     }
+
+    private void setupDiscord(){
+
+    }
+
+
+    private void initializeConfiguration() {
+        //Init file and write all json data from github page to then be read into a class
+        Yaml yaml = new Yaml(new CustomClassLoaderConstructor(Configuration.class.getClassLoader()));
+        try(InputStream in = Files.newInputStream(Paths.get(getDataFolder().getPath()+"/config.yml"))){
+            this.configuration = yaml.loadAs(in, Configuration.class);
+        }catch(IOException e){
+            log.accept("Kunne ikke læse config.yml data!");
+            this.getPluginLoader().disablePlugin(this);
+        }
+
+    }
+
+
+
 
     private void registerEvents(Listener... listeners)
     {
@@ -178,21 +117,20 @@ public final class MainPlugin extends JavaPlugin
     }
 
 
-    private void startScheduler()
+    private void startSchedulers()
     {
         Bukkit.getScheduler().runTaskTimer(this, () ->
         {
-            saveData();
             Bukkit.getOnlinePlayers()
                     .stream()
                     .filter(Player::isOp)
-                    .forEach(p -> p.sendMessage(ChatColor.translateAlternateColorCodes('&', schedulerUpdated.get())));
+                    .forEach(p -> p.sendMessage(ChatColor.translateAlternateColorCodes('&', gangsUpdated.get())));
 
         }, 6000, 6000);
+
     }
+    private final Supplier<String> gangsUpdated = () -> "&8&l| &b&lBande &8&l| &2&l" + gangManaging.gangMap.keySet().size() + "&a bander er blevet automatisk gemt...!";
 
-
-    private final Supplier<String> schedulerUpdated = () -> "&8&l| &b&lBande &8&l| &2&l" + gangManaging.gangMap.keySet().size() + "&a bander er blevet automatisk gemt...!";
 
     public WorldGuardPlugin getWorldGuard()
     {
@@ -200,7 +138,7 @@ public final class MainPlugin extends JavaPlugin
 
         if (plugin == null)
         {
-            logMessage.accept("Du skal have WorldGuard dependency");
+            log.accept("Du skal have WorldGuard dependency");
             getServer().getPluginManager().disablePlugin(this);
             return null;
         }
@@ -264,7 +202,22 @@ public final class MainPlugin extends JavaPlugin
         return econ != null;
     }
 
-    /* Getters And Setters */
+    @Override
+    public void onDisable()
+    {
+
+        saveData();
+        if (this.gangManaging.gangMap.values().size() < 1) return;
+        Bukkit.getOnlinePlayers()
+                .stream()
+                .filter(p -> p.getOpenInventory().getTopInventory().getHolder() instanceof AbstractMenu)
+                .forEach(Player::closeInventory);
+    }
+
+    /**
+     * Getters And Setters
+     *
+     */
     public Economy getEconomy()
     {
         return econ;
@@ -275,21 +228,13 @@ public final class MainPlugin extends JavaPlugin
         return MainPlugin.perms;
     }
 
-    private Consumer<String> logMessage = (string) -> Bukkit.getConsoleSender().sendMessage(ChatColor.RED + string);
-
-    public CustomSettingsProvider getCustomSettingsProvider()
-    {
-        return customSettingsProvider;
-    }
-
-    public FileInterface getMessageConfig()
-    {
-        return messageConfig;
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
     public MessageProvider getMessageProvider()
     {
-        return messageProvider;
+        return this.configuration.messageProvider;
     }
 
     public EventHandling getEventHandling()

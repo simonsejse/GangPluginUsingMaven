@@ -17,4 +17,5 @@ public class ProgessBar {
                 +" §8("+color+progress+"%§8)";
     }
 
+
 }

@@ -4,9 +4,8 @@ import java.util.List;
 
 public class NPCSettingsProvider
 {
-
     /* Properties */
-    public List<String> bannedWords, goAwayMessages, deliveredMessages;
+    public List<String> goAwayMessages, deliveredMessages;
     public String npcName;
 
 }

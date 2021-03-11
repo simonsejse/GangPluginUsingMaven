@@ -1,15 +1,10 @@
 package dk.simonwinther.commandmanaging.arguments;
 
 import dk.simonwinther.MainPlugin;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
 import dk.simonwinther.utility.MessageProvider;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-
-import java.util.*;
-import java.util.function.Function;
 
 public class CreateArgument implements CommandArguments
 {

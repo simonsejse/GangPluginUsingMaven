@@ -3,10 +3,10 @@ package dk.simonwinther.inventorymanaging.menus.infomenu.submenus;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.utility.InventoryUtility;
 import dk.simonwinther.utility.MessageProvider;
@@ -22,7 +22,7 @@ import java.text.MessageFormat;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class BankSubMenu extends Menu
+public class BankSubMenu extends AbstractMenu
 {
     private final MainPlugin plugin;
     private final MessageProvider mp;
@@ -32,7 +32,6 @@ public class BankSubMenu extends Menu
 
     public BankSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang, UUID playerUUID)
     {
-
         this.plugin = plugin;
         this.mp = this.plugin.getMessageProvider();
         this.infoMenu = infoMenu;
@@ -51,6 +50,8 @@ public class BankSubMenu extends Menu
     @Override
     public Inventory getInventory()
     {
+
+
         InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_TWO, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.LIGHT_BLUE.value[ColorIndexEnum.STAINED_GLASS.index]), true);
 
         setItem(10, new ItemBuilder(Material.GOLD_NUGGET).setItemName("&c&l-1").buildItem());

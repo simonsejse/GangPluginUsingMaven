@@ -2,10 +2,10 @@ package dk.simonwinther.inventorymanaging.menus.mainmenu;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.submenus.ShopSubMenu;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.submenus.InviteSubMenu;
@@ -21,7 +21,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public class MainMenu extends Menu
+public class MainMenu extends AbstractMenu
 {
     private final MainPlugin plugin;
     private final UUID playerUUID;

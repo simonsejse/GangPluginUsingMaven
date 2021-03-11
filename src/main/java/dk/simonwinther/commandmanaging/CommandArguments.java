@@ -2,6 +2,7 @@ package dk.simonwinther.commandmanaging;
 
 import org.bukkit.entity.Player;
 
+
 public interface CommandArguments
 {
 

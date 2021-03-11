@@ -2,7 +2,7 @@ package dk.simonwinther.commandmanaging;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Gang;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.Level;
 import dk.simonwinther.constants.QuestPayEnum;
 import dk.simonwinther.utility.MessageProvider;

@@ -2,10 +2,10 @@ package dk.simonwinther.inventorymanaging.menus.mainmenu.submenus;
 
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.utility.InventoryUtility;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -17,7 +17,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Comparator;
 
-public class LeaderBoardSubMenu extends Menu
+public class LeaderBoardSubMenu extends AbstractMenu
 {
     private OtherSubMenu otherSubMenu;
     private int count = 0;
@@ -58,7 +58,6 @@ public class LeaderBoardSubMenu extends Menu
     public Inventory getInventory()
     {
         InventoryUtility.decorate(super.inventory, InventoryUtility.MENU_PREDICATE_SIX, new ItemStack(Material.STAINED_GLASS_PANE, 1, ColorDataEnum.RED.value[ColorIndexEnum.STAINED_GLASS.index]), true);
-
         super.setItem(20, new ItemBuilder(Material.IRON_SWORD).setItemName("&a&lFangedrab").setLore(getMostPrisonerKills()).addFlags(ItemFlag.HIDE_ATTRIBUTES).buildItem());
         super.setItem(22, new ItemBuilder(Material.GOLD_SWORD).setItemName("&a&lVagtdrab").setLore(getMostGuardKills()).addFlags(ItemFlag.HIDE_ATTRIBUTES).buildItem());
         super.setItem(24, new ItemBuilder(Material.DIAMOND_SWORD).setItemName("&a&lOfficerdrab").setLore(getMostOfficerKills()).addFlags(ItemFlag.HIDE_ATTRIBUTES).buildItem());
@@ -70,7 +69,7 @@ public class LeaderBoardSubMenu extends Menu
     public String getMostDeaths(){
         count = 0;
         stringBuilder = new StringBuilder();
-        this.gangManaging.getGangMap()
+        this.gangManaging.gangMap
                 .values()
                 .stream()
                 .sorted(Comparator.comparingInt(Gang::getDeaths))
@@ -84,7 +83,7 @@ public class LeaderBoardSubMenu extends Menu
     public String getMostMoney(){
         count = 0;
         stringBuilder = new StringBuilder();
-        this.gangManaging.getGangMap()
+        this.gangManaging.gangMap
                 .values()
                 .stream()
                 .sorted(Comparator.comparing(Gang::getGangBalance).reversed())
@@ -98,7 +97,7 @@ public class LeaderBoardSubMenu extends Menu
     public String getMostOfficerKills(){
         count = 0;
         stringBuilder = new StringBuilder();
-        this.gangManaging.getGangMap()
+        this.gangManaging.gangMap
                 .values()
                 .stream()
                 .sorted(Comparator.comparing(Gang::getOfficerKills).reversed())
@@ -113,7 +112,7 @@ public class LeaderBoardSubMenu extends Menu
     public String getMostGuardKills(){
         count = 0;
         stringBuilder = new StringBuilder();
-        this.gangManaging.getGangMap()
+        this.gangManaging.gangMap
                 .values()
                 .stream()
                 .sorted(Comparator.comparing(Gang::getGuardKills).reversed())
@@ -130,7 +129,7 @@ public class LeaderBoardSubMenu extends Menu
         count = 0;
         stringBuilder = new StringBuilder();
         this.gangManaging
-                .getGangMap()
+                .gangMap
                 .values()
                 .stream()
                 .sorted(Comparator.comparing(Gang::getPrisonerKills).reversed())

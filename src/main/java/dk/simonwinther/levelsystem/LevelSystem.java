@@ -2,31 +2,48 @@ package dk.simonwinther.levelsystem;
 
 import org.bukkit.Material;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+@Entity
 public class LevelSystem implements Serializable
 {
+
+
+    public LevelSystem(int gangID){
+        this.gangID = gangID;
+    }
+
+    public LevelSystem(){
+
+    }
+
     private final long serialVersionUID = 12387213612321L;
 
-    //bread = 0, sugar = 0,ironSword = 0, ironHelmet = 0, ironChestPlate = 0, ironLegs = 0, ironBoots = 0, diamondSword = 0, diamondHelmet = 0, diamondChest = 0, diamondLegs = 0, diamondBoots = 0,
-    private int gangLevel = 1, paidForQuest = 0;
 
-    private Map<Material, Integer> itemsMap = new HashMap() {{
-        put(Material.BREAD, 0);
-        put(Material.SUGAR, 0);
-        put(Material.IRON_SWORD, 0);
-        put(Material.IRON_HELMET, 0);
-        put(Material.IRON_CHESTPLATE, 0);
-        put(Material.IRON_LEGGINGS, 0);
-        put(Material.IRON_BOOTS, 0);
-        put(Material.DIAMOND_SWORD, 0);
-        put(Material.DIAMOND_HELMET, 0);
-        put(Material.DIAMOND_CHESTPLATE, 0);
-        put(Material.DIAMOND_LEGGINGS, 0);
-        put(Material.DIAMOND_BOOTS, 0);
-    }};
+    private int gangID;
+    private int gangLevel = 1;
+    private int paidForQuest = 0;
+
+    private Map<Material, Integer> itemsMap = new HashMap<>();
+
+
+    {
+        itemsMap.put(Material.BREAD, 0);
+        itemsMap.put(Material.SUGAR, 0);
+        itemsMap.put(Material.IRON_SWORD, 0);
+        itemsMap.put(Material.IRON_HELMET, 0);
+        itemsMap.put(Material.IRON_CHESTPLATE, 0);
+        itemsMap.put(Material.IRON_LEGGINGS, 0);
+        itemsMap.put(Material.IRON_BOOTS, 0);
+        itemsMap.put(Material.DIAMOND_SWORD, 0);
+        itemsMap.put(Material.DIAMOND_HELMET, 0);
+        itemsMap.put(Material.DIAMOND_CHESTPLATE, 0);
+        itemsMap.put(Material.DIAMOND_LEGGINGS, 0);
+        itemsMap.put(Material.DIAMOND_BOOTS, 0);
+    }
 
     public Integer getValueOfMaterial(Material material) {
         return itemsMap.get(material);
@@ -36,31 +53,40 @@ public class LevelSystem implements Serializable
         itemsMap.compute(material, (oldMat, oldNum) -> oldNum + integer);
     }
 
-    public Map<Material, Integer> getItemsMap(){
-        return itemsMap;
+
+    public long getSerialVersionUID() {
+        return serialVersionUID;
     }
 
-    public void setItemsMap(Map<Material, Integer> itemsMap){
-        this.itemsMap = itemsMap;
+    public int getGangID() {
+        return gangID;
     }
 
-    public int getPaidForQuest(){
-        return this.paidForQuest;
+    public void setGangID(int gangID) {
+        this.gangID = gangID;
     }
 
-    public void setPaidForQuest(int paidForQuest){
-        this.paidForQuest = paidForQuest;
-    }
-
-    public int getGangLevel()
-    {
+    public int getGangLevel() {
         return gangLevel;
     }
 
-    public void setGangLevel(int gangLevel)
-    {
+    public void setGangLevel(int gangLevel) {
         this.gangLevel = gangLevel;
     }
 
+    public int getPaidForQuest() {
+        return paidForQuest;
+    }
 
+    public void setPaidForQuest(int paidForQuest) {
+        this.paidForQuest = paidForQuest;
+    }
+
+    public Map<Material, Integer> getItemsMap() {
+        return itemsMap;
+    }
+
+    public void setItemsMap(Map<Material, Integer> itemsMap) {
+        this.itemsMap = itemsMap;
+    }
 }

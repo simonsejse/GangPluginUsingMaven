@@ -2,15 +2,9 @@ package dk.simonwinther.utility;
 
 public class MessageProvider {
     //TODO: Check if I purposely left out "ONE"!
-    public static String[] numbers = {"NULL", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE", "THIRTEEN"};
+    public static final String[] numbers = {"NULL", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN", "ELEVEN", "TWELVE", "THIRTEEN"};
 
-    /**
-     *
-     * All messages in here are READ using Jackson Object Mapper
-     * URL for json data:
-     * https://raw.githubusercontent.com/simonsejse/gang-messages.json/main/README.md
-     *
-     */
+
     public String prefix;
     public String missingArguments;
     public String alreadyInGang;

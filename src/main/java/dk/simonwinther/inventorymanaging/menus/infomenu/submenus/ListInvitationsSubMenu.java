@@ -5,7 +5,7 @@ import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.utility.InventoryUtility;
 import dk.simonwinther.utility.MessageProvider;
 import org.bukkit.ChatColor;
@@ -16,7 +16,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class ListInvitationsSubMenu extends Menu
+public class ListInvitationsSubMenu extends AbstractMenu
 {
     private Gang gang;
     private final MemberSubMenu memberSubMenu;

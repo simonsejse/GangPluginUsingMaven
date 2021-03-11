@@ -3,10 +3,10 @@ package dk.simonwinther.inventorymanaging.menus.infomenu.submenus;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
 import dk.simonwinther.Gang;
-import dk.simonwinther.utility.GangManaging;
+import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
-import dk.simonwinther.inventorymanaging.Menu;
+import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
 import dk.simonwinther.utility.InventoryUtility;
 import dk.simonwinther.utility.MessageProvider;
@@ -20,7 +20,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public class ListEnemySubMenu extends Menu
+public class ListEnemySubMenu extends AbstractMenu
 {
     private final MainPlugin plugin;
     private final MessageProvider mp;
@@ -63,7 +63,7 @@ public class ListEnemySubMenu extends Menu
             plugin.getEventHandling().addPlayerToAwaitEnemyRequest.accept(uuid);
             whoClicked.sendMessage(this.mp.whoToEnemyChat);
             whoClicked.getOpenInventory().close();
-        } else if (slot == 51) whoClicked.openInventory(new Menu()
+        } else if (slot == 51) whoClicked.openInventory(new AbstractMenu()
         {
             private int slot;
 
