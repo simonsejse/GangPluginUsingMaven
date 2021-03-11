@@ -14,6 +14,8 @@ import dk.simonwinther.inventorymanaging.AbstractMenu;
 import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.settingsprovider.Configuration;
 import dk.simonwinther.utility.MessageProvider;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -27,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 
+import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -50,7 +53,8 @@ public final class MainPlugin extends JavaPlugin
     private Chat chat = null;
     private Economy econ = null;
 
-    private final static Logger LOGGER = Logger.getLogger("Minecraft");
+    private JDA jda;
+
     private final Consumer<String> log = (string) -> Bukkit.getConsoleSender().sendMessage(ChatColor.RED + string);
 
     //private ConnectionProvider connectionProvider;
@@ -60,8 +64,8 @@ public final class MainPlugin extends JavaPlugin
     public void onEnable()
     {
         this.saveDefaultConfig();
-        setupDiscord();
         initializeConfiguration();
+        setupDiscord();
 
         this.gangManaging = new GangManaging(this);
         getCommand("bande").setExecutor(new GangCommand(gangManaging, this));
@@ -71,7 +75,7 @@ public final class MainPlugin extends JavaPlugin
 
         if (!setupEconomy())
         {
-            LOGGER.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
+            log.accept(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -92,7 +96,11 @@ public final class MainPlugin extends JavaPlugin
     }
 
     private void setupDiscord(){
-
+        try {
+            this.jda = JDABuilder.createDefault(this.configuration.discordToken).build();
+        } catch (LoginException e) {
+            log.accept("Din token i din config.yml er forkert!");
+        }
     }
 
 
@@ -242,4 +250,7 @@ public final class MainPlugin extends JavaPlugin
         return eventHandling;
     }
 
+    public JDA getJDA() {
+        return jda;
+    }
 }

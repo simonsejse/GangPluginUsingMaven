@@ -12,6 +12,9 @@ public class Configuration {
     public int maxNameLength, minNameLength;
     public List<String> bannedWords;
 
+    public String discordToken;
+    public long gangAnnouncementsChannelID;
+
     public NPCSettingsProvider npcSettingsProvider;
     public MySQLProfile mySQLProfile;
     public MessageProvider messageProvider;

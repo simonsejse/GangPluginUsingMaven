@@ -32,6 +32,12 @@ bannedWords:
   - 'bøsse'
   - 'penis'
 
+#your discord token for the bot to work
+discordToken: 'ID'
+
+#Go to the specific channel you want the announcement messages to be delivered in and rightclick > copy channel id > replace with 29837192
+gangAnnouncementsChannelID: 29837192
+
 #Settings for the NPC, here you can edit all the details for the NPC like the name and the message it sends.
 npcSettingsProvider:
   npcName: 'Ali Mustafa'

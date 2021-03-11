@@ -5,11 +5,15 @@ import dk.simonwinther.Gang;
 import dk.simonwinther.constants.Rank;
 import dk.simonwinther.utility.MessageProvider;
 import dk.simonwinther.utility.ProgessBar;
+import net.dv8tion.jda.api.EmbedBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.awt.*;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
@@ -213,7 +217,6 @@ public class GangManaging {
     }
 
     public void createNewGang(Player player, String gangName) {
-
         UUID playerUUID = player.getUniqueId();
         if (!(playerInGangPredicate.test(playerUUID))) {
             if (!(gangExistsPredicate.test(gangName))) {
@@ -226,6 +229,18 @@ public class GangManaging {
                         player.sendMessage(this.mp.gangCreated.replace("{name}", gangName));
                         sendGlobalGangCreatedMessage(player, gangName);
                         plugin.getEconomy().withdrawPlayer(Bukkit.getOfflinePlayer(playerUUID), GANG_COST);
+                        this.plugin.getJDA()
+                                .getTextChannelById(this.plugin.getConfiguration().gangAnnouncementsChannelID)
+                                .sendMessage(new EmbedBuilder()
+                                        .setTitle("NY BANDE OPRETTET!")
+                                        .setColor(Color.GREEN)
+                                        .setDescription(player.getName()+" har oprettet banden '"+gangName+"'")
+                                        .addField("Bande navn", gangName, true)
+                                        .addField("Oprettet af", player.getName(), true)
+                                        .addField("Datoen", String.valueOf(LocalDateTime.now()), false)
+                                        .setImage("https://www.icegif.com/wp-content/uploads/congratulations-icegif.gif")
+                                        .build())
+                                .queue();
                     } else player.sendMessage(this.mp.gangNameDoesNotMeetRequirements);
                 } else {
                     player.sendMessage(this.mp.cantAffordGang.replace("{0}", String.valueOf(GANG_COST)));
