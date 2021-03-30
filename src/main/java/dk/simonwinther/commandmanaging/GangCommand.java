@@ -40,7 +40,7 @@ public class GangCommand implements CommandExecutor
             new BankArgument(gangManaging, plugin),
             new AllianceChat(gangManaging, plugin),
             new BandeChat(gangManaging, plugin),
-            new SpawnBotArgument(),
+            new TestCommandArgument(),
             new GangDamageArgument(gangManaging, plugin)
         };
 
@@ -107,7 +107,7 @@ public class GangCommand implements CommandExecutor
             //Search for Gang Name
             if (gangManaging.gangMap.containsKey(args[0]))
             {
-                p.openInventory(new InfoMenu(gangManaging, plugin, gangManaging.getGangByNameFunction.apply(args[0]), false).getInventory());
+                p.openInventory(new InfoMenu(plugin, gangManaging.getGangByNameFunction.apply(args[0]), false, null).getInventory());
                 return true;
             }
 
@@ -116,14 +116,14 @@ public class GangCommand implements CommandExecutor
                 UUID argsUuid = Bukkit.getPlayer(args[0]).getUniqueId();
                 if (gangManaging.userGangMap.containsKey(argsUuid))
                 {
-                    p.openInventory(new InfoMenu(gangManaging, plugin, gangManaging.getGangByUuidFunction.apply(argsUuid), false).getInventory());
+                    p.openInventory(new InfoMenu(plugin, gangManaging.getGangByUuidFunction.apply(argsUuid), false, null).getInventory());
                     return true;
                 }
             }
         }
         if (gangManaging.playerInGangPredicate.test(p.getUniqueId()))
-            p.openInventory(new MainMenu(gangManaging, plugin, p.getUniqueId(), true).getInventory());
-        else p.openInventory(new MainMenu(gangManaging, plugin, p.getUniqueId(), false).getInventory());
+            p.openInventory(new MainMenu(plugin, p.getUniqueId(), true).getInventory());
+        else p.openInventory(new MainMenu(plugin, p.getUniqueId(), false).getInventory());
         return false;
     }
 

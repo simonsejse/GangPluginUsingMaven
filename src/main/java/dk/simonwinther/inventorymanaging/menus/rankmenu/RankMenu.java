@@ -2,7 +2,8 @@ package dk.simonwinther.inventorymanaging.menus.rankmenu;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
-import dk.simonwinther.Gang;
+import dk.simonwinther.inventorymanaging.menus.infomenu.submenus.EditMemberMenu;
+import dk.simonwinther.manager.Gang;
 import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.Rank;
 import dk.simonwinther.inventorymanaging.AbstractMenu;
@@ -22,47 +23,22 @@ public class RankMenu extends AbstractMenu
 
     private Gang gang;
 
-    private UUID argsUuid;
-
-    private String nameOfArgs;
-    private UUID playerUUID;
-
-    //TODO: Bruger slet ikke denne variabel
-    private final String nameOfPlayer;
+    private final UUID otherUUID;
+    private final String othersName;
+    private final UUID playerUUID;
     private final GangManaging gangManaging;
     private final MessageProvider mp;
 
 
-
-
-    public UUID getArgsUuid()
-    {
-        return argsUuid;
-    }
-
-
-
-    public String getNameOfArgs()
-    {
-        return nameOfArgs;
-    }
-
-    public void setNameOfArgs(String nameOfArgs)
-    {
-        this.nameOfArgs = nameOfArgs;
-    }
-
-
-    public RankMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang, UUID playerUUID, String nameOfPlayer, UUID argsUuid, String nameOfArgs)
+    public RankMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang, UUID playerUUID, UUID otherUUID, String othersName)
     {
         super();
         this.plugin = plugin;
         this.mp = plugin.getMessageProvider();
         this.gang = gang;
         this.playerUUID = playerUUID;
-        this.nameOfPlayer = nameOfPlayer;
-        this.argsUuid = argsUuid;
-        this.nameOfArgs = nameOfArgs;
+        this.otherUUID = otherUUID;
+        this.othersName = othersName;
         this.gangManaging = gangManaging;
     }
 
@@ -81,7 +57,7 @@ public class RankMenu extends AbstractMenu
     @Override
     public void onGuiClick(int slot, ItemStack item, Player whoClicked, ClickType clickType)
     {
-        if (playerUUID.equals(argsUuid)){
+        if (playerUUID.equals(otherUUID)){
             whoClicked.getOpenInventory().close();
             whoClicked.sendMessage("Du kan ikke ændre din egen rang.");
             return;
@@ -93,24 +69,24 @@ public class RankMenu extends AbstractMenu
         switch (item.getType())
         {
             case IRON_INGOT:
-                if (gang.getMembersSorted().get(this.playerUUID) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(this.playerUUID) >= Rank.MEMBER.getValue())
-                    gang.getMembersSorted().compute(getArgsUuid(), (uuid, key) -> Rank.MEMBER.getValue());
+                if (gang.getMembersSorted().get(this.playerUUID) > gang.getMembersSorted().get(otherUUID) && gang.getMembersSorted().get(this.playerUUID) >= Rank.MEMBER.getValue())
+                    gang.getMembersSorted().compute(otherUUID, (uuid, key) -> Rank.MEMBER.getValue());
                 else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case GOLD_INGOT:
-                if (gang.getMembersSorted().get(this.playerUUID) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(this.playerUUID) > Rank.OFFICER.getValue())
-                    gang.getMembersSorted().compute(getArgsUuid(), (key, value) -> Rank.OFFICER.getValue());
+                if (gang.getMembersSorted().get(this.playerUUID) > gang.getMembersSorted().get(otherUUID) && gang.getMembersSorted().get(this.playerUUID) > Rank.OFFICER.getValue())
+                    gang.getMembersSorted().compute(otherUUID, (key, value) -> Rank.OFFICER.getValue());
                 else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case DIAMOND:
-                if (gang.getMembersSorted().get(this.playerUUID) > gang.getMembersSorted().get(getArgsUuid()) && gang.getMembersSorted().get(this.playerUUID) >= Rank.CO_LEADER.getValue())
-                    gang.getMembersSorted().compute(getArgsUuid(), (key, value) -> Rank.CO_LEADER.getValue());
+                if (gang.getMembersSorted().get(this.playerUUID) > gang.getMembersSorted().get(otherUUID) && gang.getMembersSorted().get(this.playerUUID) >= Rank.CO_LEADER.getValue())
+                    gang.getMembersSorted().compute(otherUUID, (key, value) -> Rank.CO_LEADER.getValue());
                 else whoClicked.sendMessage(this.mp.notHighRankEnough);
                 break;
             case EMERALD:
                 if (gang.getMembersSorted().get(this.playerUUID) == Rank.LEADER.getValue())
                 {
-                    gang.getMembersSorted().compute(getArgsUuid(), (key, value) -> Rank.LEADER.getValue());
+                    gang.getMembersSorted().compute(otherUUID, (key, value) -> Rank.LEADER.getValue());
                     gang.getMembersSorted().compute(this.playerUUID, (key, value) -> Rank.CO_LEADER.getValue());
                     gang.getMembersSorted().keySet()
                             .stream()
@@ -119,7 +95,7 @@ public class RankMenu extends AbstractMenu
                             .forEach(p ->
                             {
                                 if (p != null)
-                                    p.sendMessage(this.mp.newLeader.replace("{player}", whoClicked.getName()).replace("{name}", gang.getGangName()).replace("{newleader}", getNameOfArgs()));
+                                    p.sendMessage(this.mp.newLeader.replace("{player}", whoClicked.getName()).replace("{name}", gang.getGangName()).replace("{newleader}", othersName));
                             });
 
                 } else whoClicked.sendMessage(this.mp.notHighRankEnough);
@@ -132,33 +108,29 @@ public class RankMenu extends AbstractMenu
     @Override
     public Inventory getInventory()
     {
-
-        String rankOfPlayer = null;
-        try
-        {
-            rankOfPlayer = getRankOfPlayer();
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        setItem(10, new ItemBuilder(Material.IRON_INGOT).setItemName("&a&lRANK &eMember").isItemChosen(rankOfPlayer.equalsIgnoreCase("member")).buildItem());
-        setItem(12, new ItemBuilder(Material.GOLD_INGOT).setItemName("&a&lRANK &dOfficer").isItemChosen(rankOfPlayer.equalsIgnoreCase("moderator")).buildItem());
-        setItem(14, new ItemBuilder(Material.DIAMOND).setItemName("&a&lRANK &bCo-Leder").isItemChosen(rankOfPlayer.equalsIgnoreCase("co-leder")).buildItem());
-        setItem(16, new ItemBuilder(Material.EMERALD).setItemName("&a&lRANK &6Leder").isItemChosen(rankOfPlayer.equalsIgnoreCase("leder")).buildItem());
+        String rankOfPlayer = getRankOfPlayer();
+        if (rankOfPlayer == null) Bukkit.getPlayer(playerUUID).closeInventory();
+        setItem(10, memberItem.isItemChosen(rankOfPlayer.equalsIgnoreCase("member")).buildItem());
+        setItem(12, officerItem.isItemChosen(rankOfPlayer.equalsIgnoreCase("moderator")).buildItem());
+        setItem(14, coLeaderItem.isItemChosen(rankOfPlayer.equalsIgnoreCase("co-leder")).buildItem());
+        setItem(16, leaderItem.isItemChosen(rankOfPlayer.equalsIgnoreCase("leder")).buildItem());
         return super.inventory;
     }
 
-    public String getRankOfPlayer() throws Exception
+    public String getRankOfPlayer()
     {
         for (Rank rankEnum : Rank.values())
         {
-            if (gang.getMembersSorted().get(argsUuid) == rankEnum.getValue())
+            if (gang.getMembersSorted().get(otherUUID) == rankEnum.getValue())
             {
                 return rankEnum.getRankName();
             }
         }
-        throw new Exception("MenuRank spilleren har ingen rank?");
+        return null;
     }
 
-
+    private final ItemBuilder memberItem = new ItemBuilder(Material.IRON_INGOT).setItemName("&a&lRANK &eMember");
+    private final ItemBuilder officerItem = new ItemBuilder(Material.GOLD_INGOT).setItemName("&a&lRANK &dOfficer");
+    private final ItemBuilder coLeaderItem = new ItemBuilder(Material.DIAMOND).setItemName("&a&lRANK &bCo-Leder");
+    private final ItemBuilder leaderItem = new ItemBuilder(Material.EMERALD).setItemName("&a&lRANK &6Leder");
 }

@@ -2,7 +2,7 @@ package dk.simonwinther.inventorymanaging.menus.infomenu.submenus;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
-import dk.simonwinther.Gang;
+import dk.simonwinther.manager.Gang;
 import dk.simonwinther.constants.GangAccess;
 import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.GangPermissions;
@@ -28,7 +28,7 @@ public class AccessSubMenu extends AbstractMenu
     private PermissionSubMenu permissionSubMenu;
     private Gang gang;
     private GangPermissions gangPermissions;
-    private int slotType;
+    private final int slotType;
     private final GangManaging gangManaging;
 
     public AccessSubMenu(GangManaging gangManaging, MainPlugin plugin, PermissionSubMenu permissionSubMenu, UUID playerUUID, int slotType)
@@ -112,14 +112,15 @@ public class AccessSubMenu extends AbstractMenu
         int coLeader = (getCurrentPermission() == Rank.CO_LEADER ? 31 : getCurrentPermission() == Rank.MEMBER || getCurrentPermission() == Rank.OFFICER ? 4 : 6);
         int leader = (getCurrentPermission() == Rank.LEADER ? 31 : 6);
 
-        setItem(memberSlot, new ItemBuilder(Material.WOOD_SWORD).setItemName("&2&lMember").addFlags(ItemFlag.HIDE_ATTRIBUTES).setLore(getLore(Rank.MEMBER)).isItemChosen(isRankChosen(Rank.MEMBER)).buildItem());
-        setItem(officerSlot, new ItemBuilder(Material.STONE_SWORD).setItemName("&e&lOfficer").addFlags(ItemFlag.HIDE_ATTRIBUTES).setLore(getLore(Rank.OFFICER)).isItemChosen(isRankChosen(Rank.OFFICER)).buildItem());
-        setItem(coLeader, new ItemBuilder(Material.IRON_SWORD).setItemName("&c&lCo-Leder").addFlags(ItemFlag.HIDE_ATTRIBUTES).setLore(getLore(Rank.CO_LEADER)).isItemChosen(isRankChosen(Rank.CO_LEADER)).buildItem());
-        setItem(leader, new ItemBuilder(Material.DIAMOND_SWORD).setItemName("&4&lLeder").addFlags(ItemFlag.HIDE_ATTRIBUTES).setLore(getLore(Rank.LEADER)).isItemChosen(isRankChosen(Rank.LEADER)).buildItem());
+        setItem(memberSlot, memberItem.setLore(getLore(Rank.MEMBER)).isItemChosen(isRankChosen(Rank.MEMBER)).buildItem());
+        setItem(officerSlot, officerItem.setLore(getLore(Rank.OFFICER)).isItemChosen(isRankChosen(Rank.OFFICER)).buildItem());
+        setItem(coLeader, coLeaderItem.setLore(getLore(Rank.CO_LEADER)).isItemChosen(isRankChosen(Rank.CO_LEADER)).buildItem());
+        setItem(leader, leaderItem.setLore(getLore(Rank.LEADER)).isItemChosen(isRankChosen(Rank.LEADER)).buildItem());
 
 
         return super.inventory;
     }
+
 
     private Rank getCurrentPermission()
     {
@@ -151,6 +152,11 @@ public class AccessSubMenu extends AbstractMenu
                 return Rank.MEMBER;
         }
     }
+
+    private final ItemBuilder memberItem = new ItemBuilder(Material.WOOD_SWORD).setItemName("&2&lMember").addFlags(ItemFlag.HIDE_ATTRIBUTES);
+    private final ItemBuilder officerItem = new ItemBuilder(Material.STONE_SWORD).setItemName("&e&lOfficer").addFlags(ItemFlag.HIDE_ATTRIBUTES);
+    private final ItemBuilder coLeaderItem = new ItemBuilder(Material.IRON_SWORD).setItemName("&c&lCo-Leder").addFlags(ItemFlag.HIDE_ATTRIBUTES);
+    private final ItemBuilder leaderItem = new ItemBuilder(Material.DIAMOND_SWORD).setItemName("&4&lLeder").addFlags(ItemFlag.HIDE_ATTRIBUTES);
 
     public boolean isRankChosen(Rank rank)
     {

@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-@Entity
 public class LevelSystem implements Serializable
 {
 
@@ -28,8 +27,6 @@ public class LevelSystem implements Serializable
     private int paidForQuest = 0;
 
     private Map<Material, Integer> itemsMap = new HashMap<>();
-
-
     {
         itemsMap.put(Material.BREAD, 0);
         itemsMap.put(Material.SUGAR, 0);

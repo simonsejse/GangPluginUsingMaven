@@ -32,8 +32,17 @@ bannedWords:
   - 'bøsse'
   - 'penis'
 
-#your discord token for the bot to work
+#wheter to use discord or not change to 'true' if you want to use the discord API integration
+useDiscord: true
+#your discord token for your bot
 discordToken: 'ID'
+
+#The max amount of members a gang can posses
+maxMembers: 55
+#The max amount of allies a gang can posses
+maxAllies: 55
+#The max amount of enemies a gang can posses
+maxEnemies: 55
 
 #Go to the specific channel you want the announcement messages to be delivered in and rightclick > copy channel id > replace with 29837192
 gangAnnouncementsChannelID: 29837192

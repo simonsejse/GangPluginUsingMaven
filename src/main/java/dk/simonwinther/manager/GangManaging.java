@@ -1,7 +1,6 @@
 package dk.simonwinther.manager;
 
 import dk.simonwinther.MainPlugin;
-import dk.simonwinther.Gang;
 import dk.simonwinther.constants.Rank;
 import dk.simonwinther.utility.MessageProvider;
 import dk.simonwinther.utility.ProgessBar;
@@ -38,8 +37,11 @@ public class GangManaging {
     /**
      * Gang Name, Gang Instance
      */
-    public Map<String, Gang> gangMap = new HashMap<>();
-
+    public Map<String, Gang> gangMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    /**
+     * @Key: Players UUID
+     * @Value boolean whether player has damage turned on or off
+     */
     public Map<UUID, Boolean> damageMap = new HashMap<>();
 
     public BiConsumer<? super UUID, String> addNewGangToMapsBiConsumer = (ownerUuid, gangName) -> {
@@ -92,8 +94,9 @@ public class GangManaging {
 
     /**
      *
-     * @param playerGang
-     * @param player
+     * @param playerGang the gang that adds new enemy
+     * @param otherGangName the name of the enemy gang
+     * @param player the player who executed the command
      */
     public void requestEnemy(Gang playerGang, String otherGangName, Player player) {
         {
@@ -114,7 +117,7 @@ public class GangManaging {
                                 if (playerGang.isGangEnemy(otherGangName))
                                 {
                                     playerGang.removeEnemyGang(enemyGangID);
-                                    sendNoLongerEnemyMessage(otherGangName, playerGang.getMembersSorted());
+                                    sendTeamMessage.accept(playerGang, this.mp.noLongerAllies.replace("{name}", otherGangName));
                                     return;
                                 }
                                 playerGang.addEnemyGang(enemyGangID, otherGangName);
@@ -202,20 +205,17 @@ public class GangManaging {
         } else requester.sendMessage(this.mp.notHighRankEnough);
     }
 
-    public void sendNoLongerEnemyMessage(String enemyGangName, Map<UUID, Integer> members) {
-        members.keySet()
-                .stream()
-                .filter(uuid -> Bukkit.getPlayer(uuid) != null)
-                .map(Bukkit::getPlayer)
-                .forEach(member -> member.sendMessage(this.mp.noLongerAllies.replace("{name}", enemyGangName)));
-    }
-
     public void joinGang(UUID uuid, String displayName, String gangName) {
         Gang gang = getGangByNameFunction.apply(gangName);
         gang.addMember(uuid, lowerCaseFunc.apply(displayName), Rank.MEMBER);
         userGangMap.put(uuid, new GangInfo(gang.getGangId(), gangName));
     }
 
+    /**
+     *
+     * @param player the player who's going to be the leader of the gang
+     * @param gangName the gang name which would be added to the TreeMap above
+     */
     public void createNewGang(Player player, String gangName) {
         UUID playerUUID = player.getUniqueId();
         if (!(playerInGangPredicate.test(playerUUID))) {
@@ -229,18 +229,21 @@ public class GangManaging {
                         player.sendMessage(this.mp.gangCreated.replace("{name}", gangName));
                         sendGlobalGangCreatedMessage(player, gangName);
                         plugin.getEconomy().withdrawPlayer(Bukkit.getOfflinePlayer(playerUUID), GANG_COST);
-                        this.plugin.getJDA()
-                                .getTextChannelById(this.plugin.getConfiguration().gangAnnouncementsChannelID)
-                                .sendMessage(new EmbedBuilder()
-                                        .setTitle("NY BANDE OPRETTET!")
-                                        .setColor(Color.GREEN)
-                                        .setDescription(player.getName()+" har oprettet banden '"+gangName+"'")
-                                        .addField("Bande navn", gangName, true)
-                                        .addField("Oprettet af", player.getName(), true)
-                                        .addField("Datoen", String.valueOf(LocalDateTime.now()), false)
-                                        .setImage("https://www.icegif.com/wp-content/uploads/congratulations-icegif.gif")
-                                        .build())
-                                .queue();
+
+                        if (this.plugin.getConfiguration().useDiscord && this.plugin.getJDA() != null){
+                            this.plugin.getJDA()
+                                    .getTextChannelById(this.plugin.getConfiguration().gangAnnouncementsChannelID)
+                                    .sendMessage(new EmbedBuilder()
+                                            .setTitle("NY BANDE OPRETTET!")
+                                            .setColor(Color.GREEN)
+                                            .setDescription(player.getName()+" har oprettet banden '"+gangName+"'")
+                                            .addField("Bande navn", gangName, true)
+                                            .addField("Oprettet af", player.getName(), true)
+                                            .addField("Datoen", String.valueOf(LocalDateTime.now()), false)
+                                            .setImage("https://www.icegif.com/wp-content/uploads/congratulations-icegif.gif")
+                                            .build())
+                                    .queue();
+                        }
                     } else player.sendMessage(this.mp.gangNameDoesNotMeetRequirements);
                 } else {
                     player.sendMessage(this.mp.cantAffordGang.replace("{0}", String.valueOf(GANG_COST)));

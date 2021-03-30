@@ -20,7 +20,6 @@ public class ConnectionProvider
     }
 
 
-
     public void openConnection(){
         try{
             Class.forName("com.mysql.cj.jdbc.Driver");

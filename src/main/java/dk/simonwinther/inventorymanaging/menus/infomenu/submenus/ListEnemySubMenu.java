@@ -2,7 +2,7 @@ package dk.simonwinther.inventorymanaging.menus.infomenu.submenus;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
-import dk.simonwinther.Gang;
+import dk.simonwinther.manager.Gang;
 import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;
@@ -66,7 +66,6 @@ public class ListEnemySubMenu extends AbstractMenu
         } else if (slot == 51) whoClicked.openInventory(new AbstractMenu()
         {
             private int slot;
-
             @Override
             public Inventory getInventory()
             {

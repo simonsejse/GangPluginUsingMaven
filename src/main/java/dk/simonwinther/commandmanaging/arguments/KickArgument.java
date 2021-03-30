@@ -1,6 +1,6 @@
 package dk.simonwinther.commandmanaging.arguments;
 
-import dk.simonwinther.Gang;
+import dk.simonwinther.manager.Gang;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.utility.MessageProvider;
 import dk.simonwinther.manager.GangManaging;

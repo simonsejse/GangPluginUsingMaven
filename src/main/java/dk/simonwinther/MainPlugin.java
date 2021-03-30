@@ -4,10 +4,8 @@ package dk.simonwinther;
 import com.sk89q.worldguard.bukkit.RegionContainer;
 import com.sk89q.worldguard.bukkit.RegionQuery;
 import com.sk89q.worldguard.bukkit.WGBukkit;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dk.simonwinther.commandmanaging.ConfirmTransferCmd;
 import dk.simonwinther.commandmanaging.GangCommand;
 import dk.simonwinther.events.EventHandling;
 import dk.simonwinther.inventorymanaging.AbstractMenu;
@@ -23,7 +21,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.yaml.snakeyaml.Yaml;
@@ -39,37 +36,39 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 public final class MainPlugin extends JavaPlugin
 {
+    private ConnectionProvider connectionProvider;
 
     private Configuration configuration;
 
     private EventHandling eventHandling;
-    private GangManaging gangManaging = null;
+    private GangManaging gangManaging;
 
     private static Permission perms = null;
     private Chat chat = null;
     private Economy econ = null;
 
+    /**
+     * @Throws NullPointerException
+     * Reason: if useDiscord is false in config.yml
+     */
     private JDA jda;
 
-    private final Consumer<String> log = (string) -> Bukkit.getConsoleSender().sendMessage(ChatColor.RED + string);
-
-    //private ConnectionProvider connectionProvider;
-    //private final String[] tables = new String[]{"users", "memberInvitations", "gangMembers", "gangAllies", "gangPermissions", "gangs"};
+    private final Consumer<String> log = (string) -> Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_RED + string);
 
     @Override
     public void onEnable()
     {
         this.saveDefaultConfig();
         initializeConfiguration();
-        setupDiscord();
+        connectToDiscord();
+        establishDatabaseConnection();
 
         this.gangManaging = new GangManaging(this);
-        getCommand("bande").setExecutor(new GangCommand(gangManaging, this));
-        getCommand("confirmtransfercmd").setExecutor(new ConfirmTransferCmd(this.gangManaging, this));
+
+        getCommand("bande").setExecutor(new GangCommand(this.gangManaging, this));
 
         this.eventHandling = new EventHandling(gangManaging, this);
 
@@ -95,7 +94,8 @@ public final class MainPlugin extends JavaPlugin
 
     }
 
-    private void setupDiscord(){
+    private void connectToDiscord(){
+        if (!this.configuration.useDiscord) return;
         try {
             this.jda = JDABuilder.createDefault(this.configuration.discordToken).build();
         } catch (LoginException e) {
@@ -116,7 +116,10 @@ public final class MainPlugin extends JavaPlugin
 
     }
 
-
+    private void establishDatabaseConnection(){
+        log.accept("Trying to establish connection to database.");
+        this.connectionProvider = new ConnectionProvider(this.configuration.mySQLProfile);
+    }
 
 
     private void registerEvents(Listener... listeners)
@@ -135,23 +138,9 @@ public final class MainPlugin extends JavaPlugin
                     .forEach(p -> p.sendMessage(ChatColor.translateAlternateColorCodes('&', gangsUpdated.get())));
 
         }, 6000, 6000);
-
     }
     private final Supplier<String> gangsUpdated = () -> "&8&l| &b&lBande &8&l| &2&l" + gangManaging.gangMap.keySet().size() + "&a bander er blevet automatisk gemt...!";
 
-
-    public WorldGuardPlugin getWorldGuard()
-    {
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("WorldGuard");
-
-        if (plugin == null)
-        {
-            log.accept("Du skal have WorldGuard dependency");
-            getServer().getPluginManager().disablePlugin(this);
-            return null;
-        }
-        return (WorldGuardPlugin) plugin;
-    }
 
     public String getBlockAtPlayerLoc(UUID playerUUID)
     {
@@ -229,6 +218,10 @@ public final class MainPlugin extends JavaPlugin
     public Economy getEconomy()
     {
         return econ;
+    }
+
+    public GangManaging getGangManaging() {
+        return gangManaging;
     }
 
     public static Permission getPermissions()

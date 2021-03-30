@@ -1,7 +1,7 @@
 package dk.simonwinther.commandmanaging;
 
 import dk.simonwinther.MainPlugin;
-import dk.simonwinther.Gang;
+import dk.simonwinther.manager.Gang;
 import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.Level;
 import dk.simonwinther.constants.QuestPayEnum;
@@ -27,6 +27,7 @@ public class ConfirmTransferCmd implements CommandExecutor
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
     {
+        /*
         if (!(sender instanceof Player)) return true;
         Player player = (Player) sender;
         UUID uuid = player.getUniqueId();
@@ -48,6 +49,7 @@ public class ConfirmTransferCmd implements CommandExecutor
                 player.sendMessage("§cDu har annulleret overførslen!");
             }
         }else player.sendMessage("Denne kommando kan ikke bruges manuelt!");
+         */
         return false;
     }
 }

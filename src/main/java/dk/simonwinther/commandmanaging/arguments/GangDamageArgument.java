@@ -37,7 +37,7 @@ public class GangDamageArgument implements CommandArguments
     public void perform(Player p, String... args)
     {
         final boolean value = gangManaging.damageMap.get(p.getUniqueId());
-        gangManaging.damageMap.compute(p.getUniqueId(), (uuid, bool) -> !value);
+        this.gangManaging.damageMap.compute(p.getUniqueId(), (uuid, bool) -> !value);
         p.sendMessage(this.mp.toggleDamage.replace("{value}", (!value ? "&aTil" : "&cFra")));
     }
 }

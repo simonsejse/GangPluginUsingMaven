@@ -12,7 +12,11 @@ public class Configuration {
     public int maxNameLength, minNameLength;
     public List<String> bannedWords;
 
+    public boolean useDiscord;
     public String discordToken;
+
+    public int maxMembers, maxAllies, maxEnemies;
+
     public long gangAnnouncementsChannelID;
 
     public NPCSettingsProvider npcSettingsProvider;

@@ -1,7 +1,7 @@
 package dk.simonwinther.commandmanaging.arguments;
 
 import dk.simonwinther.MainPlugin;
-import dk.simonwinther.Gang;
+import dk.simonwinther.manager.Gang;
 import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
 import dk.simonwinther.inventorymanaging.menus.infomenu.InfoMenu;
@@ -52,6 +52,6 @@ public class InfoArgument implements CommandArguments
         }
         Gang gang = gangManaging.getGangByUuidFunction.apply(playerUUID);
 
-        p.openInventory(new InfoMenu(gangManaging, plugin, gang, true).getInventory());
+        p.openInventory(new InfoMenu(plugin, gang, true, null).getInventory());
     }
 }

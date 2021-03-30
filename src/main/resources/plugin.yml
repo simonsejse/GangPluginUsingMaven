@@ -9,4 +9,3 @@ website: simon-winther.dk
 commands:
   bande:
     aliases: b
-  confirmtransfercmd:

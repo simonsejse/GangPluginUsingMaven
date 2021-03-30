@@ -40,6 +40,11 @@ public class ItemBuilder
 
     }
 
+    public ItemBuilder setMaterial(Material newMaterial){
+        this.itemStack = new ItemStack(newMaterial);
+        this.itemMeta = itemStack.getItemMeta();
+        return this;
+    }
 
     public ItemBuilder setItemName(String itemName){
         itemMeta.setDisplayName(color(itemName));

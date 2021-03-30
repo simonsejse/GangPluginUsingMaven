@@ -1,12 +1,12 @@
 package dk.simonwinther.events;
 
-import dk.simonwinther.Gang;
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.inventorymanaging.AbstractMenu;
+import dk.simonwinther.inventorymanaging.AbstractPaginatedMenu;
+import dk.simonwinther.manager.Gang;
 import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.utility.MessageProvider;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
-import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,55 +20,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class EventHandling implements Listener {
     private final MainPlugin plugin;
     private final MessageProvider mp;
 
-    private final String npcName;
-    private final List<String> goAwayMessages;
-    private final List<String> deliveredMessages;
-
     private final GangManaging gangManaging;
-
-    public EventHandling(GangManaging gangManaging, MainPlugin plugin) {
-        this.plugin = plugin;
-        this.mp = this.plugin.getMessageProvider();
-        this.npcName = this.plugin.getConfiguration().npcSettingsProvider.npcName;
-        this.goAwayMessages = this.plugin.getConfiguration().npcSettingsProvider.goAwayMessages;
-        this.deliveredMessages = this.plugin.getConfiguration().npcSettingsProvider.deliveredMessages;
-        this.gangManaging = gangManaging;
-    }
-
-    public Map<UUID, String> lastOnline = new HashMap<>();
-    //TODO: Maybe create PlayerData object
-
-    @EventHandler
-    public void onPlayerJoinEvent(PlayerJoinEvent event) {
-        UUID playerUUID = event.getPlayer().getUniqueId();
-        refreshDate(playerUUID);
-
-        if (!gangManaging.damageMap.containsKey(playerUUID)) gangManaging.damageMap.put(playerUUID, false);
-
-    }
-
-    @EventHandler
-    public void onGuiClick(InventoryClickEvent event) {
-        if (event.getInventory() == null || event.getClickedInventory() == null || event.getCurrentItem() == null)
-            return;
-
-        if (event.getClickedInventory().getType() == InventoryType.PLAYER) return;
-        if (event.getView().getTopInventory().getType() == InventoryType.PLAYER) return;
-
-
-        InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof AbstractMenu) {
-            event.setCancelled(true);
-            AbstractMenu abstractMenu = (AbstractMenu) holder;
-            abstractMenu.onGuiClick(event.getSlot(), event.getCurrentItem(), (Player) event.getWhoClicked(), event.getClick());
-        }
-    }
 
     private final Set<UUID> awaitChatInputForGangCreation = new HashSet<>();
     public final Consumer<UUID> addPlayerToAwaitGangCreation = awaitChatInputForGangCreation::add;
@@ -85,6 +42,57 @@ public class EventHandling implements Listener {
     private final Set<UUID> awaitChatInputForEnemy = new HashSet<>();
     public Consumer<UUID> addPlayerToAwaitEnemyRequest = awaitChatInputForEnemy::add;
     private final Consumer<UUID> removePlayerFromAwaitEnemyRequest = awaitChatInputForEnemy::remove;
+
+    public EventHandling(GangManaging gangManaging, MainPlugin plugin) {
+        this.plugin = plugin;
+        this.mp = this.plugin.getMessageProvider();
+        this.gangManaging = gangManaging;
+    }
+
+    public Map<UUID, String> lastOnline = new HashMap<>();
+    //TODO: Maybe create PlayerData object
+
+    @EventHandler
+    public void onPlayerJoinEvent(PlayerJoinEvent event) {
+        UUID playerUUID = event.getPlayer().getUniqueId();
+        refreshDate(playerUUID);
+        if (!gangManaging.damageMap.containsKey(playerUUID)) gangManaging.damageMap.put(playerUUID, false);
+    }
+
+    @EventHandler
+    public void interactWithNPCLeft(NPCLeftClickEvent event) {
+        interactWithNPC(event.getClicker(), event.getNPC().getName());
+    }
+
+    @EventHandler
+    public void interactWithNPCRight(NPCLeftClickEvent event) {
+        interactWithNPC(event.getClicker(), event.getNPC().getName());
+    }
+    @EventHandler
+    public void onGuiClick(InventoryClickEvent event) {
+        if (event.getInventory() == null || event.getClickedInventory() == null || event.getCurrentItem() == null)
+            return;
+        if (event.getClickedInventory().getType() == InventoryType.PLAYER) return;
+        if (event.getView().getTopInventory().getType() == InventoryType.PLAYER) return;
+        InventoryHolder holder = event.getInventory().getHolder();
+        if (holder instanceof AbstractMenu) {
+            event.setCancelled(true);
+            AbstractMenu abstractMenu = (AbstractMenu) holder;
+            abstractMenu.onGuiClick(event.getSlot(), event.getCurrentItem(), (Player) event.getWhoClicked(), event.getClick());
+        }else if (holder instanceof AbstractPaginatedMenu){
+            event.setCancelled(true);
+            AbstractPaginatedMenu abstractPaginatedMenu = (AbstractPaginatedMenu) holder;
+            if (event.getSlot() == abstractPaginatedMenu.getBackPageSlot()) {
+                if (abstractPaginatedMenu.getCurrentPageIndex() == 0) return;
+                abstractPaginatedMenu.setCurrentPageIndex(abstractPaginatedMenu.getCurrentPageIndex() - 1);
+                event.getWhoClicked().openInventory(abstractPaginatedMenu.getInventories().get(abstractPaginatedMenu.getCurrentPageIndex()));
+            }else if (event.getSlot() == abstractPaginatedMenu.getNextPageSlot()) {
+                if (abstractPaginatedMenu.getCurrentPageIndex() >= abstractPaginatedMenu.getInventories().size() - 1) return;
+                abstractPaginatedMenu.setCurrentPageIndex(abstractPaginatedMenu.getCurrentPageIndex() + 1);
+                event.getWhoClicked().openInventory(abstractPaginatedMenu.getInventories().get(abstractPaginatedMenu.getCurrentPageIndex()));
+            }else abstractPaginatedMenu.onGuiClick(event.getSlot(), event.getCurrentItem(), (Player) event.getWhoClicked(), event.getClick());
+        }
+    }
 
     @EventHandler
     public void awaitPlayerChat(AsyncPlayerChatEvent event) {
@@ -108,7 +116,6 @@ public class EventHandling implements Listener {
 
 
     private void performChatInputEnemyRequest(Player player, UUID playerUUID, String otherGangName) {
-        //TODO: check if gang exists
         this.removePlayerFromAwaitEnemyRequest.accept(playerUUID);
         if(this.gangManaging.playerInGangPredicate.test(playerUUID)){
             if (this.gangManaging.gangExistsPredicate.test(otherGangName)){
@@ -121,7 +128,6 @@ public class EventHandling implements Listener {
     }
 
     private void performChatInputAllyRequest(Player player, UUID playerUUID, String otherGangName) {
-        //TODO: check if gang exists
         removePlayerFromAwaitAllyRequest.accept(playerUUID);
         if(this.gangManaging.playerInGangPredicate.test(playerUUID)){
             if (this.gangManaging.gangExistsPredicate.test(otherGangName)){
@@ -154,131 +160,7 @@ public class EventHandling implements Listener {
         }
     }
 
-    /*
-    @EventHandler
-    public void onAsyncPlayerChat(AsyncPlayerChatEvent event)
-    {
-        Player player = event.getPlayer();
-        UUID uuid = player.getUniqueId();
-        String message = event.getMessage();
-        if (inviteMemberChat.contains(uuid))
-        {
-            event.setCancelled(true);
-            removeInviteMemberChatConsumer.accept(uuid);
-            if (Bukkit.getOfflinePlayer(message) != null)
-            {
-                if (gangManaging.getGangByUuidFunction.apply(uuid).isPlayerInvited(message)){
-                    gangManaging.removeInvitationConsumer.accept(uuid, message);
-                    player.sendMessage(this.mp.playerWasUninvited.replace("{args}", message));
-                    return;
-                }
-                gangManaging.addInvitationConsumer.accept(uuid, message);
-                player.sendMessage(this.mp.playerWasInvited.replace("{args}", message));
-                if (Bukkit.getPlayer(message) != null) {
-                    Bukkit.getPlayer(message).sendMessage(this.mp.invitedToGang.replace("{name}", gangManaging.getGangByUuidFunction.apply(uuid).getGangName()).replace("{player}", player.getName()));
-                }
-            } else
-                player.sendMessage(this.mp.hasNeverPlayed.replace("{args}", message));
-        } else if (allyChat.contains(uuid))
-        {
-            event.setCancelled(true);
-            removeAllyConsumer.accept(uuid);
-            if (gangManaging.gangExistsPredicate.test(message))
-            {
-                Gang argGang = gangManaging.getGangByNameFunction.apply(message);
-                Gang playerGang = gangManaging.getGangByUuidFunction.apply(uuid);
-                if (playerGang.getAllies().size() < playerGang.getMaxAllies())
-                {
-                    if (!(playerGang.getGangName().equalsIgnoreCase(message)))
-                    {
-                        if (!playerGang.getAllyInvitation().contains(message)) //TODO: dette skal tjekke først om man skal fjerne sin ally invitation eller tilføje
-                        {
-                            if (gangManaging.gangContainsAllyInvitationPredicate.test(argGang, playerGang.getGangName()))
-                            {
-                                playerGang.getAllyInvitation().remove(message);
-                                argGang.getAllyInvitation().remove(playerGang.getGangName());
-
-                                playerGang.getAllies().put(argGang.getGangId(), message.toLowerCase());
-                                argGang.getAllies().put(playerGang.getGangId(), playerGang.getGangName().toLowerCase());
-
-                                this.gangManaging.sendTeamMessage.accept(argGang, this.mp.allySuccessful.replace("{name}", playerGang.getGangName()));
-                                this.gangManaging.sendTeamMessage.accept(playerGang, this.mp.allySuccessful.replace("{name}", message));
-                            } else
-                            {
-
-                                playerGang.askAlly(message);
-
-                                player.sendMessage(this.mp.askAlly.replace("{name}", message));
-
-                                this.gangManaging.sendTeamMessage.accept(argGang, this.mp.wishesToBeAlly.replace("{name}", playerGang.getGangName()));
-
-                                //TODO: Check if I've written more of these duplicate codes in other classes, there's a big probability that I have.
-
-                                argGang.getMembersSorted().keySet()
-                                        .stream()
-                                        .filter(_uuid -> Bukkit.getPlayer(_uuid) != null)
-                                        .map(Bukkit::getPlayer)
-                                        .forEach(gangMembers -> gangMembers.sendMessage(this.mp.wishesToBeAlly.replace("{name}", playerGang.getGangName()))));
-
-                            }
-                        } else
-                        {
-                            playerGang.getAllyInvitation().remove(message);
-                            player.sendMessage(this.mp.unAlly.replace("{name}", message));
-                            this.gangManaging.sendTeamMessage.accept(argGang, this.mp.askAlly.replace("{name}", message));
-                        }
-                    } else player.sendMessage(this.mp.cantAllyOwnGang);
-                } else player.sendMessage(this.mp.playerGangMaxAllies);
-            } else
-                player.sendMessage(this.mp.gangDoesNotExists.replace("{name}", message));
-        } else if (enemyChat.contains(uuid))
-        {
-            event.setCancelled(true);
-            removeEnemyChat.accept(uuid);
-            UUID playerUUID = player.getUniqueId();
-            message = message.toLowerCase();
-            if (gangManaging.playerInGangPredicate.test(playerUUID))
-            {
-                Gang playerGang = gangManaging.getGangByUuidFunction.apply(playerUUID);
-                if (gangManaging.isRankMinimumPredicate.test(playerUUID, playerGang.gangPermissions.accessToEnemy))
-                {
-                    if (gangManaging.gangExistsPredicate.test(message))
-                    {
-                        Gang argsGang = gangManaging.getGangByNameFunction.apply(message);
-                        //TODO: Make it a function instead
-                        if (playerGang.getEnemies().size() < playerGang.getMaxEnemies())
-                        {
-
-                            if (!playerGang.equals(argsGang))
-                            {
-                                if (!playerGang.getEnemies().values().contains(message))
-                                {
-                                    this.gangManaging.addEnemyGang.accept(playerGang, argsGang);
-                                } else player.sendMessage(this.mp.alreadyEnemies);
-                            } else player.sendMessage(this.mp.cantEnemyOwnGang);
-                        } else player.sendMessage(this.mp.playerGangMaxEnemies);
-                    } else player.sendMessage(this.mp.gangDoesNotExists.replace("{name}", String.valueOf(message.charAt(0)).toUpperCase() + message.substring(1)));
-                } else player.sendMessage(this.mp.notHighRankEnough);
-            } else player.sendMessage(this.mp.notInGang);
-        } else if (createGang.contains(uuid))
-        {
-            event.setCancelled(true);
-            if (message.equalsIgnoreCase("!stop")) {
-                removeCreateGangConsumer.accept(uuid);
-                player.sendMessage("Du har afbrudt at lave bande!");
-                return;
-            }
-            removeCreateGangConsumer.accept(uuid);
-            player.performCommand("bande create "+message);
-
-        }
-    }
-     */
-
-
     public void refreshDate(UUID playerUUID) {
-        //K key, BiFunction<? super K, ? super V, ? extends V>
-        //#compute -> first a key, then functional programming with an object of some type that extends Key and an object of some type that extends Value called remappingFunction
         DateFormat dateFormat = new SimpleDateFormat("EEEEEEE, d MMMMMMMMM yyyy, HH:mm:s");
         Date currentDate = new Date();
         String currentDateString = dateFormat.format(currentDate);
@@ -287,8 +169,8 @@ public class EventHandling implements Listener {
 
     public String getDate(UUID playerUUID) {
         StringBuilder stringBuilder = new StringBuilder();
-        lastOnline.entrySet() //Map.Entry<UUID, Integer>
-                .stream() //Stream<Map.Entry<UUID, Integer>>
+        lastOnline.entrySet()
+                .stream()
                 .filter(entry -> entry.getKey().equals(playerUUID))
                 .findAny()
                 .map(Map.Entry::getValue)
@@ -296,27 +178,19 @@ public class EventHandling implements Listener {
         return stringBuilder.toString().length() != 0 ? stringBuilder.toString() : "&cReload..";
     }
 
-    @EventHandler
-    public void interactWithNPCLeft(NPCLeftClickEvent event) {
-        interactWithNPC(event.getClicker(), event.getNPC());
+
+    private void interactWithNPC(Player whoInteract, String npcName) {
+        if(npcName.equals(this.plugin.getConfiguration().npcSettingsProvider.npcName)){
+            whoInteract.sendMessage("youre having sexual intercourse with npc");
+        }
     }
 
-    @EventHandler
-    public void interactWithNPCRight(NPCLeftClickEvent event) {
-        interactWithNPC(event.getClicker(), event.getNPC());
-    }
-
-    private void interactWithNPC(Player whoInteract, NPC npc) {
-        //if(npc.getName().equals(this.plugin.getCustomSettingsProvider().getNpcProvider().getNpcName())){
-        //    whoInteract.sendMessage("youre having sexual intercourse with npc");
-        //}
-    }
-
-
+    /*
     private final Set<UUID> activeMoneyPlayers = new HashSet<>();
     public Consumer<UUID> removeActiveMoneyPlayers = activeMoneyPlayers::remove;
     public Consumer<UUID> addActiveMoneyPlayers = activeMoneyPlayers::add;
     public Function<UUID, Boolean> containsActiveMoneyPlayer = activeMoneyPlayers::contains;
+     */
 
     /*private void playerCheck(Player player){
 

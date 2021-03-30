@@ -1,15 +1,13 @@
-package dk.simonwinther;
+package dk.simonwinther.manager;
 
+import dk.simonwinther.GangPermissions;
 import dk.simonwinther.constants.Rank;
 import dk.simonwinther.levelsystem.LevelSystem;
 import org.bukkit.Bukkit;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 
-@Entity
-@Table(name = "gangs")
 public class Gang implements Serializable
 {
 
@@ -23,6 +21,16 @@ public class Gang implements Serializable
     public Gang() {
 
     }
+    private String[][] emblemColors = new String[][]{
+            {"§f","§f", "§f","§f","§f", "§f","§f","§f","§f","§f", "§f", "§f"},
+            {"§f","§f", "§f","§f","§f", "§f","§f","§f","§f","§f", "§f", "§f"},
+            {"§f","§f", "§f","§f","§f", "§f","§f","§f","§f","§f", "§f", "§f"},
+            {"§f","§f", "§f","§f","§f", "§f","§f","§f","§f","§f", "§f", "§f"},
+            {"§f","§f", "§f","§f","§f", "§f","§f","§f","§f","§f", "§f", "§f"},
+            {"§f","§f", "§f","§f","§f", "§f","§f","§f","§f","§f", "§f", "§f"},
+            {"§f","§f", "§f","§f","§f", "§f","§f","§f","§f","§f", "§f", "§f"},
+            {"§f","§f", "§f","§f","§f", "§f","§f","§f","§f","§f", "§f", "§f"},
+    };
 
     private String gangName = "";
     private int gangId;
@@ -105,6 +113,15 @@ public class Gang implements Serializable
         this.memberInvitations.add(nameOfInvitedPlayer.toLowerCase());
     }
 
+    public String getRank(UUID uuid)
+    {
+        for (Rank rank : Rank.values())
+        {
+            if (rank.getValue() == this.membersSorted.get(uuid)) return rank.getColor() + rank.getRankName();
+        }
+        return "&aError | &cfejl";
+
+    }
 
     public UUID getOwnerUuid(){
         Optional<UUID> first = membersSorted.entrySet()
@@ -162,6 +179,13 @@ public class Gang implements Serializable
         this.enemies.remove(gangID);
     }
 
+    public String[][] getEmblemColors() {
+        return this.emblemColors;
+    }
+
+    public void setEmblemColors(String[][] emblemColors) {
+        this.emblemColors = emblemColors;
+    }
 
     public String getGangName() {
         return gangName;

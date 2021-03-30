@@ -2,7 +2,7 @@ package dk.simonwinther.inventorymanaging.menus.infomenu.submenus;
 
 import dk.simonwinther.MainPlugin;
 import dk.simonwinther.Builders.ItemBuilder;
-import dk.simonwinther.Gang;
+import dk.simonwinther.manager.Gang;
 import dk.simonwinther.inventorymanaging.menus.mainmenu.MainMenu;
 import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.ColorDataEnum;
@@ -23,31 +23,32 @@ public class ShopSubMenu extends AbstractMenu
     private final MainPlugin plugin;
     private final MessageProvider mp;
     private final GangManaging gangManaging;
-    private InfoMenu infoMenu;
-    private Gang gang;
-    private final boolean openedFromMainMenu;
+    private final Gang gang;
+    private final MainMenu mainMenu;
+    private final InfoMenu infoMenu;
+    //This is the number we're dividing for making it more expensive per level, if you wish to make it more expensive per level, make this lower.
+    private static final int DIVIDE_NUMBER = 10;
+    //10000 * (1+(LEVEL/DIVIDE_NUMBER))
 
-
-    public ShopSubMenu(GangManaging gangManaging, MainPlugin plugin, Gang gang) //In case opening directly without opening the InfoMenu
-    {
-        this.gangManaging = gangManaging;
-        this.plugin = plugin;
-        this.mp = this.plugin.getMessageProvider();
-        this.infoMenu = new InfoMenu(gangManaging, plugin, gang, true);
-        this.openedFromMainMenu = true;
-        this.gang = gang;
-    }
-    
-    public ShopSubMenu(GangManaging gangManaging, MainPlugin plugin, InfoMenu infoMenu, Gang gang)
+    public ShopSubMenu(MainPlugin plugin, Gang gang, InfoMenu infoMenu) //In case opening directly without opening the InfoMenu
     {
         this.plugin = plugin;
+        this.gangManaging = this.plugin.getGangManaging();
         this.mp = this.plugin.getMessageProvider();
         this.infoMenu = infoMenu;
-        this.openedFromMainMenu = false;
+        this.mainMenu = null;
         this.gang = gang;
-        this.gangManaging = gangManaging;
     }
 
+    public ShopSubMenu(MainPlugin plugin, Gang gang, MainMenu mainMenu) //In case opening directly without opening the InfoMenu
+    {
+        this.plugin = plugin;
+        this.gangManaging = this.plugin.getGangManaging();
+        this.mp = this.plugin.getMessageProvider();
+        this.mainMenu = mainMenu;
+        this.infoMenu = null;
+        this.gang = gang;
+    }
 
     @Override
     protected String getName()
@@ -66,10 +67,8 @@ public class ShopSubMenu extends AbstractMenu
     {
         if (item.getType() != Material.BED && item.getType() != Material.INK_SACK) return;
         if (slot == InventoryUtility.BACK_SLOT) {
-            Inventory inventory;
-            if (openedFromMainMenu) inventory = new MainMenu(gangManaging, plugin, whoClicked.getUniqueId(), true).getInventory();
-            else inventory = infoMenu.getInventory();
-            whoClicked.openInventory(inventory);
+            if (infoMenu == null && mainMenu != null) whoClicked.openInventory(mainMenu.getInventory());
+            else whoClicked.openInventory(infoMenu.getInventory());
             return;
         }
         if (gangManaging.isRankMinimumPredicate.test(whoClicked.getUniqueId(), gang.gangPermissions.accessToGangShop))
@@ -103,23 +102,23 @@ public class ShopSubMenu extends AbstractMenu
                     break;
                 //sugarcane
                 case 28:
-                    if (balance >= ShopCostUtil.MAX_MEMBERS && gang.getMaxMembers() < 20)
+                    if (balance >= ShopCostUtil.MAX_MEMBERS && gang.getMaxMembers() < this.plugin.getConfiguration().maxMembers)
                     {
-                        cost = ShopCostUtil.MAX_MEMBERS;
+                        cost = (ShopCostUtil.MAX_MEMBERS * (1 + (gang.getMembersSorted().size() / DIVIDE_NUMBER)));
                         gang.setMaxMembers(gang.getMaxMembers() + 1);
                     }
                     break;
                 case 29:
-                    if (balance >= ShopCostUtil.MAX_ALLIES && gang.getMaxAllies() < 10)
+                    if (balance >= ShopCostUtil.MAX_ALLIES && gang.getMaxAllies() < this.plugin.getConfiguration().maxAllies)
                     {
-                        cost = ShopCostUtil.MAX_ALLIES;
+                        cost = ShopCostUtil.MAX_ALLIES * (1 + (gang.getAllies().size() / DIVIDE_NUMBER));
                         gang.setMaxAllies(gang.getMaxAllies() + 1);
                     }
                     break;
                 case 30:
-                    if (balance >= ShopCostUtil.MAX_ENEMIES && gang.getMaxEnemies() < 15)
+                    if (balance >= ShopCostUtil.MAX_ENEMIES && gang.getMaxEnemies() < this.plugin.getConfiguration().maxEnemies)
                     {
-                        cost = ShopCostUtil.MAX_ENEMIES;
+                        cost = ShopCostUtil.MAX_ENEMIES * (1 + (gang.getEnemies().size() / DIVIDE_NUMBER));
                         gang.setMaxEnemies(gang.getMaxEnemies() + 1);
                     }
                     break;
@@ -179,7 +178,8 @@ public class ShopSubMenu extends AbstractMenu
                 new ItemBuilder(new ItemStack(Material.INK_SACK, Math.min(gang.getAllyDamage(), 64), ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lAlliance skade")
                         .setLore("&7Køb 1% mindre alliance skade", "&7Nuværende: &f"
-                                + gang.getAllyDamage() + "%", "&7Pris: &f" + ShopCostUtil.ALLY_DAMAGE).buildItem()
+                                + gang.getAllyDamage() + "%", "&7Pris: &f" + ShopCostUtil.ALLY_DAMAGE)
+                        .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, 1, ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lMinimum nået!")
                 .setLore("&fDin alliance skade er", "&fallerede på 0%")
@@ -215,40 +215,40 @@ public class ShopSubMenu extends AbstractMenu
                 .setAmount(2)
                 .buildItem());
 
-        setItem(28, (gang.getMaxMembers() < 20 ?
+        setItem(28, (gang.getMaxMembers() < this.plugin.getConfiguration().maxMembers ?
                 new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxMembers(), ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lAntal medlemmer")
                         .setLore("&7Køb plads til 1 medlem mere", "&7Nuværende: &f"
-                                + gang.getMaxMembers() + " medlemmer", "&7Pris: &f$" + ShopCostUtil.MAX_MEMBERS)
+                                + gang.getMaxMembers() + " medlemmer", "&7Pris: &f$" + ShopCostUtil.MAX_MEMBERS * (1 + (gang.getMembersSorted().size() / DIVIDE_NUMBER)))
                         .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxMembers(), ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lMaskimum nået!")
-                .setLore("&fDu kan maksimum købe", "&fadgang til 20 medlemmer!")
+                .setLore("&fDu kan maksimum købe", "&fadgang til"+this.plugin.getConfiguration().maxMembers+"medlemmer!")
                 .buildItem()));
-        setItem(29, gangLevel >= 2 ? (gang.getMaxAllies() < 10 ?
+        setItem(29, gangLevel >= 2 ? (gang.getMaxAllies() < this.plugin.getConfiguration().maxAllies ?
                 new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxAllies(), ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lAntal allierede")
                         .setLore("&7Køb plads til 1 allierede mere", "&7Nuværende: &f"
-                                + gang.getMaxAllies() + " medlemmer", "&7Pris: &f$" + ShopCostUtil.MAX_ALLIES)
+                                + gang.getMaxAllies() + " medlemmer", "&7Pris: &f$" + ShopCostUtil.MAX_ALLIES * (1 + (gang.getAllies().size() / DIVIDE_NUMBER)))
                         .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxAllies(), ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lMaskimum nået!")
-                .setLore("&fDu kan maksimum købe", "&fadgang til 10 allierede!")
+                .setLore("&fDu kan maksimum købe", "&fadgang til "+this.plugin.getConfiguration().maxAllies+" allierede!")
                 .buildItem())
                 : new ItemBuilder(Material.BARRIER)
                 .setItemName("&4&lLåst")
                 .setLore("&7&oLåses op i level 2")
                 .setAmount(2)
                 .buildItem());
-        setItem(30, gangLevel >= 6 ? (gang.getMaxEnemies() < 15 ?
+        setItem(30, gangLevel >= 6 ? (gang.getMaxEnemies() < this.plugin.getConfiguration().maxEnemies ?
                 new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxEnemies(), ColorDataEnum.MAGENTA.value[ColorIndexEnum.INK_SACH.index]))
                         .setItemName("&d&lAntal rivaler")
                         .setLore("&7Køb plads til 1 rival mere", "&7Nuværende: &f"
-                                + gang.getMaxEnemies() + " medlemmer", "&7Pris: &f$" + ShopCostUtil.MAX_ENEMIES)
+                                + gang.getMaxEnemies() + " medlemmer", "&7Pris: &f$" + ShopCostUtil.MAX_ENEMIES * (1 + (gang.getEnemies().size() / DIVIDE_NUMBER)))
                         .buildItem()
                 : new ItemBuilder(new ItemStack(Material.INK_SACK, gang.getMaxEnemies(), ColorDataEnum.GRAY.value[ColorIndexEnum.INK_SACH.index]))
                 .setItemName("&7&lMaskimum nået!")
-                .setLore("&fDu kan maksimum købe", "&fadgang til 15 rivaler!")
+                .setLore("&fDu kan maksimum købe", "&fadgang til "+this.plugin.getConfiguration().maxEnemies+" rivaler!")
                 .buildItem())
                 : new ItemBuilder(Material.BARRIER)
                 .setItemName("&4&lLåst")
@@ -304,23 +304,9 @@ public class ShopSubMenu extends AbstractMenu
         return super.inventory;
     }
 
-    public InfoMenu getInfoMenu()
-    {
-        return infoMenu;
-    }
-
-    public void setInfoMenu(InfoMenu infoMenu)
-    {
-        this.infoMenu = infoMenu;
-    }
-
     public Gang getGang()
     {
         return gang;
     }
 
-    public void setGang(Gang gang)
-    {
-        this.gang = gang;
-    }
 }

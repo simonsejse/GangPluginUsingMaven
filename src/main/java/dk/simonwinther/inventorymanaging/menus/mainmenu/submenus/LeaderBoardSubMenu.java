@@ -1,7 +1,7 @@
 package dk.simonwinther.inventorymanaging.menus.mainmenu.submenus;
 
 import dk.simonwinther.Builders.ItemBuilder;
-import dk.simonwinther.Gang;
+import dk.simonwinther.manager.Gang;
 import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.constants.ColorDataEnum;
 import dk.simonwinther.constants.ColorIndexEnum;

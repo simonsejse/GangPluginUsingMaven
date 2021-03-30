@@ -1,7 +1,7 @@
 package dk.simonwinther.commandmanaging.arguments;
 
 import dk.simonwinther.MainPlugin;
-import dk.simonwinther.Gang;
+import dk.simonwinther.manager.Gang;
 import dk.simonwinther.manager.GangManaging;
 import dk.simonwinther.commandmanaging.CommandArguments;
 import dk.simonwinther.inventorymanaging.menus.rankmenu.RankMenu;
@@ -42,7 +42,6 @@ public class RankArgument implements CommandArguments
         return "/bande rank <player>";
     }
 
-    @Deprecated
     @Override
     public void perform(Player p, String... args)
     {
@@ -60,7 +59,7 @@ public class RankArgument implements CommandArguments
                         Gang otherGang = this.gangManaging.getGangByUuidFunction.apply(otherPlayerUUID);
                         if (gang.equals(otherGang))
                         {
-                            p.openInventory(new RankMenu(this.gangManaging, plugin, gang, p.getUniqueId(), p.getName(), otherPlayerUUID, args[1]).getInventory());
+                            p.openInventory(new RankMenu(this.gangManaging, plugin, gang, p.getUniqueId(), otherPlayerUUID, args[1]).getInventory());
                         } else p.sendMessage(this.mp.notInSameGang);
                     }else p.sendMessage(this.mp.playerNotInGang);
                 } else p.sendMessage(this.mp.hasNeverPlayed);

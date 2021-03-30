@@ -29,13 +29,13 @@ public class MainMenu extends AbstractMenu
     private final MessageProvider mp;
     private final GangManaging gangManaging;
 
-    public MainMenu(GangManaging gangManaging, MainPlugin plugin, UUID playerUUID, boolean isInGang)
+    public MainMenu(MainPlugin plugin, UUID playerUUID, boolean isInGang)
     {
         this.plugin = plugin;
         this.mp = this.plugin.getMessageProvider();
         this.playerUUID = playerUUID;
         this.isInGang = isInGang;
-        this.gangManaging = gangManaging;
+        this.gangManaging = this.plugin.getGangManaging();
     }
 
     @Override
@@ -57,8 +57,7 @@ public class MainMenu extends AbstractMenu
         if (item.getType() == Material.STAINED_GLASS_PANE) return;
         if (slot == InventoryUtility.MEMBER_AND_OPEN_SHOP_SLOT){
             if (!isInGang) whoClicked.openInventory(new InviteSubMenu(this.gangManaging, plugin, this, playerUUID).getInventory());
-            else
-                whoClicked.openInventory(new ShopSubMenu(gangManaging, plugin, gangManaging.getGangByUuidFunction.apply(uniqueId)).getInventory());
+            else whoClicked.openInventory(new ShopSubMenu(plugin, gangManaging.getGangByUuidFunction.apply(uniqueId), this).getInventory());
         } else if (slot == InventoryUtility.OTHERS_SLOT) whoClicked.openInventory(new OtherSubMenu(this.gangManaging, this).getInventory());
         else if (slot == InventoryUtility.BACK_SLOT || slot == 40) whoClicked.getOpenInventory().close();
         else if (slot == InventoryUtility.GANG_OR_CREATION_SLOT)
@@ -69,8 +68,7 @@ public class MainMenu extends AbstractMenu
                 plugin.getEventHandling().addPlayerToAwaitGangCreation.accept(playerUUID);
                 return;
             }
-
-            whoClicked.openInventory(new InfoMenu(gangManaging, plugin, gangManaging.getGangByUuidFunction.apply(uniqueId), true).getInventory());
+            whoClicked.openInventory(new InfoMenu(plugin, gangManaging.getGangByUuidFunction.apply(uniqueId), true, this).getInventory());
         }
 
     }

@@ -1,7 +1,7 @@
 package dk.simonwinther.constants;
 
 import dk.simonwinther.MainPlugin;
-import dk.simonwinther.Gang;
+import dk.simonwinther.manager.Gang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
