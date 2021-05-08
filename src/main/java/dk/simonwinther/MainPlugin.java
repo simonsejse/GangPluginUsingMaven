@@ -105,7 +105,6 @@ public final class MainPlugin extends JavaPlugin
 
 
     private void initializeConfiguration() {
-        //Init file and write all json data from github page to then be read into a class
         Yaml yaml = new Yaml(new CustomClassLoaderConstructor(Configuration.class.getClassLoader()));
         try(InputStream in = Files.newInputStream(Paths.get(getDataFolder().getPath()+"/config.yml"))){
             this.configuration = yaml.loadAs(in, Configuration.class);
@@ -113,7 +112,6 @@ public final class MainPlugin extends JavaPlugin
             log.accept("Kunne ikke læse config.yml data!");
             this.getPluginLoader().disablePlugin(this);
         }
-
     }
 
     private void establishDatabaseConnection(){
